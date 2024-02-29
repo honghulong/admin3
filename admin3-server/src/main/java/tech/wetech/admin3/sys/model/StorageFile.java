@@ -35,11 +35,6 @@ public class StorageFile extends BaseEntity {
    */
   private Long size;
 
-  /**
-   * 文件访问链接
-   */
-  private String url;
-
   private String createUser;
 
   private LocalDateTime createTime;
@@ -83,14 +78,6 @@ public class StorageFile extends BaseEntity {
 
   public void setSize(Long size) {
     this.size = size;
-  }
-
-  public String getUrl() {
-    return url;
-  }
-
-  public void setUrl(String url) {
-    this.url = url;
   }
 
   public String getCreateUser() {
