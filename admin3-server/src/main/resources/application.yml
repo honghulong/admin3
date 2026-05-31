@@ -26,6 +26,12 @@ spring:
         one-indexed-parameters: true
   profiles:
     include: biz
+xiaoyi:
+  mcp:
+    auth:
+      appId: admin3-leave-app
+      apiKey: admin3-leave-api-key-2026
+
 server:
   servlet:
     context-path: /admin3

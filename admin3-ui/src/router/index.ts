@@ -51,6 +51,22 @@ const routes: RouteRecordRaw[] = [
         component: () => import(/* webpackChunkName: "dashboard" */ '../views/log-list.vue'),
       },
       {
+        path: '/leaves',
+        name: 'leaves',
+        meta: {
+          title: '请假管理',
+        },
+        component: () => import(/* webpackChunkName: "dashboard" */ '../views/leave-list.vue'),
+      },
+      {
+        path: '/dict',
+        name: 'dict',
+        meta: {
+          title: '字典管理',
+        },
+        component: () => import(/* webpackChunkName: "dashboard" */ '../views/dict-list.vue'),
+      },
+      {
         path: '/storage',
         name: 'storage',
         meta: {

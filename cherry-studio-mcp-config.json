@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "leave-mcp": {
+      "type": "streamableHttp",
+      "baseUrl": "http://localhost:8080/admin3/mcp/message"
+    }
+  }
+}
