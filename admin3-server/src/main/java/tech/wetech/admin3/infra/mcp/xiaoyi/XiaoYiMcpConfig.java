@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
-import tech.wetech.admin3.sys.service.DictService;
 import tech.wetech.admin3.sys.service.LeaveService;
 
 import java.time.LocalDateTime;
@@ -44,7 +43,7 @@ public class XiaoYiMcpConfig {
   }
 
   @Bean
-  McpStatelessSyncServer xiaoyiMcpStatelessSyncServer(@Qualifier("xiaoyiWebMvcStatelessServerTransport") WebMvcStatelessServerTransport xiaoyiWebMvcStatelessServerTransport, LeaveService leaveService, DictService dictService, @Qualifier("xiaoyiMcpJsonMapper") McpJsonMapper xiaoyiMcpJsonMapper) {
+  McpStatelessSyncServer xiaoyiMcpStatelessSyncServer(@Qualifier("xiaoyiWebMvcStatelessServerTransport") WebMvcStatelessServerTransport xiaoyiWebMvcStatelessServerTransport, LeaveService leaveService, @Qualifier("xiaoyiMcpJsonMapper") McpJsonMapper xiaoyiMcpJsonMapper) {
     return McpServer.sync(xiaoyiWebMvcStatelessServerTransport)
       .serverInfo("xiaoyi-leave-mcp-server", "1.0.0")
       .capabilities(McpSchema.ServerCapabilities.builder()
@@ -53,8 +52,8 @@ public class XiaoYiMcpConfig {
         .build())
       .tools(
         createQueryLeavesTool(leaveService, xiaoyiMcpJsonMapper),
-        createCreateLeaveTool(leaveService, dictService, xiaoyiMcpJsonMapper),
-        createUpdateLeaveTool(leaveService, dictService, xiaoyiMcpJsonMapper),
+        createCreateLeaveTool(leaveService, xiaoyiMcpJsonMapper),
+        createUpdateLeaveTool(leaveService, xiaoyiMcpJsonMapper),
         createCancelLeaveTool(leaveService, xiaoyiMcpJsonMapper)
       )
       .build();
@@ -125,7 +124,7 @@ public class XiaoYiMcpConfig {
     }
   }
 
-  private McpStatelessServerFeatures.SyncToolSpecification createCreateLeaveTool(LeaveService leaveService, DictService dictService, McpJsonMapper jsonMapper) {
+  private McpStatelessServerFeatures.SyncToolSpecification createCreateLeaveTool(LeaveService leaveService, McpJsonMapper jsonMapper) {
     McpSchema.Tool tool = McpSchema.Tool.builder()
       .name("create_leave")
       .description("新增一条用户请假记录，创建成功后状态为0(刚提交)")
@@ -139,7 +138,7 @@ public class XiaoYiMcpConfig {
             },
             "leaveType": {
               "type": "string",
-              "description": "请假类型，只接受汉字，可选值: 病假、事假、年假、婚假、丧假、产假、调休"
+              "description": "请假类型: sick(病假), personal(事假), annual(年假), marriage(婚假), bereavement(丧假), maternity(产假), offshift(调休)"
             },
             "startTime": {
               "type": "string",
@@ -161,8 +160,7 @@ public class XiaoYiMcpConfig {
     return new McpStatelessServerFeatures.SyncToolSpecification(tool, (ctx, request) -> {
       try {
         String username = String.valueOf(request.arguments().get("username"));
-        String leaveTypeLabel = String.valueOf(request.arguments().get("leaveType"));
-        String leaveType = dictService.findValueByDictCodeAndLabel("leave_type", leaveTypeLabel);
+        String leaveType = String.valueOf(request.arguments().get("leaveType"));
         LocalDateTime startTime = parseDateTime(String.valueOf(request.arguments().get("startTime")));
         LocalDateTime endTime = parseDateTime(String.valueOf(request.arguments().get("endTime")));
         String leaveReason = request.arguments().containsKey("leaveReason") ? String.valueOf(request.arguments().get("leaveReason")) : null;
@@ -191,7 +189,7 @@ public class XiaoYiMcpConfig {
     });
   }
 
-  private McpStatelessServerFeatures.SyncToolSpecification createUpdateLeaveTool(LeaveService leaveService, DictService dictService, McpJsonMapper jsonMapper) {
+  private McpStatelessServerFeatures.SyncToolSpecification createUpdateLeaveTool(LeaveService leaveService, McpJsonMapper jsonMapper) {
     McpSchema.Tool tool = McpSchema.Tool.builder()
       .name("update_leave")
       .description("修改请假记录，status字段说明: 0=刚提交, 1=审核通过, 2=被退回, 3=已销假")
@@ -205,7 +203,7 @@ public class XiaoYiMcpConfig {
             },
             "leaveType": {
               "type": "string",
-              "description": "请假类型，只接受汉字，可选值: 病假、事假、年假、婚假、丧假、产假、调休"
+              "description": "请假类型: sick(病假), personal(事假), annual(年假), marriage(婚假), bereavement(丧假), maternity(产假), offshift(调休)"
             },
             "startTime": {
               "type": "string",
@@ -227,8 +225,7 @@ public class XiaoYiMcpConfig {
     return new McpStatelessServerFeatures.SyncToolSpecification(tool, (ctx, request) -> {
       try {
         Long leaveId = Long.valueOf(String.valueOf(request.arguments().get("leaveId")));
-        String leaveTypeLabel = String.valueOf(request.arguments().get("leaveType"));
-        String leaveType = dictService.findValueByDictCodeAndLabel("leave_type", leaveTypeLabel);
+        String leaveType = String.valueOf(request.arguments().get("leaveType"));
         LocalDateTime startTime = parseDateTime(String.valueOf(request.arguments().get("startTime")));
         LocalDateTime endTime = parseDateTime(String.valueOf(request.arguments().get("endTime")));
         String leaveReason = request.arguments().containsKey("leaveReason") ? String.valueOf(request.arguments().get("leaveReason")) : null;
