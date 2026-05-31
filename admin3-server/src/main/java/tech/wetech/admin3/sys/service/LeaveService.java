@@ -26,12 +26,10 @@ public class LeaveService {
 
   private final LeaveRepository leaveRepository;
   private final UserRepository userRepository;
-  private final DictService dictService;
 
-  public LeaveService(LeaveRepository leaveRepository, UserRepository userRepository, DictService dictService) {
+  public LeaveService(LeaveRepository leaveRepository, UserRepository userRepository) {
     this.leaveRepository = leaveRepository;
     this.userRepository = userRepository;
-    this.dictService = dictService;
   }
 
   public PageDTO<LeaveDTO> findLeaves(Pageable pageable) {
@@ -147,12 +145,13 @@ public class LeaveService {
       case "3" -> "已销假";
       default -> leave.getLeaveStatus();
     };
-    String typeLabel;
-    try {
-      typeLabel = dictService.findLabelByDictCodeAndValue("leave_type", leave.getLeaveType());
-    } catch (Exception e) {
-      typeLabel = leave.getLeaveType();
-    }
+    String typeLabel = switch (leave.getLeaveType()) {
+      case "sick" -> "病假";
+      case "personal" -> "事假";
+      case "maternity" -> "产假";
+      case "offshift" -> "调休";
+      default -> leave.getLeaveType();
+    };
     return new LeaveDTO(
       leave.getId(),
       leave.getUser(),

@@ -107,26 +107,4 @@ public class DictService {
   public void deleteDictValue(Long valueId) {
     sysDictValueRepository.deleteById(valueId);
   }
-
-  public String findValueByDictCodeAndLabel(String dictCode, String label) {
-    SysDict dict = sysDictRepository.findByDictCode(dictCode)
-      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST, "字典编码不存在: " + dictCode));
-    List<SysDictValue> values = sysDictValueRepository.findByDictIdOrderBySortOrderAsc(dict.getId());
-    return values.stream()
-      .filter(v -> v.getLabel().equals(label))
-      .findFirst()
-      .map(SysDictValue::getValue)
-      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST, "字典中不存在该标签: " + label));
-  }
-
-  public String findLabelByDictCodeAndValue(String dictCode, String value) {
-    SysDict dict = sysDictRepository.findByDictCode(dictCode)
-      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST, "字典编码不存在: " + dictCode));
-    List<SysDictValue> values = sysDictValueRepository.findByDictIdOrderBySortOrderAsc(dict.getId());
-    return values.stream()
-      .filter(v -> v.getValue().equals(value))
-      .findFirst()
-      .map(SysDictValue::getLabel)
-      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST, "字典中不存在该值: " + value));
-  }
 }
