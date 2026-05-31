@@ -9,6 +9,7 @@ import tech.wetech.admin3.sys.model.Organization;
 import tech.wetech.admin3.sys.model.User;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -19,6 +20,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   @Query("from User where id in (:userIds)")
   Set<User> findByIds(Set<Long> userIds);
+
+  Optional<User> findByUsername(String username);
 
   @Query("""
     from User user where (user.organization=:organization or user.organization.parentIds like concat(:orgParentIds, '%'))

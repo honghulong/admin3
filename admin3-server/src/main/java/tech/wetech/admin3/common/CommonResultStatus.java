@@ -16,6 +16,8 @@ public enum CommonResultStatus implements ResultStatus {
 
   FORBIDDEN(1005, "禁止访问"),
 
+  DICT_CODE_EXISTS(1006, "字典编码已存在"),
+
   SERVER_ERROR(-1, "服务器内部错误");
 
   private final int code;

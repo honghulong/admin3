@@ -4,6 +4,8 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tech.wetech.admin3.common.JsonUtils;
@@ -42,10 +44,10 @@ public class LocalSessionManager implements SessionManager {
 
   public LocalSessionManager(SessionRepository sessionRepository) {
     this.sessionRepository = sessionRepository;
-    checkSession();
   }
 
-  private void checkSession() {
+  @EventListener(ApplicationReadyEvent.class)
+  public void startSessionCheck() {
     sessionCheckExecutor.scheduleWithFixedDelay(() -> {
       try {
         ConcurrentMap<String, Session> map = cache.asMap();

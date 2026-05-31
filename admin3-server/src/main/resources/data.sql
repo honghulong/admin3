@@ -234,5 +234,88 @@ INSERT INTO role_resource (role_id, resource_id) VALUES (4, 15);
 
 INSERT INTO storage_config (type, id, is_default, name, address, storage_path, access_key, bucket_name, endpoint, secret_key, create_time, create_user, storage_id) VALUES (0, 1, true, '本地', 'storage/fetch/', 'files', null, null, null, null, '2023-07-10 17:00:48.000000', 'admin', 'SsIPzgpd9rFgxJhe3yUxk');
 
+-- 请假管理菜单和权限
+INSERT INTO resource (id, icon, name, parent_ids, permission, type, url, parent_id) VALUES (31, 'Calendar', '请假管理', null, 'leave:view', 0, '/leaves', 1);
+INSERT INTO resource (id, icon, name, parent_ids, permission, type, url, parent_id) VALUES (32, null, '查看请假', null, 'leave:view', 1, null, 31);
+INSERT INTO resource (id, icon, name, parent_ids, permission, type, url, parent_id) VALUES (33, null, '新增请假', null, 'leave:create', 1, null, 31);
+INSERT INTO resource (id, icon, name, parent_ids, permission, type, url, parent_id) VALUES (34, null, '修改请假', null, 'leave:update', 1, null, 31);
+INSERT INTO resource (id, icon, name, parent_ids, permission, type, url, parent_id) VALUES (35, null, '删除请假', null, 'leave:delete', 1, null, 31);
+INSERT INTO resource (id, icon, name, parent_ids, permission, type, url, parent_id) VALUES (36, null, '审批请假', null, 'leave:approve', 1, null, 31);
+INSERT INTO resource (id, icon, name, parent_ids, permission, type, url, parent_id) VALUES (37, null, '销假', null, 'leave:cancel', 1, null, 31);
+
+-- 为超级管理员角色分配请假管理权限
+INSERT INTO role_resource (role_id, resource_id) VALUES (1, 31);
+INSERT INTO role_resource (role_id, resource_id) VALUES (1, 32);
+INSERT INTO role_resource (role_id, resource_id) VALUES (1, 33);
+INSERT INTO role_resource (role_id, resource_id) VALUES (1, 34);
+INSERT INTO role_resource (role_id, resource_id) VALUES (1, 35);
+INSERT INTO role_resource (role_id, resource_id) VALUES (1, 36);
+INSERT INTO role_resource (role_id, resource_id) VALUES (1, 37);
+INSERT INTO role_resource (role_id, resource_id) VALUES (2, 31);
+INSERT INTO role_resource (role_id, resource_id) VALUES (2, 32);
+INSERT INTO role_resource (role_id, resource_id) VALUES (2, 33);
+INSERT INTO role_resource (role_id, resource_id) VALUES (2, 34);
+INSERT INTO role_resource (role_id, resource_id) VALUES (2, 35);
+INSERT INTO role_resource (role_id, resource_id) VALUES (2, 36);
+INSERT INTO role_resource (role_id, resource_id) VALUES (2, 37);
+
+-- 请假管理测试数据
+INSERT INTO `leave` (id, leave_type, start_time, end_time, leave_reason, leave_status, cancel_time, user_id) VALUES (100, 'sick', '2026-05-20 09:00:00.000000', '2026-05-21 18:00:00.000000', '感冒发烧，需要休息', '0', null, 2);
+INSERT INTO `leave` (id, leave_type, start_time, end_time, leave_reason, leave_status, cancel_time, user_id) VALUES (101, 'personal', '2026-05-25 09:00:00.000000', '2026-05-25 18:00:00.000000', '家里有急事需要处理', '0', null, 3);
+INSERT INTO `leave` (id, leave_type, start_time, end_time, leave_reason, leave_status, cancel_time, user_id) VALUES (102, 'maternity', '2026-06-01 09:00:00.000000', '2026-06-30 18:00:00.000000', '产假', '1', null, 260);
+INSERT INTO `leave` (id, leave_type, start_time, end_time, leave_reason, leave_status, cancel_time, user_id) VALUES (103, 'offshift', '2026-05-28 09:00:00.000000', '2026-05-28 18:00:00.000000', '周末加班调休', '2', null, 207);
+INSERT INTO `leave` (id, leave_type, start_time, end_time, leave_reason, leave_status, cancel_time, user_id) VALUES (104, 'sick', '2026-05-15 09:00:00.000000', '2026-05-16 18:00:00.000000', '身体不适，去医院检查', '3', '2026-05-17 10:00:00.000000', 214);
+INSERT INTO `leave` (id, leave_type, start_time, end_time, leave_reason, leave_status, cancel_time, user_id) VALUES (105, 'personal', '2026-06-05 09:00:00.000000', '2026-06-05 18:00:00.000000', '参加朋友婚礼', '0', null, 223);
+INSERT INTO `leave` (id, leave_type, start_time, end_time, leave_reason, leave_status, cancel_time, user_id) VALUES (106, 'sick', '2026-06-10 09:00:00.000000', '2026-06-12 18:00:00.000000', '腰椎不适，需卧床休息', '0', null, 237);
+INSERT INTO `leave` (id, leave_type, start_time, end_time, leave_reason, leave_status, cancel_time, user_id) VALUES (107, 'offshift', '2026-05-30 09:00:00.000000', '2026-05-30 18:00:00.000000', '五一值班调休', '1', null, 202);
+INSERT INTO `leave` (id, leave_type, start_time, end_time, leave_reason, leave_status, cancel_time, user_id) VALUES (108, 'personal', '2026-06-15 09:00:00.000000', '2026-06-16 18:00:00.000000', '回老家探亲', '0', null, 215);
+INSERT INTO `leave` (id, leave_type, start_time, end_time, leave_reason, leave_status, cancel_time, user_id) VALUES (109, 'sick', '2026-05-18 09:00:00.000000', '2026-05-18 18:00:00.000000', '牙疼需要治疗', '2', null, 208);
+
+-- 字典管理菜单和权限
+INSERT INTO resource (id, icon, name, parent_ids, permission, type, url, parent_id) VALUES (38, 'Reading', '字典管理', null, 'dict:view', 0, '/dict', 3);
+INSERT INTO resource (id, icon, name, parent_ids, permission, type, url, parent_id) VALUES (39, null, '查看字典', null, 'dict:view', 1, null, 38);
+INSERT INTO resource (id, icon, name, parent_ids, permission, type, url, parent_id) VALUES (40, null, '新增字典', null, 'dict:create', 1, null, 38);
+INSERT INTO resource (id, icon, name, parent_ids, permission, type, url, parent_id) VALUES (41, null, '修改字典', null, 'dict:update', 1, null, 38);
+INSERT INTO resource (id, icon, name, parent_ids, permission, type, url, parent_id) VALUES (42, null, '删除字典', null, 'dict:delete', 1, null, 38);
+
+-- 为超级管理员角色分配字典管理权限
+INSERT INTO role_resource (role_id, resource_id) VALUES (1, 38);
+INSERT INTO role_resource (role_id, resource_id) VALUES (1, 39);
+INSERT INTO role_resource (role_id, resource_id) VALUES (1, 40);
+INSERT INTO role_resource (role_id, resource_id) VALUES (1, 41);
+INSERT INTO role_resource (role_id, resource_id) VALUES (1, 42);
+INSERT INTO role_resource (role_id, resource_id) VALUES (2, 38);
+INSERT INTO role_resource (role_id, resource_id) VALUES (2, 39);
+INSERT INTO role_resource (role_id, resource_id) VALUES (2, 40);
+INSERT INTO role_resource (role_id, resource_id) VALUES (2, 41);
+INSERT INTO role_resource (role_id, resource_id) VALUES (2, 42);
+
+-- 初始化字典数据：请假类型
+INSERT INTO sys_dict (id, dict_code, dict_name, description) VALUES (1, 'leave_type', '请假类型', '请假申请中的请假类型');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (1, 1, '病假', 'sick', 1, '因病请假');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (2, 1, '事假', 'personal', 2, '因私事请假');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (3, 1, '年假', 'annual', 3, '年休假');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (4, 1, '婚假', 'marriage', 4, '结婚休假');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (5, 1, '丧假', 'bereavement', 5, '丧事休假');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (6, 1, '产假', 'maternity', 6, '产假');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (7, 1, '调休', 'offshift', 7, '调休');
+
+-- 初始化字典数据：请假状态
+INSERT INTO sys_dict (id, dict_code, dict_name, description) VALUES (2, 'leave_status', '请假状态', '请假申请的状态');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (8, 2, '刚提交', '0', 1, '刚提交的请假申请');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (9, 2, '审核通过', '1', 2, '审核通过的请假申请');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (10, 2, '被退回', '2', 3, '被退回的请假申请');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (11, 2, '已销假', '3', 4, '已销假的请假申请');
+
+-- 初始化字典数据：用户性别
+INSERT INTO sys_dict (id, dict_code, dict_name, description) VALUES (3, 'user_gender', '用户性别', '用户性别');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (12, 3, '男', '0', 1, '男性');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (13, 3, '女', '1', 2, '女性');
+
+-- 初始化字典数据：用户状态
+INSERT INTO sys_dict (id, dict_code, dict_name, description) VALUES (4, 'user_state', '用户状态', '用户账户状态');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (14, 4, '正常', '0', 1, '账户正常');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (15, 4, '锁定', '1', 2, '账户被锁定');
+
 -- 开启外键约束检查
 set foreign_key_checks = 1;

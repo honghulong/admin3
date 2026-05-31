@@ -42,7 +42,10 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
       "/favicon.ico",
       "/avatar.jpg",
       "/index.html",
-      "/"
+      "/",
+      "/mcp/**",
+      "/xiaoyi-mcp/**",
+      "/sse"
     );
     InterceptorRegistration eventSubscribesInterceptor = registry.addInterceptor(new EventSubscribesInterceptor(eventStore, sessionService));
     eventSubscribesInterceptor.addPathPatterns("/**");
