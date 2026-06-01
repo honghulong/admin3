@@ -1,9 +1,9 @@
 -- 关闭外键约束检查
 set foreign_key_checks = 0;
 
-INSERT INTO user (id, username, avatar, created_time, gender, state, organization_id) VALUES (1, 'admin', 'avatar.jpg', '2023-01-05 17:16:11.000000', 0, 0, 1);
-INSERT INTO user (id, username, avatar, created_time, gender, state, organization_id) VALUES (2, 'employee', 'avatar.jpg', '2023-01-05 17:16:11.000000', 1, 0, 3);
-INSERT INTO user (id, username, avatar, created_time, gender, state, organization_id) VALUES (3, 'guest', 'avatar.jpg', '2023-01-05 17:16:11.000000', 0, 0, 3);
+INSERT INTO user (id, username, x_employee_id, avatar, created_time, gender, state, organization_id) VALUES (1, 'admin', 'EMP001', 'avatar.jpg', '2023-01-05 17:16:11.000000', 0, 0, 1);
+INSERT INTO user (id, username, x_employee_id, avatar, created_time, gender, state, organization_id) VALUES (2, 'employee', 'EMP002', 'avatar.jpg', '2023-01-05 17:16:11.000000', 1, 0, 3);
+INSERT INTO user (id, username, x_employee_id, avatar, created_time, gender, state, organization_id) VALUES (3, 'guest', 'EMP003', 'avatar.jpg', '2023-01-05 17:16:11.000000', 0, 0, 3);
 INSERT INTO user (id, username, avatar, created_time, gender, state, organization_id) VALUES (202, '呼保义宋江 ', 'avatar.jpg', '2023-01-05 17:16:11.000000', 0, 0, 2);
 INSERT INTO user (id, username, avatar, created_time, gender, state, organization_id) VALUES (203, '玉麒麟卢俊义', 'avatar.jpg', '2023-01-05 17:16:11.000000', 0, 0, 2);
 INSERT INTO user (id, username, avatar, created_time, gender, state, organization_id) VALUES (204, '智多星吴用', 'avatar.jpg', '2023-01-05 17:16:11.000000', 0, 0, 2);

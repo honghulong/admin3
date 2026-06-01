@@ -21,6 +21,9 @@ public class User extends BaseEntity {
   @Column(nullable = false, unique = true)
   private String username;
 
+  @Column(unique = true)
+  private String xEmployeeId;
+
   private String avatar;
 
   @Column(nullable = false)
@@ -95,6 +98,14 @@ public class User extends BaseEntity {
 
   public void setUsername(String username) {
     this.username = username;
+  }
+
+  public String getXEmployeeId() {
+    return xEmployeeId;
+  }
+
+  public void setXEmployeeId(String xEmployeeId) {
+    this.xEmployeeId = xEmployeeId;
   }
 
   public String getAvatar() {
