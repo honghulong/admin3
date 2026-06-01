@@ -23,6 +23,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   Optional<User> findByUsername(String username);
 
+  Optional<User> findByXEmployeeId(String xEmployeeId);
+
   @Query("""
     from User user where (user.organization=:organization or user.organization.parentIds like concat(:orgParentIds, '%'))
     and (:username is null or user.username=:username)
