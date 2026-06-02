@@ -63,17 +63,18 @@ public class LeaveService {
     UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
     User user = new User();
     user.setId(userInfo.userId());
-    return createLeaveInternal(user, leaveType, startTime, endTime, leaveReason);
+    return createLeaveInternal(user, leaveType, startTime, endTime, leaveReason, userInfo.userId());
   }
 
   @Transactional
   public LeaveDTO createLeaveByUsername(String username, String leaveType, LocalDateTime startTime, LocalDateTime endTime, String leaveReason) {
     User user = userRepository.findByUsername(username)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST, "用户不存在: " + username));
-    return createLeaveInternal(user, leaveType, startTime, endTime, leaveReason);
+    return createLeaveInternal(user, leaveType, startTime, endTime, leaveReason, user.getId());
   }
 
-  private LeaveDTO createLeaveInternal(User user, String leaveType, LocalDateTime startTime, LocalDateTime endTime, String leaveReason) {
+  private LeaveDTO createLeaveInternal(User user, String leaveType, LocalDateTime startTime, LocalDateTime endTime, String leaveReason, Long operatorId) {
+    LocalDateTime now = LocalDateTime.now();
     Leave leave = new Leave();
     leave.setUser(user);
     leave.setLeaveType(leaveType);
@@ -81,46 +82,85 @@ public class LeaveService {
     leave.setEndTime(endTime);
     leave.setLeaveReason(leaveReason);
     leave.setLeaveStatus("0");
+    leave.setCreatedAt(now);
+    leave.setCreatedBy(operatorId);
+    leave.setUpdatedAt(now);
+    leave.setUpdatedBy(operatorId);
     leave = leaveRepository.save(leave);
     return toLeaveDTO(leave);
   }
 
   @Transactional
   public LeaveDTO updateLeave(Long leaveId, String leaveType, LocalDateTime startTime, LocalDateTime endTime, String leaveReason) {
+    UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
     Leave leave = leaveRepository.findById(leaveId)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
     leave.setLeaveType(leaveType);
     leave.setStartTime(startTime);
     leave.setEndTime(endTime);
     leave.setLeaveReason(leaveReason);
+    leave.setUpdatedAt(LocalDateTime.now());
+    leave.setUpdatedBy(userInfo.userId());
+    leave = leaveRepository.save(leave);
+    return toLeaveDTO(leave);
+  }
+
+  @Transactional
+  public LeaveDTO updateLeaveByUser(Long leaveId, String leaveType, LocalDateTime startTime, LocalDateTime endTime, String leaveReason, Long operatorId) {
+    Leave leave = leaveRepository.findById(leaveId)
+      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    leave.setLeaveType(leaveType);
+    leave.setStartTime(startTime);
+    leave.setEndTime(endTime);
+    leave.setLeaveReason(leaveReason);
+    leave.setUpdatedAt(LocalDateTime.now());
+    leave.setUpdatedBy(operatorId);
     leave = leaveRepository.save(leave);
     return toLeaveDTO(leave);
   }
 
   @Transactional
   public LeaveDTO approveLeave(Long leaveId) {
+    UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
     Leave leave = leaveRepository.findById(leaveId)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
     leave.setLeaveStatus("1");
+    leave.setUpdatedAt(LocalDateTime.now());
+    leave.setUpdatedBy(userInfo.userId());
     leave = leaveRepository.save(leave);
     return toLeaveDTO(leave);
   }
 
   @Transactional
   public LeaveDTO rejectLeave(Long leaveId) {
+    UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
     Leave leave = leaveRepository.findById(leaveId)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
     leave.setLeaveStatus("2");
+    leave.setUpdatedAt(LocalDateTime.now());
+    leave.setUpdatedBy(userInfo.userId());
     leave = leaveRepository.save(leave);
     return toLeaveDTO(leave);
   }
 
   @Transactional
   public LeaveDTO cancelLeave(Long leaveId) {
+    UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
+    return cancelLeaveInternal(leaveId, userInfo.userId());
+  }
+
+  @Transactional
+  public LeaveDTO cancelLeaveByUser(Long leaveId, Long operatorId) {
+    return cancelLeaveInternal(leaveId, operatorId);
+  }
+
+  private LeaveDTO cancelLeaveInternal(Long leaveId, Long operatorId) {
     Leave leave = leaveRepository.findById(leaveId)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
     leave.setLeaveStatus("3");
     leave.setCancelTime(LocalDateTime.now());
+    leave.setUpdatedAt(LocalDateTime.now());
+    leave.setUpdatedBy(operatorId);
     leave = leaveRepository.save(leave);
     return toLeaveDTO(leave);
   }
@@ -162,7 +202,11 @@ public class LeaveService {
       leave.getLeaveReason(),
       leave.getLeaveStatus(),
       statusLabel,
-      leave.getCancelTime()
+      leave.getCancelTime(),
+      leave.getCreatedAt(),
+      leave.getCreatedBy(),
+      leave.getUpdatedAt(),
+      leave.getUpdatedBy()
     );
   }
 }

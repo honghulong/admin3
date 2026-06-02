@@ -32,7 +32,7 @@ public class McpConfig {
   WebMvcStatelessServerTransport webMvcStatelessServerTransport(@Qualifier("mcpJsonMapper") McpJsonMapper jsonMapper) {
     return WebMvcStatelessServerTransport.builder()
       .jsonMapper(jsonMapper)
-      .messageEndpoint("/mcp/message")
+      .messageEndpoint("/xiaoyi-mcp/message")
       .securityValidator(ServerTransportSecurityValidator.NOOP)
       .build();
   }
@@ -198,7 +198,7 @@ public class McpConfig {
           "type": "object",
           "properties": {
             "leaveId": {
-              "type": "number",
+              "type": "string",
               "description": "请假记录ID"
             },
             "leaveType": {
@@ -230,7 +230,7 @@ public class McpConfig {
         LocalDateTime endTime = parseDateTime(String.valueOf(request.arguments().get("endTime")));
         String leaveReason = request.arguments().containsKey("leaveReason") ? String.valueOf(request.arguments().get("leaveReason")) : null;
 
-        var leave = leaveService.updateLeave(leaveId, leaveType, startTime, endTime, leaveReason);
+        var leave = leaveService.updateLeaveByUser(leaveId, leaveType, startTime, endTime, leaveReason, null);
         String result = String.format("""
           请假修改成功!
           ID: %s
@@ -263,7 +263,7 @@ public class McpConfig {
           "type": "object",
           "properties": {
             "leaveId": {
-              "type": "number",
+              "type": "string",
               "description": "请假记录ID"
             }
           },
@@ -274,7 +274,7 @@ public class McpConfig {
     return new McpStatelessServerFeatures.SyncToolSpecification(tool, (ctx, request) -> {
       try {
         Long leaveId = Long.valueOf(String.valueOf(request.arguments().get("leaveId")));
-        var leave = leaveService.cancelLeave(leaveId);
+        var leave = leaveService.cancelLeaveByUser(leaveId, null);
         String result = String.format("""
           销假成功!
           ID: %s
