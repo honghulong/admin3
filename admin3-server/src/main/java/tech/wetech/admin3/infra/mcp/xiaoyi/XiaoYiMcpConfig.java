@@ -16,10 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
-import tech.wetech.admin3.common.Constants;
-import tech.wetech.admin3.common.SessionItemHolder;
 import tech.wetech.admin3.sys.service.LeaveService;
-import tech.wetech.admin3.sys.service.dto.UserinfoDTO;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +24,8 @@ import java.time.format.DateTimeParseException;
 
 @Configuration
 public class XiaoYiMcpConfig {
+
+  private static final Logger log = LoggerFactory.getLogger(XiaoYiMcpConfig.class);
 
   @Bean
   McpJsonMapper xiaoyiMcpJsonMapper(ObjectMapper mapper) {
@@ -64,18 +63,6 @@ public class XiaoYiMcpConfig {
       .build();
   }
 
-  private static final Logger log = LoggerFactory.getLogger(XiaoYiMcpConfig.class);
-
-  private String resolveUsername() {
-    UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(Constants.SESSION_CURRENT_USER);
-    if (userInfo != null) {
-      log.info("XiaoYi MCP resolved user from session: username={}, xEmployeeId={}", userInfo.username(), userInfo.identifier());
-      return userInfo.username();
-    }
-    log.warn("XiaoYi MCP no user in session, proceeding with request-provided username");
-    return null;
-  }
-
   private McpStatelessServerFeatures.SyncToolSpecification createQueryLeavesTool(LeaveService leaveService, McpJsonMapper jsonMapper) {
     McpSchema.Tool tool = McpSchema.Tool.builder()
       .name("query_leaves_by_username")
@@ -86,21 +73,16 @@ public class XiaoYiMcpConfig {
           "properties": {
             "username": {
               "type": "string",
-              "description": "用户名（已授权用户可不传，将自动使用当前登录用户）"
+              "description": "用户名"
             }
-          }
+          },
+          "required": ["username"]
         }
         """)
       .build();
     return new McpStatelessServerFeatures.SyncToolSpecification(tool, (ctx, request) -> {
       String username = String.valueOf(request.arguments().get("username"));
-      if (username == null || "null".equals(username)) {
-        username = resolveUsername();
-      }
       log.info("XiaoYi MCP tool called: query_leaves_by_username, username={}", username);
-      if (username == null) {
-        return new McpSchema.CallToolResult("无法识别用户身份，请先授权登录", true);
-      }
       var leaves = leaveService.findLeavesByUsername(username);
       log.info("XiaoYi MCP query_leaves_by_username result: username={}, count={}", username, leaves.size());
       StringBuilder result = new StringBuilder();
@@ -158,7 +140,7 @@ public class XiaoYiMcpConfig {
           "properties": {
             "username": {
               "type": "string",
-              "description": "用户名（已授权用户可不传，将自动使用当前登录用户）"
+              "description": "用户名"
             },
             "leaveType": {
               "type": "string",
@@ -177,21 +159,15 @@ public class XiaoYiMcpConfig {
               "description": "请假原因"
             }
           },
-          "required": ["leaveType", "startTime", "endTime"]
+          "required": ["username", "leaveType", "startTime", "endTime"]
         }
         """)
       .build();
     return new McpStatelessServerFeatures.SyncToolSpecification(tool, (ctx, request) -> {
       try {
         String username = String.valueOf(request.arguments().get("username"));
-        if (username == null || "null".equals(username)) {
-          username = resolveUsername();
-        }
         log.info("XiaoYi MCP tool called: create_leave, username={}, leaveType={}",
           username, request.arguments().get("leaveType"));
-        if (username == null) {
-          return new McpSchema.CallToolResult("无法识别用户身份，请先授权登录", true);
-        }
         String leaveType = String.valueOf(request.arguments().get("leaveType"));
         LocalDateTime startTime = parseDateTime(String.valueOf(request.arguments().get("startTime")));
         LocalDateTime endTime = parseDateTime(String.valueOf(request.arguments().get("endTime")));
@@ -216,6 +192,7 @@ public class XiaoYiMcpConfig {
         );
         return new McpSchema.CallToolResult(result, false);
       } catch (Exception e) {
+        log.error("XiaoYi MCP create_leave failed: username={}, error={}", request.arguments().get("username"), e.getMessage(), e);
         return new McpSchema.CallToolResult("创建请假失败: " + e.getMessage(), true);
       }
     });
@@ -282,6 +259,7 @@ public class XiaoYiMcpConfig {
         );
         return new McpSchema.CallToolResult(result, false);
       } catch (Exception e) {
+        log.error("XiaoYi MCP update_leave failed: leaveId={}, error={}", request.arguments().get("leaveId"), e.getMessage(), e);
         return new McpSchema.CallToolResult("修改请假失败: " + e.getMessage(), true);
       }
     });
@@ -327,6 +305,7 @@ public class XiaoYiMcpConfig {
         );
         return new McpSchema.CallToolResult(result, false);
       } catch (Exception e) {
+        log.error("XiaoYi MCP cancel_leave failed: leaveId={}, error={}", request.arguments().get("leaveId"), e.getMessage(), e);
         return new McpSchema.CallToolResult("销假失败: " + e.getMessage(), true);
       }
     });

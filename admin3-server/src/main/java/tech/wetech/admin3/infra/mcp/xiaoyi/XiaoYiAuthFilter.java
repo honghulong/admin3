@@ -12,9 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import tech.wetech.admin3.common.Constants;
-import tech.wetech.admin3.common.SessionItemHolder;
-import tech.wetech.admin3.sys.service.dto.UserinfoDTO;
 
 import java.io.IOException;
 
@@ -26,11 +23,9 @@ public class XiaoYiAuthFilter implements Filter {
   private static final Logger log = LoggerFactory.getLogger(XiaoYiAuthFilter.class);
 
   private final XiaoYiAuthProperties authProperties;
-  private final XiaoYiAuthService authService;
 
-  public XiaoYiAuthFilter(XiaoYiAuthProperties authProperties, XiaoYiAuthService authService) {
+  public XiaoYiAuthFilter(XiaoYiAuthProperties authProperties) {
     this.authProperties = authProperties;
-    this.authService = authService;
   }
 
   @Override
@@ -44,10 +39,7 @@ public class XiaoYiAuthFilter implements Filter {
       return;
     }
 
-    log.info("XiaoYi MCP request: {} {}, headers: appId={}, X-Employee-ID={}",
-      request.getMethod(), path,
-      request.getHeader("appId"),
-      request.getHeader("X-Employee-ID"));
+    log.info("XiaoYi MCP request: {} {}", request.getMethod(), path);
 
     String appId = request.getHeader("appId");
     String apiKey = request.getHeader("apiKey");
@@ -68,33 +60,7 @@ public class XiaoYiAuthFilter implements Filter {
       return;
     }
 
-    String xEmployeeId = request.getHeader("X-Employee-ID");
-    if (xEmployeeId != null && !xEmployeeId.isBlank()) {
-      log.info("XiaoYi MCP looking up user by X-Employee-ID: {}", xEmployeeId);
-      var userOpt = authService.findUserByEmployeeId(xEmployeeId);
-      if (userOpt.isPresent()) {
-        var user = userOpt.get();
-        UserinfoDTO userinfo = new UserinfoDTO(
-          xEmployeeId,
-          user.getId(),
-          user.getUsername(),
-          user.getAvatar(),
-          null,
-          null
-        );
-        SessionItemHolder.setItem(Constants.SESSION_CURRENT_USER, userinfo);
-        log.info("XiaoYi MCP user identified: username={}, xEmployeeId={}", user.getUsername(), xEmployeeId);
-      } else {
-        log.warn("XiaoYi MCP no user found for X-Employee-ID: {}", xEmployeeId);
-      }
-    } else {
-      log.warn("XiaoYi MCP request without X-Employee-ID header, proceeding as anonymous");
-    }
-
-    try {
-      filterChain.doFilter(request, response);
-    } finally {
-      SessionItemHolder.clear();
-    }
+    log.info("XiaoYi MCP auth success: {} {}, appId={}", request.getMethod(), path, appId);
+    filterChain.doFilter(request, response);
   }
 }

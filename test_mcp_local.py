@@ -2,11 +2,14 @@ import urllib.request
 import json
 import re
 
-BASE_URL = "http://localhost:8080/admin3/mcp/message"
+BASE_URL = "https://28wh9253sf76.vicp.fun/admin3/xiaoyi-mcp/message"
 HEADERS = {
     "Content-Type": "application/json",
-    "Accept": "application/json, text/event-stream"
+    "Accept": "application/json, text/event-stream",
+    "appId": "admin3-leave-app",
+    "apiKey": "admin3-leave-api-key-2026"
 }
+
 
 def call_mcp(method, params=None):
     body = json.dumps({
@@ -24,85 +27,64 @@ def call_mcp(method, params=None):
     except Exception as e:
         return {"error": str(e)}
 
+
 def extract_leave_id(result):
-    """从返回结果中提取 leave ID"""
     if "result" in result and "content" in result["result"]:
         for content in result["result"]["content"]:
             if content.get("type") == "text":
-                # 匹配 "ID: 110"
                 match = re.search(r'ID:\s*(\d+)', content["text"])
                 if match:
                     return int(match.group(1))
     return None
 
-# 1. 查询用户 admin 的请假记录
-print("=" * 60)
-print("1. 查询用户 admin 的请假记录")
-print("=" * 60)
-result = call_mcp("tools/call", {
+
+def print_result(label, result):
+    print(f"\n{'=' * 60}")
+    print(f"  {label}")
+    print(f"{'=' * 60}")
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+
+
+print_result("1. tools/list", call_mcp("tools/list"))
+
+print_result("2. query_leaves_by_username (admin)", call_mcp("tools/call", {
     "name": "query_leaves_by_username",
     "arguments": {"username": "admin"}
-})
-print(json.dumps(result, indent=2, ensure_ascii=False))
-print()
+}))
 
-# 2. 新增请假记录
-print("=" * 60)
-print("2. 新增请假记录 (admin, 病假)")
-print("=" * 60)
 result = call_mcp("tools/call", {
     "name": "create_leave",
     "arguments": {
         "username": "admin",
         "leaveType": "sick",
-        "startTime": "2026-06-01 09:00:00",
-        "endTime": "2026-06-02 18:00:00",
+        "startTime": "2026-06-02 09:00:00",
+        "endTime": "2026-06-03 18:00:00",
         "leaveReason": "身体不舒服，需要休息"
     }
 })
-print(json.dumps(result, indent=2, ensure_ascii=False))
-print()
+print_result("3. create_leave", result)
 
 leave_id = extract_leave_id(result)
-print(f"提取到 leave_id: {leave_id}")
-print()
+print(f"\n>>> leave_id: {leave_id}")
 
 if leave_id:
-    # 3. 修改请假记录
-    print("=" * 60)
-    print(f"3. 修改请假记录 (ID: {leave_id})")
-    print("=" * 60)
-    result = call_mcp("tools/call", {
+    print_result(f"4. update_leave (ID={leave_id})", call_mcp("tools/call", {
         "name": "update_leave",
         "arguments": {
             "leaveId": leave_id,
             "leaveType": "personal",
-            "startTime": "2026-06-01 13:00:00",
-            "endTime": "2026-06-02 12:00:00",
-            "leaveReason": "修改为事假，有私事处理"
+            "startTime": "2026-06-02 13:00:00",
+            "endTime": "2026-06-03 12:00:00",
+            "leaveReason": "修改为事假"
         }
-    })
-    print(json.dumps(result, indent=2, ensure_ascii=False))
-    print()
+    }))
 
-    # 4. 销假
-    print("=" * 60)
-    print(f"4. 销假 (ID: {leave_id})")
-    print("=" * 60)
-    result = call_mcp("tools/call", {
+    print_result(f"5. cancel_leave (ID={leave_id})", call_mcp("tools/call", {
         "name": "cancel_leave",
         "arguments": {"leaveId": leave_id}
-    })
-    print(json.dumps(result, indent=2, ensure_ascii=False))
-    print()
+    }))
 
-# 5. 再次查询确认状态
-print("=" * 60)
-print("5. 再次查询 admin 的请假记录确认状态")
-print("=" * 60)
-result = call_mcp("tools/call", {
+print_result("6. 再次查询确认", call_mcp("tools/call", {
     "name": "query_leaves_by_username",
     "arguments": {"username": "admin"}
-})
-print(json.dumps(result, indent=2, ensure_ascii=False))
-print()
+}))
