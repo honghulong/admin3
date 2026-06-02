@@ -30,6 +30,18 @@ public class Leave extends BaseEntity {
   @Column
   private LocalDateTime cancelTime;
 
+  @Column
+  private LocalDateTime createdAt;
+
+  @Column
+  private Long createdBy;
+
+  @Column
+  private LocalDateTime updatedAt;
+
+  @Column
+  private Long updatedBy;
+
   public User getUser() {
     return user;
   }
@@ -84,5 +96,37 @@ public class Leave extends BaseEntity {
 
   public void setCancelTime(LocalDateTime cancelTime) {
     this.cancelTime = cancelTime;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public Long getCreatedBy() {
+    return createdBy;
+  }
+
+  public void setCreatedBy(Long createdBy) {
+    this.createdBy = createdBy;
+  }
+
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
+  public Long getUpdatedBy() {
+    return updatedBy;
+  }
+
+  public void setUpdatedBy(Long updatedBy) {
+    this.updatedBy = updatedBy;
   }
 }

@@ -105,7 +105,7 @@ public class XiaoYiAuthService {
     }
   }
 
-  public record DeauthorizeResult(boolean success, String errorMessage) {
+  public record DeauthorizeResult(boolean ok, String errorMessage) {
     public static DeauthorizeResult success() {
       return new DeauthorizeResult(true, null);
     }

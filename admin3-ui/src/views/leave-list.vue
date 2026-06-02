@@ -17,6 +17,10 @@
           </template>
         </el-table-column>
         <el-table-column prop="cancelTime" label="销假时间" width="160"></el-table-column>
+        <el-table-column prop="createdAt" label="创建时间" width="160"></el-table-column>
+        <el-table-column prop="createdBy" label="创建人ID" width="100"></el-table-column>
+        <el-table-column prop="updatedAt" label="修改时间" width="160"></el-table-column>
+        <el-table-column prop="updatedBy" label="修改人ID" width="100"></el-table-column>
         <el-table-column label="操作" width="350" fixed="right">
           <template #default="scope">
             <el-button text :icon="Edit" @click="handleEdit(scope.row)" v-action:leave:update>编辑</el-button>
@@ -98,6 +102,10 @@ interface TableItem {
   leaveStatus: string;
   leaveStatusLabel: string;
   cancelTime: string;
+  createdAt: string;
+  createdBy: number;
+  updatedAt: string;
+  updatedBy: number;
 }
 
 const query = reactive({

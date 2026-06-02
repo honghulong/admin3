@@ -14,6 +14,10 @@ public record LeaveDTO(
   String leaveReason,
   String leaveStatus,
   String leaveStatusLabel,
-  LocalDateTime cancelTime
+  LocalDateTime cancelTime,
+  LocalDateTime createdAt,
+  Long createdBy,
+  LocalDateTime updatedAt,
+  Long updatedBy
 ) {
 }

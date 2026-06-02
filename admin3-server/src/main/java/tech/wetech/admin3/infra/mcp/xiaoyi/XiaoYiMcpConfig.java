@@ -240,7 +240,7 @@ public class XiaoYiMcpConfig {
         LocalDateTime endTime = parseDateTime(String.valueOf(request.arguments().get("endTime")));
         String leaveReason = request.arguments().containsKey("leaveReason") ? String.valueOf(request.arguments().get("leaveReason")) : null;
 
-        var leave = leaveService.updateLeave(leaveId, leaveType, startTime, endTime, leaveReason);
+        var leave = leaveService.updateLeaveByUser(leaveId, leaveType, startTime, endTime, leaveReason, null);
         String result = String.format("""
           请假修改成功!
           ID: %s
@@ -286,7 +286,7 @@ public class XiaoYiMcpConfig {
       try {
         Long leaveId = Long.valueOf(String.valueOf(request.arguments().get("leaveId")));
         log.info("XiaoYi MCP tool called: cancel_leave, leaveId={}", leaveId);
-        var leave = leaveService.cancelLeave(leaveId);
+        var leave = leaveService.cancelLeaveByUser(leaveId, null);
         String result = String.format("""
           销假成功!
           ID: %s
