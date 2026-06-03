@@ -9,6 +9,8 @@ import io.modelcontextprotocol.server.McpStatelessSyncServer;
 import io.modelcontextprotocol.server.transport.ServerTransportSecurityValidator;
 import io.modelcontextprotocol.server.transport.WebMvcStatelessServerTransport;
 import io.modelcontextprotocol.spec.McpSchema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +24,8 @@ import java.time.format.DateTimeParseException;
 
 @Configuration
 public class McpConfig {
+
+  private static final Logger log = LoggerFactory.getLogger(McpConfig.class);
 
   @Bean
   McpJsonMapper mcpJsonMapper(ObjectMapper mapper) {
@@ -54,7 +58,8 @@ public class McpConfig {
         createQueryLeavesTool(leaveService, jsonMapper),
         createCreateLeaveTool(leaveService, jsonMapper),
         createUpdateLeaveTool(leaveService, jsonMapper),
-        createCancelLeaveTool(leaveService, jsonMapper)
+        createCancelLeaveTool(leaveService, jsonMapper),
+        createCancelLeaveByNameTool(leaveService, jsonMapper)
       )
       .build();
   }
@@ -265,16 +270,22 @@ public class McpConfig {
             "leaveId": {
               "type": "string",
               "description": "请假记录ID"
+            },
+            "momoda": {
+              "type": "string",
+              "description": "请假记录ID"
             }
           },
-          "required": ["leaveId"]
+          "required": ["leaveId", "momoda"]
         }
         """)
       .build();
     return new McpStatelessServerFeatures.SyncToolSpecification(tool, (ctx, request) -> {
       try {
-        Long leaveId = Long.valueOf(String.valueOf(request.arguments().get("leaveId")));
+        Long leaveId = Long.valueOf(String.valueOf(request.arguments().get("momoda")));
+        log.info("MCP销假请求: leaveId={}", leaveId);
         var leave = leaveService.cancelLeaveByUser(leaveId, null);
+        log.info("MCP销假成功: leaveId={}, 请假类型={}, 状态={}", leave.id(), leave.leaveTypeLabel(), leave.leaveStatus());
         String result = String.format("""
           销假成功!
           ID: %s
@@ -293,6 +304,48 @@ public class McpConfig {
         );
         return new McpSchema.CallToolResult(result, false);
       } catch (Exception e) {
+        log.error("MCP销假失败: {}", e.getMessage(), e);
+        return new McpSchema.CallToolResult("销假失败: " + e.getMessage(), true);
+      }
+    });
+  }
+
+  private McpStatelessServerFeatures.SyncToolSpecification createCancelLeaveByNameTool(LeaveService leaveService, McpJsonMapper jsonMapper) {
+    McpSchema.Tool tool = McpSchema.Tool.builder()
+      .name("cancelleavebyname")
+      .description("按用户名销假，查找该用户所有未销假的请假记录并全部销假")
+      .inputSchema(jsonMapper, """
+        {
+          "type": "object",
+          "properties": {
+            "username": {
+              "type": "string",
+              "description": "用户名"
+            }
+          },
+          "required": ["username"]
+        }
+        """)
+      .build();
+    return new McpStatelessServerFeatures.SyncToolSpecification(tool, (ctx, request) -> {
+      try {
+        String username = String.valueOf(request.arguments().get("username"));
+        log.info("MCP按用户名销假请求: username={}", username);
+        var leaves = leaveService.findLeavesByUsername(username);
+        if (leaves.isEmpty()) {
+          log.warn("MCP按用户名销假失败: 未找到用户[{}]的请假记录", username);
+          return new McpSchema.CallToolResult("销假失败: 未找到用户[" + username + "]的请假记录", true);
+        }
+        int count = 0;
+        for (var leave : leaves) {
+          leaveService.cancelLeaveByUser(leave.id(), null);
+          count++;
+          log.info("MCP按用户名销假: username={}, leaveId={} 已销假", username, leave.id());
+        }
+        log.info("MCP按用户名销假完成: username={}, 共销假{}条记录", username, count);
+        return new McpSchema.CallToolResult("销假成功: 用户[" + username + "]共" + count + "条请假记录已全部销假", false);
+      } catch (Exception e) {
+        log.error("MCP按用户名销假失败: {}", e.getMessage(), e);
         return new McpSchema.CallToolResult("销假失败: " + e.getMessage(), true);
       }
     });

@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 title admin3-server
 
 set JAR_FILE=admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar
@@ -14,8 +15,6 @@ echo [INFO] Stopping any existing Java process...
 taskkill /f /im java.exe >nul 2>&1
 echo [INFO] Waiting for port %SERVER_PORT% to be released...
 timeout /t 5 /nobreak >nul
-
-set JAVA_HOME=C:\JAVA\jdk21.0.11-win_x64
 
 set SERVER_PORT=9099
 
