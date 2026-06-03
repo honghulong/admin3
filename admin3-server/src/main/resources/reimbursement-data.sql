@@ -1,0 +1,34 @@
+set foreign_key_checks = 0;
+
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (1, '6月出差上海差旅费', 'travel', 1280.50, '6月1日-3日上海出差差旅费', 'pending', 2, '管理员', '2026-06-01 10:00:00.000000', '2026-06-01 10:00:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (2, '办公用品采购', 'office', 320.00, '采购打印纸、笔、文件夹等', 'approved', 3, '张三', '2026-06-01 14:00:00.000000', '2026-06-02 09:00:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (3, '打车费用报销', 'transport', 85.00, '5月28日客户拜访打车', 'draft', 2, '管理员', '2026-06-02 11:00:00.000000', '2026-06-02 11:00:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (4, '客户招待餐饮费', 'catering', 560.00, '招待重要客户午餐', 'rejected', 3, '张三', '2026-05-30 16:00:00.000000', '2026-05-31 10:00:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (5, '端午节福利采购', 'other', 2000.00, '端午节员工福利采购', 'pending', 2, '管理员', '2026-05-25 09:00:00.000000', '2026-05-25 09:00:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (6, '6月出差深圳差旅费', 'travel', 3500.00, '6月5日-7日深圳出差差旅费', 'pending', 202, '呼保义宋江', '2026-06-03 08:00:00.000000', '2026-06-03 08:00:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (7, '项目团建餐饮费', 'catering', 1800.00, '项目第一阶段完成团建聚餐', 'draft', 203, '玉麒麟卢俊义', '2026-06-02 16:00:00.000000', '2026-06-02 16:00:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (8, '服务器采购', 'office', 15000.00, '采购开发服务器一台', 'pending', 207, '豹子头林冲', '2026-06-01 09:30:00.000000', '2026-06-01 09:30:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (9, '客户拜访交通费', 'transport', 230.00, '6月2日拜访客户往返打车', 'approved', 214, '花和尚鲁智深', '2026-06-02 10:00:00.000000', '2026-06-03 09:00:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (10, '技术书籍采购', 'other', 450.00, '采购Spring Cloud相关技术书籍', 'recalled', 215, '行者武松', '2026-05-28 14:00:00.000000', '2026-05-29 11:00:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (11, '成都出差差旅费', 'travel', 2200.00, '5月20日-22日成都出差', 'approved', 218, '青面兽杨志', '2026-05-19 09:00:00.000000', '2026-05-23 10:00:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (12, '团队下午茶', 'catering', 320.00, '周五团队下午茶', 'rejected', 223, '黑旋风李逵', '2026-06-02 15:00:00.000000', '2026-06-03 08:30:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (13, '出差北京高铁票', 'transport', 580.00, '5月15日北京出差高铁票', 'approved', 237, '浪子燕青', '2026-05-14 10:00:00.000000', '2026-05-16 14:00:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (14, '显示器采购', 'office', 1299.00, '采购27寸4K显示器一台', 'pending', 240, '病尉迟孙立', '2026-06-03 11:00:00.000000', '2026-06-03 11:00:00.000000');
+INSERT IGNORE INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (15, '云服务器费用', 'other', 299.00, '6月阿里云服务器费用', 'draft', 202, '呼保义宋江', '2026-06-01 00:00:00.000000', '2026-06-01 00:00:00.000000');
+
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (1, 2, 'submit', 3, '张三', null, '2026-06-01 14:00:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (2, 2, 'approve', 2, '管理员', '同意报销', '2026-06-02 09:00:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (3, 4, 'submit', 3, '张三', null, '2026-05-30 16:00:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (4, 4, 'reject', 2, '管理员', '发票金额与实际申请不一致，请重新核实', '2026-05-31 10:00:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (5, 9, 'submit', 214, '花和尚鲁智深', null, '2026-06-02 10:00:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (6, 9, 'approve', 2, '管理员', '核实无误，同意报销', '2026-06-03 09:00:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (7, 10, 'submit', 215, '行者武松', null, '2026-05-28 14:00:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (8, 10, 'recall', 215, '行者武松', '重复提交了，先撤回', '2026-05-29 11:00:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (9, 11, 'submit', 218, '青面兽杨志', null, '2026-05-19 09:00:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (10, 11, 'approve', 2, '管理员', '同意报销', '2026-05-23 10:00:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (11, 12, 'submit', 223, '黑旋风李逵', null, '2026-06-02 15:00:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (12, 12, 'reject', 2, '管理员', '下午茶费用请从团建经费中支出', '2026-06-03 08:30:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (13, 13, 'submit', 237, '浪子燕青', null, '2026-05-14 10:00:00.000000');
+INSERT IGNORE INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (14, 13, 'approve', 2, '管理员', '同意', '2026-05-16 14:00:00.000000');
+
+set foreign_key_checks = 1;

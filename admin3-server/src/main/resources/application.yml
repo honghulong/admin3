@@ -2,7 +2,7 @@ spring:
   jpa:
     generate-ddl: true
     defer-datasource-initialization: true
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: update
     properties:
@@ -33,5 +33,6 @@ xiaoyi:
       apiKey: admin3-leave-api-key-2026
 
 server:
+  port: 9099
   servlet:
     context-path: /admin3
