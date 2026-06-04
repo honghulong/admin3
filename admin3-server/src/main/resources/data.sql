@@ -361,22 +361,37 @@ INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) 
 INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (24, 6, '已退回', 'rejected', 4, '已审批退回');
 INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (25, 6, '已撤回', 'recalled', 5, '已撤回');
 
+-- 初始化字典数据：发票类型
+INSERT INTO sys_dict (id, dict_code, dict_name, description) VALUES (7, 'reimbursement_invoice_type', '发票类型', '发票的类型分类');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (26, 7, '增值税专用发票', 'special', 1, '增值税专用发票');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (27, 7, '增值税普通发票', 'normal', 2, '增值税普通发票');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (28, 7, '电子发票', 'electronic', 3, '电子发票');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (29, 7, '定额发票', 'fixed', 4, '定额发票');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (30, 7, '机动车销售发票', 'vehicle', 5, '机动车销售统一发票');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (31, 7, '其他', 'other', 6, '其他类型发票');
+
+-- 初始化字典数据：发票状态
+INSERT INTO sys_dict (id, dict_code, dict_name, description) VALUES (8, 'reimbursement_invoice_status', '发票状态', '发票的状态');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (32, 8, '正常', 'normal', 1, '发票正常');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (33, 8, '已作废', 'voided', 2, '发票已作废');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (34, 8, '已红冲', 'red_charged', 3, '发票已红冲');
+
 -- 报销管理测试数据
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (1, '6月出差上海差旅费', 'travel', 1280.50, '6月1日-3日上海出差差旅费', 'pending', 2, '管理员', '2026-06-01 10:00:00.000000', '2026-06-01 10:00:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (2, '办公用品采购', 'office', 320.00, '采购打印纸、笔、文件夹等', 'approved', 3, '张三', '2026-06-01 14:00:00.000000', '2026-06-02 09:00:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (3, '打车费用报销', 'transport', 85.00, '5月28日客户拜访打车', 'draft', 2, '管理员', '2026-06-02 11:00:00.000000', '2026-06-02 11:00:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (4, '客户招待餐饮费', 'catering', 560.00, '招待重要客户午餐', 'rejected', 3, '张三', '2026-05-30 16:00:00.000000', '2026-05-31 10:00:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (5, '端午节福利采购', 'other', 2000.00, '端午节员工福利采购', 'pending', 2, '管理员', '2026-05-25 09:00:00.000000', '2026-05-25 09:00:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (6, '6月出差深圳差旅费', 'travel', 3500.00, '6月5日-7日深圳出差差旅费', 'pending', 202, '呼保义宋江', '2026-06-03 08:00:00.000000', '2026-06-03 08:00:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (7, '项目团建餐饮费', 'catering', 1800.00, '项目第一阶段完成团建聚餐', 'draft', 203, '玉麒麟卢俊义', '2026-06-02 16:00:00.000000', '2026-06-02 16:00:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (8, '服务器采购', 'office', 15000.00, '采购开发服务器一台', 'pending', 207, '豹子头林冲', '2026-06-01 09:30:00.000000', '2026-06-01 09:30:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (9, '客户拜访交通费', 'transport', 230.00, '6月2日拜访客户往返打车', 'approved', 214, '花和尚鲁智深', '2026-06-02 10:00:00.000000', '2026-06-03 09:00:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (10, '技术书籍采购', 'other', 450.00, '采购Spring Cloud相关技术书籍', 'recalled', 215, '行者武松', '2026-05-28 14:00:00.000000', '2026-05-29 11:00:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (11, '成都出差差旅费', 'travel', 2200.00, '5月20日-22日成都出差', 'approved', 218, '青面兽杨志', '2026-05-19 09:00:00.000000', '2026-05-23 10:00:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (12, '团队下午茶', 'catering', 320.00, '周五团队下午茶', 'rejected', 223, '黑旋风李逵', '2026-06-02 15:00:00.000000', '2026-06-03 08:30:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (13, '出差北京高铁票', 'transport', 580.00, '5月15日北京出差高铁票', 'approved', 237, '浪子燕青', '2026-05-14 10:00:00.000000', '2026-05-16 14:00:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (14, '显示器采购', 'office', 1299.00, '采购27寸4K显示器一台', 'pending', 240, '病尉迟孙立', '2026-06-03 11:00:00.000000', '2026-06-03 11:00:00.000000');
-INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at) VALUES (15, '云服务器费用', 'other', 299.00, '6月阿里云服务器费用', 'draft', 202, '呼保义宋江', '2026-06-01 00:00:00.000000', '2026-06-01 00:00:00.000000');
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (1, '6月出差上海差旅费', 'travel', 1280.50, '6月1日-3日上海出差差旅费', 'pending', 2, '管理员', '2026-06-01 10:00:00.000000', '2026-06-01 10:00:00.000000', 2, 2);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (2, '办公用品采购', 'office', 320.00, '采购打印纸、笔、文件夹等', 'approved', 3, '张三', '2026-06-01 14:00:00.000000', '2026-06-02 09:00:00.000000', 3, 3);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (3, '打车费用报销', 'transport', 85.00, '5月28日客户拜访打车', 'draft', 2, '管理员', '2026-06-02 11:00:00.000000', '2026-06-02 11:00:00.000000', 2, 2);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (4, '客户招待餐饮费', 'catering', 560.00, '招待重要客户午餐', 'rejected', 3, '张三', '2026-05-30 16:00:00.000000', '2026-05-31 10:00:00.000000', 3, 3);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (5, '端午节福利采购', 'other', 2000.00, '端午节员工福利采购', 'pending', 2, '管理员', '2026-05-25 09:00:00.000000', '2026-05-25 09:00:00.000000', 2, 2);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (6, '6月出差深圳差旅费', 'travel', 3500.00, '6月5日-7日深圳出差差旅费', 'pending', 202, '呼保义宋江', '2026-06-03 08:00:00.000000', '2026-06-03 08:00:00.000000', 202, 202);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (7, '项目团建餐饮费', 'catering', 1800.00, '项目第一阶段完成团建聚餐', 'draft', 203, '玉麒麟卢俊义', '2026-06-02 16:00:00.000000', '2026-06-02 16:00:00.000000', 203, 203);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (8, '服务器采购', 'office', 15000.00, '采购开发服务器一台', 'pending', 207, '豹子头林冲', '2026-06-01 09:30:00.000000', '2026-06-01 09:30:00.000000', 207, 207);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (9, '客户拜访交通费', 'transport', 230.00, '6月2日拜访客户往返打车', 'approved', 214, '花和尚鲁智深', '2026-06-02 10:00:00.000000', '2026-06-03 09:00:00.000000', 214, 214);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (10, '技术书籍采购', 'other', 450.00, '采购Spring Cloud相关技术书籍', 'recalled', 215, '行者武松', '2026-05-28 14:00:00.000000', '2026-05-29 11:00:00.000000', 215, 215);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (11, '成都出差差旅费', 'travel', 2200.00, '5月20日-22日成都出差', 'approved', 218, '青面兽杨志', '2026-05-19 09:00:00.000000', '2026-05-23 10:00:00.000000', 218, 218);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (12, '团队下午茶', 'catering', 320.00, '周五团队下午茶', 'rejected', 223, '黑旋风李逵', '2026-06-02 15:00:00.000000', '2026-06-03 08:30:00.000000', 223, 223);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (13, '出差北京高铁票', 'transport', 580.00, '5月15日北京出差高铁票', 'approved', 237, '浪子燕青', '2026-05-14 10:00:00.000000', '2026-05-16 14:00:00.000000', 237, 237);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (14, '显示器采购', 'office', 1299.00, '采购27寸4K显示器一台', 'pending', 240, '病尉迟孙立', '2026-06-03 11:00:00.000000', '2026-06-03 11:00:00.000000', 240, 240);
+INSERT INTO reimbursement (id, title, category, amount, description, status, applicant_id, applicant_name, created_at, updated_at, created_by, updated_by) VALUES (15, '云服务器费用', 'other', 299.00, '6月阿里云服务器费用', 'draft', 202, '呼保义宋江', '2026-06-01 00:00:00.000000', '2026-06-01 00:00:00.000000', 202, 202);
 
 -- 审批日志测试数据
 INSERT INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (1, 2, 'submit', 3, '张三', null, '2026-06-01 14:00:00.000000');
@@ -394,5 +409,30 @@ INSERT INTO approval_log (id, reimbursement_id, action, operator_id, operator_na
 INSERT INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (13, 13, 'submit', 237, '浪子燕青', null, '2026-05-14 10:00:00.000000');
 INSERT INTO approval_log (id, reimbursement_id, action, operator_id, operator_name, comment, created_at) VALUES (14, 13, 'approve', 2, '管理员', '同意', '2026-05-16 14:00:00.000000');
 
--- 开启外键约束检查
+-- 创建临时发票表
+CREATE TABLE IF NOT EXISTS invoice_temp (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+  reimbursement_id BIGINT COMMENT '关联的正式报销单ID',
+  image_path VARCHAR(500) COMMENT '发票图片物理路径',
+  ocr_raw_json MEDIUMTEXT COMMENT 'OCR 原始返回 JSON',
+  invoice_no VARCHAR(50) COMMENT '发票号码（OCR识别）',
+  invoice_code VARCHAR(50) COMMENT '发票代码（OCR识别）',
+  invoice_date DATETIME COMMENT '开票日期（OCR识别）',
+  buyer_name VARCHAR(200) COMMENT '购买方名称（OCR识别）',
+  seller_name VARCHAR(200) COMMENT '销售方名称（OCR识别）',
+  buyer_tax_id VARCHAR(50) COMMENT '购买方税号（OCR识别）',
+  seller_tax_id VARCHAR(50) COMMENT '销售方税号（OCR识别）',
+  total_amount DECIMAL(10,2) COMMENT '价税合计金额（OCR识别）',
+  invoice_type VARCHAR(50) COMMENT '发票类型（关联字典 reimbursement_invoice_type）',
+  invoice_status VARCHAR(50) COMMENT '发票状态（关联字典 reimbursement_invoice_status）',
+  status VARCHAR(20) NOT NULL DEFAULT 'pending' COMMENT '状态: pending=待确认, confirmed=已确认, discarded=已废弃',
+  created_by BIGINT COMMENT '创建人ID',
+  created_at DATETIME NOT NULL COMMENT '创建时间',
+  updated_by BIGINT COMMENT '修改人ID',
+  updated_at DATETIME NOT NULL COMMENT '修改时间',
+  INDEX idx_reimbursement_id (reimbursement_id),
+  INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='临时发票表 - 每次OCR识别的结果';
+
+-- 重新启用外键约束检查
 set foreign_key_checks = 1;

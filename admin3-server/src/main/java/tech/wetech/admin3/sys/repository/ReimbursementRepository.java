@@ -24,7 +24,7 @@ public interface ReimbursementRepository extends JpaRepository<Reimbursement, Lo
     "(:category IS NULL OR r.category = :category) AND " +
     "(:dateFrom IS NULL OR r.createdAt >= :dateFrom) AND " +
     "(:dateTo IS NULL OR r.createdAt <= :dateTo) AND " +
-    "(:keyword IS NULL OR r.title LIKE %:keyword% OR r.description LIKE %:keyword%) " +
+    "(:keyword IS NULL OR r.title LIKE CONCAT('%', :keyword, '%') OR r.description LIKE CONCAT('%', :keyword, '%')) " +
     "ORDER BY r.createdAt DESC")
   Page<Reimbursement> searchReimbursements(
     @Param("status") String status,
@@ -36,4 +36,6 @@ public interface ReimbursementRepository extends JpaRepository<Reimbursement, Lo
     Pageable pageable);
 
   List<Reimbursement> findByApplicantIdAndStatus(Long applicantId, String status);
+
+  List<Reimbursement> findByApplicantNameOrderByCreatedAtDesc(String applicantName);
 }

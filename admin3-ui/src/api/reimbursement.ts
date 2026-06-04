@@ -46,6 +46,15 @@ export function createReimbursement(data: {
     category: string;
     amount: number;
     description?: string;
+    invoiceNo?: string;
+    invoiceCode?: string;
+    invoiceDate?: string;
+    buyerName?: string;
+    sellerName?: string;
+    buyerTaxId?: string;
+    sellerTaxId?: string;
+    invoiceType?: string;
+    invoiceStatus?: string;
     attachmentIds?: number[];
 }) {
     return request({
@@ -60,6 +69,15 @@ export function updateReimbursement(id: number, data: {
     category: string;
     amount: number;
     description?: string;
+    invoiceNo?: string;
+    invoiceCode?: string;
+    invoiceDate?: string;
+    buyerName?: string;
+    sellerName?: string;
+    buyerTaxId?: string;
+    sellerTaxId?: string;
+    invoiceType?: string;
+    invoiceStatus?: string;
     attachmentIds?: number[];
 }) {
     return request({
@@ -106,9 +124,12 @@ export function recallReimbursement(id: number) {
     });
 };
 
-export function uploadAttachment(file: File) {
+export function uploadAttachment(file: File, reimbursementId?: number) {
     const formData = new FormData();
     formData.append('file', file);
+    if (reimbursementId) {
+        formData.append('reimbursementId', String(reimbursementId));
+    }
     return request({
         url: `${BASE_URI}/attachments/upload`,
         method: 'post',

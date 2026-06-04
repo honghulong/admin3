@@ -1,6 +1,8 @@
 package tech.wetech.admin3.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +15,7 @@ import tech.wetech.admin3.common.SessionItemHolder;
 import tech.wetech.admin3.common.authz.RequiresPermissions;
 import tech.wetech.admin3.sys.model.Attachment;
 import tech.wetech.admin3.sys.repository.AttachmentRepository;
+import tech.wetech.admin3.sys.service.OcrService;
 import tech.wetech.admin3.sys.service.dto.ReimbursementDTO;
 import tech.wetech.admin3.sys.service.dto.UserinfoDTO;
 
@@ -35,16 +38,22 @@ import static tech.wetech.admin3.common.Constants.SESSION_CURRENT_USER;
 @RequestMapping("/attachments")
 public class AttachmentController {
 
+  private static final Logger log = LoggerFactory.getLogger(AttachmentController.class);
+
   private final AttachmentRepository attachmentRepository;
+  private final OcrService ocrService;
   private final Path uploadDir = Paths.get("uploads/attachments");
 
-  public AttachmentController(AttachmentRepository attachmentRepository) {
+  public AttachmentController(AttachmentRepository attachmentRepository, OcrService ocrService) {
     this.attachmentRepository = attachmentRepository;
+    this.ocrService = ocrService;
   }
 
   @RequiresPermissions("reimbursement:create")
   @PostMapping("/upload")
-  public ResponseEntity<ReimbursementDTO.AttachmentDTO> uploadAttachment(@RequestParam("file") MultipartFile file) {
+  public ResponseEntity<ReimbursementDTO.AttachmentDTO> uploadAttachment(
+    @RequestParam("file") MultipartFile file,
+    @RequestParam(value = "reimbursementId", required = false) Long reimbursementId) {
     if (file.isEmpty()) {
       throw new BusinessException(PARAM_ERROR, "文件不能为空");
     }
@@ -72,16 +81,26 @@ public class AttachmentController {
       UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
 
       Attachment attachment = new Attachment();
+      attachment.setReimbursementId(reimbursementId);
       attachment.setFileName(originalName);
       attachment.setFileSize(file.getSize());
       attachment.setFileType(contentType);
       attachment.setFileUrl("/attachments/" + storedName + "/download");
       attachment.setUploadedBy(userInfo.userId());
       attachment.setCreatedAt(LocalDateTime.now());
+      attachment.setOcrStatus("pending");
       attachment = attachmentRepository.save(attachment);
+
+      log.info("Attachment uploaded: id={}, file={}, size={}, reimbursementId={}, stored={}",
+        attachment.getId(), originalName, file.getSize(), reimbursementId, storedName);
+
+      // 异步触发 OCR 识别
+      ocrService.recognizeAttachmentAsync(attachment.getId(), targetPath);
+      log.info("OCR triggered for attachment {}", attachment.getId());
 
       return ResponseEntity.ok(new ReimbursementDTO.AttachmentDTO(attachment));
     } catch (IOException e) {
+      log.error("File upload failed: {}", e.getMessage(), e);
       throw new BusinessException(SERVER_ERROR, "文件上传失败: " + e.getMessage());
     }
   }
@@ -91,6 +110,7 @@ public class AttachmentController {
   public ResponseEntity<Void> deleteAttachment(@PathVariable Long id) {
     Attachment attachment = attachmentRepository.findById(id)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    log.info("Deleting attachment: id={}, file={}, reimbursementId={}", id, attachment.getFileName(), attachment.getReimbursementId());
     // 删除物理文件
     try {
       String storedName = attachment.getFileUrl().substring(
@@ -99,9 +119,12 @@ public class AttachmentController {
       );
       Path filePath = uploadDir.resolve(storedName);
       Files.deleteIfExists(filePath);
-    } catch (IOException ignored) {
+      log.debug("Deleted physical file: {}", storedName);
+    } catch (IOException e) {
+      log.warn("Failed to delete physical file for attachment {}: {}", id, e.getMessage());
     }
     attachmentRepository.delete(attachment);
+    log.info("Attachment deleted: id={}", id);
     return ResponseEntity.noContent().build();
   }
 

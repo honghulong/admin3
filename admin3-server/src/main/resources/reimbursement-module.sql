@@ -65,6 +65,21 @@ INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) 
 INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (24, 6, '已退回', 'rejected', 4, '已审批退回');
 INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (25, 6, '已撤回', 'recalled', 5, '已撤回');
 
+-- 发票类型字典
+INSERT INTO sys_dict (id, dict_code, dict_name, description) VALUES (7, 'reimbursement_invoice_type', '发票类型', '发票的类型分类');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (26, 7, '增值税专用发票', 'special', 1, '增值税专用发票');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (27, 7, '增值税普通发票', 'normal', 2, '增值税普通发票');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (28, 7, '电子发票', 'electronic', 3, '电子发票');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (29, 7, '定额发票', 'fixed', 4, '定额发票');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (30, 7, '机动车销售发票', 'vehicle', 5, '机动车销售统一发票');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (31, 7, '其他', 'other', 6, '其他类型发票');
+
+-- 发票状态字典
+INSERT INTO sys_dict (id, dict_code, dict_name, description) VALUES (8, 'reimbursement_invoice_status', '发票状态', '发票的状态');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (32, 8, '正常', 'normal', 1, '发票正常');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (33, 8, '已作废', 'voided', 2, '发票已作废');
+INSERT INTO sys_dict_value (id, dict_id, label, value, sort_order, description) VALUES (34, 8, '已红冲', 'red_charged', 3, '发票已红冲');
+
 -- ============================================================
 -- 4. 测试数据
 -- ============================================================

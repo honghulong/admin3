@@ -4,17 +4,23 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * 临时发票表 - 每次 OCR 识别的结果
+ * 一个正式报销单（Reimbursement）可以对应多个临时发票记录
+ */
 @Entity
-public class Reimbursement extends BaseEntity {
+public class InvoiceTemp extends BaseEntity {
 
-  @Column(nullable = false, length = 100)
-  private String title;
+  /** 关联的正式报销单ID */
+  private Long reimbursementId;
 
-  @Column(nullable = false, length = 20)
-  private String category;
+  /** 发票图片物理路径 */
+  @Column(length = 500)
+  private String imagePath;
 
-  @Column(nullable = false, precision = 10, scale = 2)
-  private BigDecimal amount;
+  /** OCR 原始返回 JSON */
+  @Column(columnDefinition = "MEDIUMTEXT")
+  private String ocrRawJson;
 
   /** 发票号码（OCR识别） */
   @Column(length = 50)
@@ -43,6 +49,10 @@ public class Reimbursement extends BaseEntity {
   @Column(length = 50)
   private String sellerTaxId;
 
+  /** 价税合计金额（OCR识别） */
+  @Column(precision = 10, scale = 2)
+  private BigDecimal totalAmount;
+
   /** 发票类型（关联字典 reimbursement_invoice_type） */
   @Column(length = 50)
   private String invoiceType;
@@ -51,62 +61,44 @@ public class Reimbursement extends BaseEntity {
   @Column(length = 50)
   private String invoiceStatus;
 
-  @Column(columnDefinition = "TEXT")
-  private String description;
-
+  /** 状态: pending=待确认, confirmed=已确认, discarded=已废弃 */
   @Column(nullable = false, length = 20)
   private String status;
 
-  @Column(nullable = false)
-  private Long applicantId;
-
-  @Column(nullable = false, length = 50)
-  private String applicantName;
-
-  private Long approverId;
-
-  @Column(length = 50)
-  private String approverName;
-
-  @Column(columnDefinition = "TEXT")
-  private String approveComment;
-
-  private LocalDateTime approveTime;
-
-  /** 创建人ID（审计字段） */
+  /** 创建人ID */
   private Long createdBy;
 
   @Column(nullable = false)
   private LocalDateTime createdAt;
 
-  /** 修改人ID（审计字段） */
+  /** 修改人ID */
   private Long updatedBy;
 
   @Column(nullable = false)
   private LocalDateTime updatedAt;
 
-  public String getTitle() {
-    return title;
+  public Long getReimbursementId() {
+    return reimbursementId;
   }
 
-  public void setTitle(String title) {
-    this.title = title;
+  public void setReimbursementId(Long reimbursementId) {
+    this.reimbursementId = reimbursementId;
   }
 
-  public String getCategory() {
-    return category;
+  public String getImagePath() {
+    return imagePath;
   }
 
-  public void setCategory(String category) {
-    this.category = category;
+  public void setImagePath(String imagePath) {
+    this.imagePath = imagePath;
   }
 
-  public BigDecimal getAmount() {
-    return amount;
+  public String getOcrRawJson() {
+    return ocrRawJson;
   }
 
-  public void setAmount(BigDecimal amount) {
-    this.amount = amount;
+  public void setOcrRawJson(String ocrRawJson) {
+    this.ocrRawJson = ocrRawJson;
   }
 
   public String getInvoiceNo() {
@@ -165,6 +157,14 @@ public class Reimbursement extends BaseEntity {
     this.sellerTaxId = sellerTaxId;
   }
 
+  public BigDecimal getTotalAmount() {
+    return totalAmount;
+  }
+
+  public void setTotalAmount(BigDecimal totalAmount) {
+    this.totalAmount = totalAmount;
+  }
+
   public String getInvoiceType() {
     return invoiceType;
   }
@@ -181,68 +181,12 @@ public class Reimbursement extends BaseEntity {
     this.invoiceStatus = invoiceStatus;
   }
 
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
   public String getStatus() {
     return status;
   }
 
   public void setStatus(String status) {
     this.status = status;
-  }
-
-  public Long getApplicantId() {
-    return applicantId;
-  }
-
-  public void setApplicantId(Long applicantId) {
-    this.applicantId = applicantId;
-  }
-
-  public String getApplicantName() {
-    return applicantName;
-  }
-
-  public void setApplicantName(String applicantName) {
-    this.applicantName = applicantName;
-  }
-
-  public Long getApproverId() {
-    return approverId;
-  }
-
-  public void setApproverId(Long approverId) {
-    this.approverId = approverId;
-  }
-
-  public String getApproverName() {
-    return approverName;
-  }
-
-  public void setApproverName(String approverName) {
-    this.approverName = approverName;
-  }
-
-  public String getApproveComment() {
-    return approveComment;
-  }
-
-  public void setApproveComment(String approveComment) {
-    this.approveComment = approveComment;
-  }
-
-  public LocalDateTime getApproveTime() {
-    return approveTime;
-  }
-
-  public void setApproveTime(LocalDateTime approveTime) {
-    this.approveTime = approveTime;
   }
 
   public Long getCreatedBy() {
