@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 @Entity
 public class Attachment extends BaseEntity {
 
-  @Column(nullable = false)
+  @Column(nullable = true)
   private Long reimbursementId;
 
   @Column(nullable = false, length = 255)
@@ -27,6 +27,14 @@ public class Attachment extends BaseEntity {
 
   @Column(nullable = false)
   private LocalDateTime createdAt;
+
+  /** OCR 状态: pending=待识别, processing=识别中, completed=已完成, failed=识别失败 */
+  @Column(length = 20)
+  private String ocrStatus;
+
+  /** OCR 识别结果 JSON */
+  @Column(columnDefinition = "MEDIUMTEXT")
+  private String ocrResult;
 
   public Long getReimbursementId() {
     return reimbursementId;
@@ -82,5 +90,21 @@ public class Attachment extends BaseEntity {
 
   public void setCreatedAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
+  }
+
+  public String getOcrStatus() {
+    return ocrStatus;
+  }
+
+  public void setOcrStatus(String ocrStatus) {
+    this.ocrStatus = ocrStatus;
+  }
+
+  public String getOcrResult() {
+    return ocrResult;
+  }
+
+  public void setOcrResult(String ocrResult) {
+    this.ocrResult = ocrResult;
   }
 }

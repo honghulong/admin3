@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,8 @@ import java.util.List;
 @RequestMapping("/reimbursements")
 public class ReimbursementController {
 
+  private static final Logger log = LoggerFactory.getLogger(ReimbursementController.class);
+
   private final ReimbursementService reimbursementService;
 
   public ReimbursementController(ReimbursementService reimbursementService) {
@@ -39,6 +43,8 @@ public class ReimbursementController {
     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTo,
     @RequestParam(required = false) String keyword,
     Pageable pageable) {
+    log.debug("findReimbursements called: status={}, applicantId={}, category={}, keyword={}, page={}, size={}",
+      status, applicantId, category, keyword, pageable.getPageNumber(), pageable.getPageSize());
     return ResponseEntity.ok(reimbursementService.findReimbursements(status, applicantId, category, dateFrom, dateTo, keyword, pageable));
   }
 
@@ -64,7 +70,9 @@ public class ReimbursementController {
   @PostMapping
   public ResponseEntity<ReimbursementDTO> createReimbursement(@RequestBody @Valid CreateReimbursementRequest request) {
     return new ResponseEntity<>(
-      reimbursementService.createReimbursement(request.title(), request.category(), request.amount(), request.description(), request.attachmentIds()),
+      reimbursementService.createReimbursement(request.title(), request.category(), request.amount(), request.description(),
+        request.invoiceNo(), request.invoiceCode(), request.invoiceDate(), request.buyerName(), request.sellerName(),
+        request.buyerTaxId(), request.sellerTaxId(), request.invoiceType(), request.invoiceStatus(), request.attachmentIds()),
       HttpStatus.CREATED);
   }
 
@@ -72,7 +80,9 @@ public class ReimbursementController {
   @PutMapping("/{id}")
   public ResponseEntity<ReimbursementDTO> updateReimbursement(@PathVariable Long id, @RequestBody @Valid CreateReimbursementRequest request) {
     return ResponseEntity.ok(
-      reimbursementService.updateReimbursement(id, request.title(), request.category(), request.amount(), request.description(), request.attachmentIds()));
+      reimbursementService.updateReimbursement(id, request.title(), request.category(), request.amount(), request.description(),
+        request.invoiceNo(), request.invoiceCode(), request.invoiceDate(), request.buyerName(), request.sellerName(),
+        request.buyerTaxId(), request.sellerTaxId(), request.invoiceType(), request.invoiceStatus(), request.attachmentIds()));
   }
 
   @RequiresPermissions("reimbursement:delete")
@@ -111,6 +121,15 @@ public class ReimbursementController {
     @NotBlank String category,
     @NotNull BigDecimal amount,
     String description,
+    String invoiceNo,
+    String invoiceCode,
+    String invoiceDate,
+    String buyerName,
+    String sellerName,
+    String buyerTaxId,
+    String sellerTaxId,
+    String invoiceType,
+    String invoiceStatus,
     List<Long> attachmentIds
   ) {}
 

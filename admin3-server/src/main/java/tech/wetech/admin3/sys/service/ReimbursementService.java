@@ -9,9 +9,11 @@ import tech.wetech.admin3.common.CommonResultStatus;
 import tech.wetech.admin3.common.SessionItemHolder;
 import tech.wetech.admin3.sys.model.Attachment;
 import tech.wetech.admin3.sys.model.ApprovalLog;
+import tech.wetech.admin3.sys.model.InvoiceTemp;
 import tech.wetech.admin3.sys.model.Reimbursement;
 import tech.wetech.admin3.sys.repository.AttachmentRepository;
 import tech.wetech.admin3.sys.repository.ApprovalLogRepository;
+import tech.wetech.admin3.sys.repository.InvoiceTempRepository;
 import tech.wetech.admin3.sys.repository.ReimbursementRepository;
 import tech.wetech.admin3.sys.service.dto.PageDTO;
 import tech.wetech.admin3.sys.service.dto.ReimbursementDTO;
@@ -32,13 +34,16 @@ public class ReimbursementService {
   private final ReimbursementRepository reimbursementRepository;
   private final AttachmentRepository attachmentRepository;
   private final ApprovalLogRepository approvalLogRepository;
+  private final InvoiceTempRepository invoiceTempRepository;
 
   public ReimbursementService(ReimbursementRepository reimbursementRepository,
                               AttachmentRepository attachmentRepository,
-                              ApprovalLogRepository approvalLogRepository) {
+                              ApprovalLogRepository approvalLogRepository,
+                              InvoiceTempRepository invoiceTempRepository) {
     this.reimbursementRepository = reimbursementRepository;
     this.attachmentRepository = attachmentRepository;
     this.approvalLogRepository = approvalLogRepository;
+    this.invoiceTempRepository = invoiceTempRepository;
   }
 
   public PageDTO<ReimbursementDTO> findReimbursements(String status, Long applicantId, String category,
@@ -70,28 +75,75 @@ public class ReimbursementService {
     return new PageDTO<>(dtoPage.getContent(), dtoPage.getTotalElements());
   }
 
+  public List<ReimbursementDTO> findReimbursementsByUsername(String username) {
+    List<Reimbursement> list = reimbursementRepository.findByApplicantNameOrderByCreatedAtDesc(username);
+    return list.stream().map(ReimbursementDTO::brief).toList();
+  }
+
   public ReimbursementDTO findReimbursementById(Long id) {
     Reimbursement r = reimbursementRepository.findById(id)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
     List<Attachment> attachments = attachmentRepository.findByReimbursementIdOrderByCreatedAtAsc(id);
     List<ApprovalLog> logs = approvalLogRepository.findByReimbursementIdOrderByCreatedAtAsc(id);
-    return ReimbursementDTO.of(r, attachments, logs);
+    List<InvoiceTemp> invoiceTemps = invoiceTempRepository.findByReimbursementIdOrderByCreatedAtDesc(id);
+    return ReimbursementDTO.of(r, attachments, logs, invoiceTemps);
   }
 
   public ReimbursementDTO createReimbursement(String title, String category, BigDecimal amount,
                                               String description, List<Long> attachmentIds) {
     UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
+    return createReimbursement(title, category, amount, description, attachmentIds,
+      userInfo.userId(), userInfo.username(), null, null, null,
+      null, null, null, null, null, null);
+  }
+
+  public ReimbursementDTO createReimbursement(String title, String category, BigDecimal amount,
+                                              String description,
+                                              String invoiceNo, String invoiceCode, String invoiceDate,
+                                              String buyerName, String sellerName,
+                                              String buyerTaxId, String sellerTaxId,
+                                              String invoiceType, String invoiceStatus,
+                                              List<Long> attachmentIds) {
+    UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
+    LocalDateTime date = invoiceDate != null ? LocalDateTime.parse(invoiceDate) : null;
+    return createReimbursement(title, category, amount, description, attachmentIds,
+      userInfo.userId(), userInfo.username(), invoiceNo, invoiceCode, date,
+      buyerName, sellerName, buyerTaxId, sellerTaxId, invoiceType, invoiceStatus);
+  }
+
+  /**
+   * 创建报销单（支持 MCP 无 Session 场景，直接传入用户信息）
+   */
+  public ReimbursementDTO createReimbursement(String title, String category, BigDecimal amount,
+                                              String description, List<Long> attachmentIds,
+                                              Long applicantId, String applicantName,
+                                              String invoiceNo, String invoiceCode,
+                                              LocalDateTime invoiceDate, String buyerName,
+                                              String sellerName, String buyerTaxId,
+                                              String sellerTaxId, String invoiceType,
+                                              String invoiceStatus) {
     LocalDateTime now = LocalDateTime.now();
 
     Reimbursement r = new Reimbursement();
     r.setTitle(title);
     r.setCategory(category);
     r.setAmount(amount);
+    r.setInvoiceNo(invoiceNo);
+    r.setInvoiceCode(invoiceCode);
+    r.setInvoiceDate(invoiceDate);
+    r.setBuyerName(buyerName);
+    r.setSellerName(sellerName);
+    r.setBuyerTaxId(buyerTaxId);
+    r.setSellerTaxId(sellerTaxId);
+    r.setInvoiceType(invoiceType);
+    r.setInvoiceStatus(invoiceStatus);
     r.setDescription(description);
     r.setStatus("draft");
-    r.setApplicantId(userInfo.userId());
-    r.setApplicantName(userInfo.username());
+    r.setApplicantId(applicantId);
+    r.setApplicantName(applicantName);
+    r.setCreatedBy(applicantId);
     r.setCreatedAt(now);
+    r.setUpdatedBy(applicantId);
     r.setUpdatedAt(now);
     Reimbursement saved = reimbursementRepository.save(r);
     final Long savedId = saved.getId();
@@ -111,6 +163,17 @@ public class ReimbursementService {
 
   public ReimbursementDTO updateReimbursement(Long id, String title, String category, BigDecimal amount,
                                               String description, List<Long> attachmentIds) {
+    return updateReimbursement(id, title, category, amount, description,
+      null, null, null, null, null, null, null, null, null, attachmentIds);
+  }
+
+  public ReimbursementDTO updateReimbursement(Long id, String title, String category, BigDecimal amount,
+                                              String description,
+                                              String invoiceNo, String invoiceCode, String invoiceDate,
+                                              String buyerName, String sellerName,
+                                              String buyerTaxId, String sellerTaxId,
+                                              String invoiceType, String invoiceStatus,
+                                              List<Long> attachmentIds) {
     Reimbursement r = reimbursementRepository.findById(id)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
     if (!"draft".equals(r.getStatus())) {
@@ -120,6 +183,15 @@ public class ReimbursementService {
     r.setCategory(category);
     r.setAmount(amount);
     r.setDescription(description);
+    if (invoiceNo != null) r.setInvoiceNo(invoiceNo);
+    if (invoiceCode != null) r.setInvoiceCode(invoiceCode);
+    if (invoiceDate != null) r.setInvoiceDate(LocalDateTime.parse(invoiceDate));
+    if (buyerName != null) r.setBuyerName(buyerName);
+    if (sellerName != null) r.setSellerName(sellerName);
+    if (buyerTaxId != null) r.setBuyerTaxId(buyerTaxId);
+    if (sellerTaxId != null) r.setSellerTaxId(sellerTaxId);
+    if (invoiceType != null) r.setInvoiceType(invoiceType);
+    if (invoiceStatus != null) r.setInvoiceStatus(invoiceStatus);
     r.setUpdatedAt(LocalDateTime.now());
     reimbursementRepository.save(r);
 
@@ -247,5 +319,120 @@ public class ReimbursementService {
     log.setComment(comment);
     log.setCreatedAt(LocalDateTime.now());
     approvalLogRepository.save(log);
+  }
+
+  // ========== InvoiceTemp（临时发票）相关方法 ==========
+
+  /**
+   * 创建临时发票记录（OCR 识别前）
+   */
+  public InvoiceTemp createInvoiceTemp(Long reimbursementId, String imagePath, Long userId) {
+    LocalDateTime now = LocalDateTime.now();
+    InvoiceTemp t = new InvoiceTemp();
+    t.setReimbursementId(reimbursementId);
+    t.setImagePath(imagePath);
+    t.setStatus("pending");
+    t.setCreatedBy(userId);
+    t.setCreatedAt(now);
+    t.setUpdatedBy(userId);
+    t.setUpdatedAt(now);
+    return invoiceTempRepository.save(t);
+  }
+
+  /**
+   * 更新临时发票的 OCR 识别结果
+   */
+  public InvoiceTemp updateInvoiceTempOcrResult(Long tempId, String ocrRawJson,
+                                                 String invoiceNo, String invoiceCode,
+                                                 LocalDateTime invoiceDate,
+                                                 String buyerName, String sellerName,
+                                                 String buyerTaxId, String sellerTaxId,
+                                                 BigDecimal totalAmount,
+                                                 String invoiceType, String invoiceStatus,
+                                                 Long userId) {
+    InvoiceTemp t = invoiceTempRepository.findById(tempId)
+      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    t.setOcrRawJson(ocrRawJson);
+    t.setInvoiceNo(invoiceNo);
+    t.setInvoiceCode(invoiceCode);
+    t.setInvoiceDate(invoiceDate);
+    t.setBuyerName(buyerName);
+    t.setSellerName(sellerName);
+    t.setBuyerTaxId(buyerTaxId);
+    t.setSellerTaxId(sellerTaxId);
+    t.setTotalAmount(totalAmount);
+    t.setInvoiceType(invoiceType);
+    t.setInvoiceStatus(invoiceStatus);
+    t.setUpdatedBy(userId);
+    t.setUpdatedAt(LocalDateTime.now());
+    return invoiceTempRepository.save(t);
+  }
+
+  /**
+   * 用户确认临时发票，将数据同步到正式报销单
+   */
+  public ReimbursementDTO confirmInvoiceTemp(Long tempId) {
+    InvoiceTemp t = invoiceTempRepository.findById(tempId)
+      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    if (!"pending".equals(t.getStatus())) {
+      throw new BusinessException(PARAM_ERROR, "仅待确认状态的临时发票可确认");
+    }
+
+    Reimbursement r = reimbursementRepository.findById(t.getReimbursementId())
+      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+
+    // 将临时发票数据同步到正式报销单
+    r.setInvoiceNo(t.getInvoiceNo());
+    r.setInvoiceCode(t.getInvoiceCode());
+    r.setInvoiceDate(t.getInvoiceDate());
+    r.setBuyerName(t.getBuyerName());
+    r.setSellerName(t.getSellerName());
+    r.setBuyerTaxId(t.getBuyerTaxId());
+    r.setSellerTaxId(t.getSellerTaxId());
+    r.setInvoiceType(t.getInvoiceType());
+    r.setInvoiceStatus(t.getInvoiceStatus());
+    if (t.getTotalAmount() != null) {
+      r.setAmount(t.getTotalAmount());
+    }
+    r.setUpdatedAt(LocalDateTime.now());
+    reimbursementRepository.save(r);
+
+    // 标记临时发票为已确认
+    t.setStatus("confirmed");
+    t.setUpdatedAt(LocalDateTime.now());
+    invoiceTempRepository.save(t);
+
+    // 废弃同一报销单下其他待确认的临时发票
+    List<InvoiceTemp> others = invoiceTempRepository
+      .findByReimbursementIdAndStatusOrderByCreatedAtDesc(r.getId(), "pending");
+    for (InvoiceTemp other : others) {
+      other.setStatus("discarded");
+      other.setUpdatedAt(LocalDateTime.now());
+      invoiceTempRepository.save(other);
+    }
+
+    return findReimbursementById(r.getId());
+  }
+
+  /**
+   * 用户不认可，废弃临时发票
+   */
+  public void discardInvoiceTemp(Long tempId) {
+    InvoiceTemp t = invoiceTempRepository.findById(tempId)
+      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    if (!"pending".equals(t.getStatus())) {
+      throw new BusinessException(PARAM_ERROR, "仅待确认状态的临时发票可废弃");
+    }
+    t.setStatus("discarded");
+    t.setUpdatedAt(LocalDateTime.now());
+    invoiceTempRepository.save(t);
+  }
+
+  /**
+   * 查询报销单下的临时发票列表
+   */
+  public List<ReimbursementDTO.InvoiceTempDTO> findInvoiceTempsByReimbursementId(Long reimbursementId) {
+    List<InvoiceTemp> list = invoiceTempRepository.findByReimbursementIdOrderByCreatedAtDesc(reimbursementId);
+    return list.stream().map(ReimbursementDTO.InvoiceTempDTO::new).toList();
   }
 }
