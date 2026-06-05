@@ -1,5 +1,7 @@
 package tech.wetech.admin3.sys.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.wetech.admin3.common.BusinessException;
@@ -16,6 +18,8 @@ import static tech.wetech.admin3.common.CommonResultStatus.RECORD_NOT_EXIST;
 @Service
 public class DictService {
 
+  private static final Logger log = LoggerFactory.getLogger(DictService.class);
+
   private final SysDictRepository sysDictRepository;
   private final SysDictValueRepository sysDictValueRepository;
 
@@ -25,6 +29,7 @@ public class DictService {
   }
 
   public List<SysDict> findAllDicts() {
+    log.debug("查询所有字典");
     return sysDictRepository.findAll();
   }
 

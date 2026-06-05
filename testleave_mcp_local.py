@@ -1,7 +1,7 @@
 import urllib.request
 import json
 import re
-
+# 测试请假 域名MCP 接口
 BASE_URL = "https://28wh9253sf76.vicp.fun/admin3/xiaoyi-mcp/message"
 HEADERS = {
     "Content-Type": "application/json",

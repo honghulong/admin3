@@ -16,9 +16,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
+import tech.wetech.admin3.sys.model.ApprovalLog;
 import tech.wetech.admin3.sys.model.Attachment;
 import tech.wetech.admin3.sys.model.InvoiceTemp;
+import tech.wetech.admin3.sys.model.Reimbursement;
+import tech.wetech.admin3.sys.repository.ApprovalLogRepository;
 import tech.wetech.admin3.sys.repository.AttachmentRepository;
+import tech.wetech.admin3.sys.repository.ReimbursementRepository;
 import tech.wetech.admin3.sys.service.ReimbursementService;
 import tech.wetech.admin3.sys.service.dto.ReimbursementDTO;
 
@@ -72,6 +76,8 @@ public class ReimbursementMcpConfig {
     @Qualifier("reimbursementWebMvcStatelessServerTransport") WebMvcStatelessServerTransport transport,
     ReimbursementService reimbursementService,
     AttachmentRepository attachmentRepository,
+    ReimbursementRepository reimbursementRepository,
+    ApprovalLogRepository approvalLogRepository,
     @Qualifier("reimbursementMcpJsonMapper") McpJsonMapper jsonMapper) {
     return McpServer.sync(transport)
       .serverInfo("xiaoyi-reimbursement-mcp-server", "1.0.0")
@@ -81,7 +87,7 @@ public class ReimbursementMcpConfig {
         .build())
       .tools(
         createOcrUploadTool(reimbursementService, attachmentRepository, jsonMapper),
-        createConfirmReimbursementTool(reimbursementService, jsonMapper),
+        createConfirmReimbursementTool(reimbursementService, reimbursementRepository, approvalLogRepository, jsonMapper),
         createQueryReimbursementsTool(reimbursementService, jsonMapper)
       )
       .build();
@@ -234,14 +240,17 @@ public class ReimbursementMcpConfig {
         }
 
         // 3. 创建草稿报销单（状态为 draft）
-        String title = "发票报销 - " + (invoiceNo.isEmpty() ? filename : invoiceNo);
+        // 标题加 [MCP] 前缀，与 Web 端创建的报销单区分
+        String title = "[MCP] 发票报销 - " + (invoiceNo.isEmpty() ? filename : invoiceNo);
         BigDecimal amount;
         try {
           amount = new BigDecimal(totalAmount);
         } catch (NumberFormatException e) {
           amount = BigDecimal.ZERO;
         }
-        String description = "OCR识别自动创建\n"
+        // description 开头标记来源，方便区分 MCP 与 Web 创建的报销单
+        String description = "[来源: MCP]\n"
+          + "OCR识别自动创建\n"
           + "发票号码: " + (invoiceNo.isEmpty() ? "未识别" : invoiceNo) + "\n"
           + "发票代码: " + (invoiceCode.isEmpty() ? "未识别" : invoiceCode) + "\n"
           + "开票日期: " + (date.isEmpty() ? "未识别" : date) + "\n"
@@ -253,9 +262,19 @@ public class ReimbursementMcpConfig {
           + "原始OCR文本: " + (ocrText.length() > 200 ? ocrText.substring(0, 200) + "..." : ocrText);
 
         // MCP 上下文没有 Session，使用调用方传入的用户信息创建草稿报销单
+        // 同时传入 OCR 识别的发票字段，确保报销单正式字段有数据
         ReimbursementDTO draft = reimbursementService.createReimbursement(
           title, "other", amount, description, null, 0L, applicantName,
-          null, null, null, null, null, null, null, null, null
+          invoiceNo.isEmpty() ? null : invoiceNo,
+          invoiceCode.isEmpty() ? null : invoiceCode,
+          invoiceDate,
+          buyerName.isEmpty() ? null : buyerName,
+          sellerName.isEmpty() ? null : sellerName,
+          buyerTaxId.isEmpty() ? null : buyerTaxId,
+          sellerTaxId.isEmpty() ? null : sellerTaxId,
+          invoiceType.isEmpty() ? null : invoiceType,
+          "normal",
+          ocrResultJson
         );
 
         // 4. 保存图片到附件目录并创建 Attachment 记录
@@ -354,8 +373,14 @@ public class ReimbursementMcpConfig {
 
   /**
    * Tool 2: 用户确认后，将草稿报销单转为正式报销单（提交审批）
+   * <p>
+   * 注意：此方法直接操作数据库，不走 ReimbursementService.submitReimbursement，
+   * 避免依赖 SessionItemHolder 会话上下文。审批日志使用虚拟用户 xiaoyi_mcp。
    */
-  private McpStatelessServerFeatures.SyncToolSpecification createConfirmReimbursementTool(ReimbursementService reimbursementService, McpJsonMapper jsonMapper) {
+  private McpStatelessServerFeatures.SyncToolSpecification createConfirmReimbursementTool(ReimbursementService reimbursementService,
+                                                                                          ReimbursementRepository reimbursementRepository,
+                                                                                          ApprovalLogRepository approvalLogRepository,
+                                                                                          McpJsonMapper jsonMapper) {
     McpSchema.Tool tool = McpSchema.Tool.builder()
       .name("confirm_reimbursement")
       .description("用户确认OCR识别结果后，将草稿报销单提交为正式报销单（进入审批流程）")
@@ -385,23 +410,29 @@ public class ReimbursementMcpConfig {
         """)
       .build();
     return new McpStatelessServerFeatures.SyncToolSpecification(tool, (ctx, request) -> {
+      long startTime = System.currentTimeMillis();
       try {
         Long reimbursementId = Long.valueOf(String.valueOf(request.arguments().get("reimbursementId")));
         String category = String.valueOf(request.arguments().get("category"));
-        log.info("Reimbursement MCP tool called: confirm_reimbursement, id={}, category={}", reimbursementId, category);
+        String title = request.arguments().containsKey("title") ? String.valueOf(request.arguments().get("title")) : null;
+        String amountStr = request.arguments().containsKey("amount") ? String.valueOf(request.arguments().get("amount")) : null;
+
+        log.info("[xiaoyi_mcp] confirm_reimbursement called: reimbursementId={}, category={}, title={}, amount={}",
+          reimbursementId, category, title, amountStr);
 
         // 获取草稿报销单
         ReimbursementDTO draft = reimbursementService.findReimbursementById(reimbursementId);
         if (!"draft".equals(draft.status())) {
+          log.warn("[xiaoyi_mcp] confirm_reimbursement failed: not draft status, id={}, status={}", reimbursementId, draft.status());
           return new McpSchema.CallToolResult("该报销单不是草稿状态，无法提交", true);
         }
 
         // 更新报销信息
-        String title = request.arguments().containsKey("title") ? String.valueOf(request.arguments().get("title")) : draft.title();
+        if (title == null) title = draft.title();
         BigDecimal amount;
-        if (request.arguments().containsKey("amount")) {
+        if (amountStr != null) {
           try {
-            amount = new BigDecimal(String.valueOf(request.arguments().get("amount")));
+            amount = new BigDecimal(amountStr);
           } catch (NumberFormatException e) {
             amount = draft.amount();
           }
@@ -421,8 +452,31 @@ public class ReimbursementMcpConfig {
           reimbursementService.confirmInvoiceTemp(pendingTemp.get().id());
         }
 
-        // 提交报销单（进入审批流程）
-        ReimbursementDTO submitted = reimbursementService.submitReimbursement(reimbursementId);
+        // 直接操作数据库提交报销单，不依赖 SessionItemHolder
+        Reimbursement r = reimbursementRepository.findById(reimbursementId)
+          .orElseThrow(() -> new RuntimeException("报销单不存在: " + reimbursementId));
+        if (!"draft".equals(r.getStatus())) {
+          return new McpSchema.CallToolResult("仅草稿状态可提交", true);
+        }
+        if (r.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+          return new McpSchema.CallToolResult("报销金额必须大于0", true);
+        }
+        r.setStatus("pending");
+        r.setUpdatedAt(LocalDateTime.now());
+        reimbursementRepository.save(r);
+
+        // 写入审批日志（使用虚拟用户 xiaoyi_mcp）
+        ApprovalLog approvalLog = new ApprovalLog();
+        approvalLog.setReimbursementId(reimbursementId);
+        approvalLog.setAction("submit");
+        approvalLog.setOperatorId(0L);
+        approvalLog.setOperatorName("xiaoyi_mcp");
+        approvalLog.setCreatedAt(LocalDateTime.now());
+        approvalLogRepository.save(approvalLog);
+
+        long elapsed = System.currentTimeMillis() - startTime;
+        log.info("[xiaoyi_mcp] confirm_reimbursement succeeded: id={}, title={}, category={}, amount={}, applicantName={}, elapsed={}ms",
+          r.getId(), r.getTitle(), r.getCategory(), r.getAmount(), r.getApplicantName(), elapsed);
 
         String result = String.format("""
           报销单提交成功！已进入审批流程。
@@ -438,17 +492,18 @@ public class ReimbursementMcpConfig {
 
           请等待审批。
           """,
-          submitted.id(),
-          submitted.title(),
-          submitted.category(),
-          submitted.amount(),
+          r.getId(),
+          r.getTitle(),
+          r.getCategory(),
+          r.getAmount(),
           "待审批",
-          submitted.applicantName(),
-          submitted.createdAt() != null ? submitted.createdAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : ""
+          r.getApplicantName(),
+          r.getCreatedAt() != null ? r.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : ""
         );
         return new McpSchema.CallToolResult(result, false);
       } catch (Exception e) {
-        log.error("Reimbursement MCP confirm_reimbursement failed: id={}, error={}", request.arguments().get("reimbursementId"), e.getMessage(), e);
+        long elapsed = System.currentTimeMillis() - startTime;
+        log.error("[xiaoyi_mcp] confirm_reimbursement failed: id={}, elapsed={}ms, error={}", request.arguments().get("reimbursementId"), elapsed, e.getMessage(), e);
         return new McpSchema.CallToolResult("提交报销单失败: " + e.getMessage(), true);
       }
     });
