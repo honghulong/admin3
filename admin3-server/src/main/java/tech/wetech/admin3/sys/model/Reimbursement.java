@@ -54,6 +54,10 @@ public class Reimbursement extends BaseEntity {
   @Column(columnDefinition = "TEXT")
   private String description;
 
+  /** OCR 原始返回 JSON（最后一次有效识别的完整结果） */
+  @Column(columnDefinition = "MEDIUMTEXT")
+  private String ocrRawJson;
+
   @Column(nullable = false, length = 20)
   private String status;
 
@@ -187,6 +191,14 @@ public class Reimbursement extends BaseEntity {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getOcrRawJson() {
+    return ocrRawJson;
+  }
+
+  public void setOcrRawJson(String ocrRawJson) {
+    this.ocrRawJson = ocrRawJson;
   }
 
   public String getStatus() {

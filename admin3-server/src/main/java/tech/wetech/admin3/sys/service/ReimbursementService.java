@@ -94,7 +94,7 @@ public class ReimbursementService {
     UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
     return createReimbursement(title, category, amount, description, attachmentIds,
       userInfo.userId(), userInfo.username(), null, null, null,
-      null, null, null, null, null, null);
+      null, null, null, null, null, null, null);
   }
 
   public ReimbursementDTO createReimbursement(String title, String category, BigDecimal amount,
@@ -108,7 +108,8 @@ public class ReimbursementService {
     LocalDateTime date = invoiceDate != null ? LocalDateTime.parse(invoiceDate) : null;
     return createReimbursement(title, category, amount, description, attachmentIds,
       userInfo.userId(), userInfo.username(), invoiceNo, invoiceCode, date,
-      buyerName, sellerName, buyerTaxId, sellerTaxId, invoiceType, invoiceStatus);
+      buyerName, sellerName, buyerTaxId, sellerTaxId, invoiceType, invoiceStatus,
+      null);
   }
 
   /**
@@ -121,7 +122,8 @@ public class ReimbursementService {
                                               LocalDateTime invoiceDate, String buyerName,
                                               String sellerName, String buyerTaxId,
                                               String sellerTaxId, String invoiceType,
-                                              String invoiceStatus) {
+                                              String invoiceStatus,
+                                              String ocrRawJson) {
     LocalDateTime now = LocalDateTime.now();
 
     Reimbursement r = new Reimbursement();
@@ -138,6 +140,7 @@ public class ReimbursementService {
     r.setInvoiceType(invoiceType);
     r.setInvoiceStatus(invoiceStatus);
     r.setDescription(description);
+    r.setOcrRawJson(ocrRawJson);
     r.setStatus("draft");
     r.setApplicantId(applicantId);
     r.setApplicantName(applicantName);
@@ -393,6 +396,10 @@ public class ReimbursementService {
     r.setInvoiceStatus(t.getInvoiceStatus());
     if (t.getTotalAmount() != null) {
       r.setAmount(t.getTotalAmount());
+    }
+    // 同步 OCR 原始 JSON
+    if (t.getOcrRawJson() != null) {
+      r.setOcrRawJson(t.getOcrRawJson());
     }
     r.setUpdatedAt(LocalDateTime.now());
     reimbursementRepository.save(r);

@@ -3,6 +3,26 @@
 -- 新增 InvoiceTemp（临时发票表），用于 OCR 多次识别/确认流程
 -- ============================================================
 
+-- 0. 报销单表增加 ocr_raw_json 字段（存储最后一次有效识别的完整 OCR JSON）
+-- 如果字段已存在会报错，忽略即可；或者用下面的存储过程方式
+-- ALTER TABLE reimbursement ADD COLUMN ocr_raw_json MEDIUMTEXT COMMENT 'OCR 原始返回 JSON（最后一次有效识别）';
+
+-- 安全方式：通过存储过程判断字段是否存在
+DROP PROCEDURE IF EXISTS add_column_if_not_exists;
+DELIMITER //
+CREATE PROCEDURE add_column_if_not_exists()
+BEGIN
+  IF NOT EXISTS (
+    SELECT * FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'reimbursement' AND COLUMN_NAME = 'ocr_raw_json'
+  ) THEN
+    ALTER TABLE reimbursement ADD COLUMN ocr_raw_json MEDIUMTEXT COMMENT 'OCR 原始返回 JSON（最后一次有效识别）';
+  END IF;
+END //
+DELIMITER ;
+CALL add_column_if_not_exists();
+DROP PROCEDURE IF EXISTS add_column_if_not_exists;
+
 -- 1. 创建临时发票表
 CREATE TABLE IF NOT EXISTS invoice_temp (
   id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
@@ -29,24 +49,24 @@ CREATE TABLE IF NOT EXISTS invoice_temp (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='临时发票表 - 每次OCR识别的结果';
 
 -- 2. 发票类型字典（如果不存在）
-INSERT IGNORE INTO sys_dict (id, dict_code, dict_name, description, sort_order, status)
-VALUES (7, 'reimbursement_invoice_type', '发票类型', '报销发票类型字典', 7, 1);
+INSERT IGNORE INTO sys_dict (id, dict_code, dict_name, description)
+VALUES (7, 'reimbursement_invoice_type', '发票类型', '报销发票类型字典');
 
-INSERT IGNORE INTO sys_dict_value (id, dict_id, value_label, value, sort_order, status)
+INSERT IGNORE INTO sys_dict_value (id, dict_id, label, value, sort_order, description)
 VALUES
-(26, 7, '增值税专用发票', 'special', 1, 1),
-(27, 7, '增值税普通发票', 'normal', 2, 1),
-(28, 7, '电子发票', 'electronic', 3, 1),
-(29, 7, '定额发票', 'fixed', 4, 1),
-(30, 7, '机动车发票', 'vehicle', 5, 1),
-(31, 7, '其他', 'other', 6, 1);
+(26, 7, '增值税专用发票', 'special', 1, '增值税专用发票'),
+(27, 7, '增值税普通发票', 'normal', 2, '增值税普通发票'),
+(28, 7, '电子发票', 'electronic', 3, '电子发票'),
+(29, 7, '定额发票', 'fixed', 4, '定额发票'),
+(30, 7, '机动车发票', 'vehicle', 5, '机动车销售统一发票'),
+(31, 7, '其他', 'other', 6, '其他类型发票');
 
 -- 3. 发票状态字典（如果不存在）
-INSERT IGNORE INTO sys_dict (id, dict_code, dict_name, description, sort_order, status)
-VALUES (8, 'reimbursement_invoice_status', '发票状态', '报销发票状态字典', 8, 1);
+INSERT IGNORE INTO sys_dict (id, dict_code, dict_name, description)
+VALUES (8, 'reimbursement_invoice_status', '发票状态', '报销发票状态字典');
 
-INSERT IGNORE INTO sys_dict_value (id, dict_id, value_label, value, sort_order, status)
+INSERT IGNORE INTO sys_dict_value (id, dict_id, label, value, sort_order, description)
 VALUES
-(32, 8, '正常', 'normal', 1, 1),
-(33, 8, '已作废', 'voided', 2, 1),
-(34, 8, '已红冲', 'red_charged', 3, 1);
+(32, 8, '正常', 'normal', 1, '发票正常'),
+(33, 8, '已作废', 'voided', 2, '发票已作废'),
+(34, 8, '已红冲', 'red_charged', 3, '发票已红冲');

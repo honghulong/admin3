@@ -66,93 +66,140 @@
     </div>
 
     <!-- 新建/编辑对话框 -->
-    <el-dialog :title="isEdit ? '编辑报销' : '新建报销'" v-model="dialogVisible" width="55%">
+    <el-dialog :title="isEdit ? '编辑报销' : '新建报销'" v-model="dialogVisible" width="60%">
       <el-form label-width="110px">
-        <el-form-item label="报销标题">
-          <el-input v-model="form.title" placeholder="请输入报销标题"></el-input>
-        </el-form-item>
-        <el-form-item label="报销类别">
-          <el-select v-model="form.category" placeholder="请选择类别" style="width: 100%">
-            <el-option label="差旅" value="travel"></el-option>
-            <el-option label="办公" value="office"></el-option>
-            <el-option label="交通" value="transport"></el-option>
-            <el-option label="餐饮" value="catering"></el-option>
-            <el-option label="其他" value="other"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="报销金额">
-          <el-input-number v-model="form.amount" :min="0.01" :precision="2" style="width: 100%"></el-input-number>
-        </el-form-item>
-        <el-form-item label="发票号码">
-          <el-input v-model="form.invoiceNo" placeholder="发票号码"></el-input>
-        </el-form-item>
-        <el-form-item label="发票代码">
-          <el-input v-model="form.invoiceCode" placeholder="发票代码"></el-input>
-        </el-form-item>
-        <el-form-item label="开票日期">
-          <el-date-picker v-model="form.invoiceDate" type="date" placeholder="选择日期" style="width: 100%" value-format="YYYY-MM-DDTHH:mm:ss"></el-date-picker>
-        </el-form-item>
-        <el-form-item label="购买方名称">
-          <el-input v-model="form.buyerName" placeholder="购买方名称"></el-input>
-        </el-form-item>
-        <el-form-item label="销售方名称">
-          <el-input v-model="form.sellerName" placeholder="销售方名称"></el-input>
-        </el-form-item>
-        <el-form-item label="购买方税号">
-          <el-input v-model="form.buyerTaxId" placeholder="购买方税号"></el-input>
-        </el-form-item>
-        <el-form-item label="销售方税号">
-          <el-input v-model="form.sellerTaxId" placeholder="销售方税号"></el-input>
-        </el-form-item>
-        <el-form-item label="发票类型">
-          <el-select v-model="form.invoiceType" placeholder="发票类型" clearable style="width: 100%">
-            <el-option label="增值税专用发票" value="special"></el-option>
-            <el-option label="增值税普通发票" value="normal"></el-option>
-            <el-option label="电子发票" value="electronic"></el-option>
-            <el-option label="定额发票" value="fixed"></el-option>
-            <el-option label="机动车发票" value="vehicle"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="发票状态">
-          <el-select v-model="form.invoiceStatus" placeholder="发票状态" clearable style="width: 100%">
-            <el-option label="正常" value="normal"></el-option>
-            <el-option label="作废" value="voided"></el-option>
-            <el-option label="红冲" value="red"></el-option>
-          </el-select>
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="报销标题">
+              <el-input v-model="form.title" placeholder="请输入报销标题"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="报销类别">
+              <el-select v-model="form.category" placeholder="请选择类别" style="width: 100%">
+                <el-option label="差旅" value="travel"></el-option>
+                <el-option label="办公" value="office"></el-option>
+                <el-option label="交通" value="transport"></el-option>
+                <el-option label="餐饮" value="catering"></el-option>
+                <el-option label="其他" value="other"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="报销金额">
+              <el-input v-model="form.amount" type="number" step="0.01" min="0.01" placeholder="请输入金额"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="发票号码">
+              <el-input v-model="form.invoiceNo" placeholder="发票号码"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="发票代码">
+              <el-input v-model="form.invoiceCode" placeholder="发票代码"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="开票日期">
+              <el-date-picker v-model="form.invoiceDate" type="date" placeholder="选择日期" style="width: 100%" value-format="YYYY-MM-DDTHH:mm:ss"></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="购买方名称">
+              <el-input v-model="form.buyerName" placeholder="购买方名称"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="销售方名称">
+              <el-input v-model="form.sellerName" placeholder="销售方名称"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="购买方税号">
+              <el-input v-model="form.buyerTaxId" placeholder="购买方税号"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="销售方税号">
+              <el-input v-model="form.sellerTaxId" placeholder="销售方税号"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="发票类型">
+              <el-select v-model="form.invoiceType" placeholder="发票类型" clearable style="width: 100%">
+                <el-option label="增值税专用发票" value="special"></el-option>
+                <el-option label="增值税普通发票" value="normal"></el-option>
+                <el-option label="电子发票" value="electronic"></el-option>
+                <el-option label="定额发票" value="fixed"></el-option>
+                <el-option label="机动车发票" value="vehicle"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="发票状态">
+              <el-select v-model="form.invoiceStatus" placeholder="发票状态" clearable style="width: 100%">
+                <el-option label="正常" value="normal"></el-option>
+                <el-option label="作废" value="voided"></el-option>
+                <el-option label="红冲" value="red"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
         <el-form-item label="报销说明">
-          <el-input v-model="form.description" type="textarea" :rows="5" placeholder="请输入报销说明"></el-input>
+          <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入报销说明"></el-input>
+        </el-form-item>
+        <el-form-item label="OCR原始数据">
+          <el-input :model-value="form.ocrRawJson" type="textarea" :rows="8" readonly placeholder="OCR识别完成后，完整JSON将显示在此处"></el-input>
+        </el-form-item>
+        <el-form-item label="OCR识别文本" v-if="form.ocrText">
+          <el-input :model-value="form.ocrText" type="textarea" :rows="6" readonly placeholder="OCR识别完成后，完整识别文本将显示在此处"></el-input>
         </el-form-item>
         <el-form-item label="上传凭证">
-          <el-upload
-            ref="uploadRef"
-            :auto-upload="false"
-            :on-change="handleFileChange"
-            :file-list="fileList"
-            list-type="picture-card"
-            accept=".jpg,.png,.gif,.webp,.pdf"
-            :limit="9"
-            multiple>
-            <template #file="{ file }">
-              <div>
-                <img v-if="file.url" :src="file.url" class="el-upload-list__item-thumbnail" />
-                <span class="el-upload-list__item-actions">
-                  <span class="el-upload-list__item-preview" @click="handlePictureCardPreview(file)">
-                    <el-icon><ZoomIn /></el-icon>
+          <div style="width: 100%">
+            <!-- 文件列表 -->
+            <div v-for="file in fileList" :key="file.id || file.uid" class="file-item">
+              <div class="file-item-header">
+                <span class="file-name" :title="file.name">{{ file.name }}</span>
+                <span class="file-size">{{ formatFileSize(file.size) }}</span>
+                <el-tag
+                  :type="file.ocrStatus === 'completed' ? 'success' : file.ocrStatus === 'failed' ? 'danger' : file.ocrStatus === 'processing' ? 'warning' : 'info'"
+                  size="small"
+                  effect="dark">
+                  <span v-if="file.ocrStatus === 'processing'" class="ocr-animation">
+                    <span class="dot-animation">正在OCR识别</span>
                   </span>
-                  <span class="el-upload-list__item-delete" @click="handleRemoveUploadedFile(file)">
-                    <el-icon><Delete /></el-icon>
-                  </span>
-                </span>
-                <div v-if="file.ocrStatus === 'processing'" class="ocr-status processing">识别中...</div>
-                <div v-else-if="file.ocrStatus === 'completed'" class="ocr-status completed">已识别</div>
-                <div v-else-if="file.ocrStatus === 'failed'" class="ocr-status failed">识别失败</div>
-                <div v-else-if="file.ocrStatus === 'pending'" class="ocr-status pending">待识别</div>
-                <div v-if="file.ocrStatus === 'failed' && file.ocrResult" class="ocr-error" :title="getOcrError(file.ocrResult)">{{ getOcrError(file.ocrResult) }}</div>
+                  <span v-else>{{ getStatusLabel2(file.ocrStatus) }}</span>
+                </el-tag>
+                <el-button text size="small" type="primary" @click="toggleOcrJson(file)" v-if="file.ocrResult">
+                  {{ file.showOcrJson ? '收起' : '查看JSON' }}
+                </el-button>
+                <el-button text size="small" type="danger" @click="handleRemoveUploadedFile(file)">
+                  <el-icon><Delete /></el-icon>
+                </el-button>
               </div>
-            </template>
-            <el-icon><Plus /></el-icon>
-          </el-upload>
+              <div v-if="file.showOcrJson && file.ocrResult" class="file-ocr-json">
+                <pre>{{ formatOcrJson(file.ocrResult) }}</pre>
+              </div>
+              <div v-if="file.ocrStatus === 'failed' && file.ocrResult" class="file-ocr-error">
+                {{ getOcrError(file.ocrResult) }}
+              </div>
+            </div>
+            <!-- 上传按钮 -->
+            <el-upload
+              ref="uploadRef"
+              :auto-upload="false"
+              :on-change="handleFileChange"
+              :file-list="[]"
+              accept=".jpg,.png,.gif,.webp,.pdf"
+              :limit="9"
+              :show-file-list="false"
+              multiple>
+              <template #trigger>
+                <el-button type="primary" :icon="Plus">选择文件</el-button>
+              </template>
+            </el-upload>
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -186,6 +233,17 @@
           <el-descriptions-item label="发票类型">{{ detailData.invoiceType || '无' }}</el-descriptions-item>
           <el-descriptions-item label="发票状态">{{ detailData.invoiceStatus || '无' }}</el-descriptions-item>
           <el-descriptions-item label="说明" :span="2">{{ detailData.description || '无' }}</el-descriptions-item>
+          <el-descriptions-item label="OCR原始数据" :span="2">
+            <div v-if="detailData.ocrRawJson" style="max-height: 200px; overflow-y: auto; background: #f5f7fa; padding: 8px; border-radius: 4px; font-size: 12px;">
+              <pre style="margin: 0; white-space: pre-wrap; word-break: break-all;">{{ formatOcrJson(detailData.ocrRawJson) }}</pre>
+            </div>
+            <span v-else style="color: #999">无</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="OCR识别文本" :span="2" v-if="detailData.ocrText">
+            <div style="max-height: 200px; overflow-y: auto; background: #f5f7fa; padding: 8px; border-radius: 4px; font-size: 12px;">
+              <pre style="margin: 0; white-space: pre-wrap; word-break: break-all;">{{ detailData.ocrText }}</pre>
+            </div>
+          </el-descriptions-item>
           <el-descriptions-item label="审批人" v-if="detailData.approverName">{{ detailData.approverName }}</el-descriptions-item>
           <el-descriptions-item label="审批时间" v-if="detailData.approveTime">{{ detailData.approveTime }}</el-descriptions-item>
           <el-descriptions-item label="审批意见" :span="2" v-if="detailData.approveComment">{{ detailData.approveComment }}</el-descriptions-item>
@@ -309,6 +367,8 @@ const form = reactive({
   category: '',
   amount: 0.01,
   description: '',
+  ocrRawJson: '',
+  ocrText: '',
   invoiceNo: '',
   invoiceCode: '',
   invoiceDate: '',
@@ -374,6 +434,37 @@ function getLogType(action: string) {
   return 'primary';
 }
 
+function getStatusLabel2(status: string) {
+  const map: Record<string, string> = {
+    pending: '待识别',
+    processing: '识别中',
+    completed: '已识别',
+    failed: '识别失败'
+  };
+  return map[status] || status;
+}
+
+function formatFileSize(bytes: number) {
+  if (!bytes) return '';
+  if (bytes < 1024) return bytes + 'B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
+}
+
+function formatOcrJson(jsonStr: string) {
+  if (!jsonStr) return '';
+  try {
+    const obj = JSON.parse(jsonStr);
+    return JSON.stringify(obj, null, 2);
+  } catch {
+    return jsonStr;
+  }
+}
+
+function toggleOcrJson(file: any) {
+  file.showOcrJson = !file.showOcrJson;
+}
+
 function handleSearch() {
   query.pageIndex = 1;
   loadData();
@@ -418,6 +509,8 @@ async function handleAdd() {
   form.category = '';
   form.amount = 0.01;
   form.description = '';
+  form.ocrRawJson = '';
+  form.ocrText = '';
   form.invoiceNo = '';
   form.invoiceCode = '';
   form.invoiceDate = '';
@@ -457,6 +550,8 @@ async function handleEdit(row: TableItem) {
   form.category = data.category;
   form.amount = data.amount;
   form.description = data.description || '';
+  form.ocrRawJson = data.ocrRawJson || '';
+  form.ocrText = data.ocrText || '';
   form.invoiceNo = data.invoiceNo || '';
   form.invoiceCode = data.invoiceCode || '';
   form.invoiceDate = data.invoiceDate || '';
@@ -469,7 +564,7 @@ async function handleEdit(row: TableItem) {
   fileList.value = [];
   uploadedAttachmentIds.value = [];
   if (data.attachments) {
-    fileList.value = data.attachments.map((a: any) => ({name: a.fileName, url: '/admin3' + a.fileUrl, id: a.id, ocrStatus: a.ocrStatus}));
+    fileList.value = data.attachments.map((a: any) => ({name: a.fileName, url: '/admin3' + a.fileUrl, id: a.id, size: a.fileSize, ocrStatus: a.ocrStatus, ocrResult: a.ocrResult || '', showOcrJson: false}));
     uploadedAttachmentIds.value = data.attachments.map((a: any) => a.id);
   }
   dialogVisible.value = true;
@@ -487,12 +582,15 @@ async function handleFileChange(uploadFile: any) {
     const att = res.data;
     console.log('Upload success, attachment:', att);
     uploadedAttachmentIds.value.push(att.id);
-    // 更新 fileList 显示缩略图
+    // 更新 fileList 显示文件列表
     fileList.value.push({
       name: att.fileName,
       url: '/admin3' + att.fileUrl,
       id: att.id,
-      ocrStatus: att.ocrStatus || 'pending'
+      size: att.fileSize,
+      ocrStatus: att.ocrStatus || 'pending',
+      ocrResult: att.ocrResult || '',
+      showOcrJson: false
     });
     ElMessage.success('上传成功，正在识别中...');
     // 启动 OCR 轮询
@@ -518,13 +616,18 @@ function startOcrPolling() {
     attempts++;
     try {
       const res = await getReimbursementDetail(id);
-      const attachments = res.data.attachments || [];
+      const data = res.data;
+      const attachments = data.attachments || [];
+      // 更新报销单的 ocrRawJson
+      if (data.ocrRawJson) {
+        form.ocrRawJson = data.ocrRawJson;
+      }
       // 更新 fileList 中的 OCR 状态
       for (const att of attachments) {
         const item = fileList.value.find(f => f.id === att.id);
         if (item) {
           item.ocrStatus = att.ocrStatus;
-          item.ocrResult = att.ocrResult;
+          item.ocrResult = att.ocrResult || '';
         }
       }
       // 检查是否所有附件都已完成
@@ -631,15 +734,24 @@ function handleOcrSuccess(att: any) {
     if (fields.buyerTaxId) form.buyerTaxId = fields.buyerTaxId;
     if (fields.sellerTaxId) form.sellerTaxId = fields.sellerTaxId;
     if (fields.invoiceType) form.invoiceType = fields.invoiceType;
-    // 更新说明
+    // 更新说明（补全所有匹配到的字段）
     const descParts: string[] = [];
     if (fields.invoiceNo) descParts.push(`发票号码: ${fields.invoiceNo}`);
     if (fields.invoiceCode) descParts.push(`发票代码: ${fields.invoiceCode}`);
+    if (fields.invoiceDate) descParts.push(`开票日期: ${fields.invoiceDate.substring(0, 10)}`);
+    if (fields.buyerName) descParts.push(`购买方: ${fields.buyerName}`);
     if (fields.sellerName) descParts.push(`销售方: ${fields.sellerName}`);
+    if (fields.buyerTaxId) descParts.push(`购买方税号: ${fields.buyerTaxId}`);
+    if (fields.sellerTaxId) descParts.push(`销售方税号: ${fields.sellerTaxId}`);
+    if (fields.invoiceType) descParts.push(`发票类型: ${fields.invoiceType}`);
     if (fields.amount) descParts.push(`金额: ¥${fields.amount}`);
     if (descParts.length > 0) {
       form.description = descParts.join('\n');
     }
+    // 更新 OCR 原始 JSON（取最后一次有效识别的完整结果）
+    form.ocrRawJson = att.ocrResult;
+    // 更新 OCR 识别文本（可读的纯文本内容）
+    form.ocrText = ocrText;
     console.log('Form auto-filled from OCR:', fields);
   } catch (e) {
     console.error('Failed to parse OCR result:', e, att.ocrResult);
@@ -750,13 +862,18 @@ async function pollOcrResults() {
   const maxAttempts = 30; // 最多等 60 秒
   for (let i = 0; i < maxAttempts; i++) {
     const res = await getReimbursementDetail(id);
-    const attachments = res.data.attachments || [];
+    const data = res.data;
+    const attachments = data.attachments || [];
+    // 更新报销单的 ocrRawJson
+    if (data.ocrRawJson) {
+      form.ocrRawJson = data.ocrRawJson;
+    }
     // 更新 fileList 中的 OCR 状态
     for (const att of attachments) {
       const item = fileList.value.find(f => f.id === att.id);
       if (item) {
         item.ocrStatus = att.ocrStatus;
-        item.ocrResult = att.ocrResult;
+        item.ocrResult = att.ocrResult || '';
       }
     }
     const pending = attachments.filter((a: any) => a.ocrStatus === 'pending' || a.ocrStatus === 'processing');
@@ -904,45 +1021,64 @@ loadData();
 .red {
   color: #f56c6c;
 }
-.ocr-status {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 12px;
-  padding: 2px 0;
-  color: #fff;
-  z-index: 1;
+.file-item {
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: #fafafa;
 }
-.el-upload-list__item {
-  position: relative !important;
+.file-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.ocr-status.processing {
-  background: rgba(230, 162, 60, 0.8);
-}
-.ocr-status.completed {
-  background: rgba(103, 194, 58, 0.8);
-}
-.ocr-status.failed {
-  background: rgba(245, 108, 108, 0.8);
-}
-.ocr-status.pending {
-  background: rgba(144, 147, 153, 0.8);
-}
-.ocr-error {
-  position: absolute;
-  bottom: 22px;
-  left: 0;
-  right: 0;
-  font-size: 10px;
-  color: #f56c6c;
-  text-align: center;
-  padding: 1px 2px;
-  background: rgba(255, 255, 255, 0.9);
+.file-name {
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  z-index: 1;
+  font-size: 13px;
+}
+.file-size {
+  color: #999;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.file-ocr-json {
+  margin-top: 6px;
+  background: #f5f7fa;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  padding: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.file-ocr-json pre {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.file-ocr-error {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #f56c6c;
+}
+.ocr-animation {
+  display: inline-flex;
+  align-items: center;
+}
+.dot-animation::after {
+  content: '';
+  animation: dot-pulse 1.5s steps(4, end) infinite;
+}
+@keyframes dot-pulse {
+  0% { content: ''; }
+  25% { content: ' .'; }
+  50% { content: ' ..'; }
+  75% { content: ' ...'; }
+  100% { content: ''; }
 }
 </style>

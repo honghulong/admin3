@@ -6,7 +6,7 @@ import Components from 'unplugin-vue-components/vite';
 import {ElementPlusResolver} from 'unplugin-vue-components/resolvers';
 
 export default defineConfig({
-	base: './',
+	base: '/admin3/webjars/admin3-ui/',
 	plugins: [
 		vue(),
 		VueSetupExtend(),
@@ -21,7 +21,7 @@ export default defineConfig({
 		host: '0.0.0.0',
 		proxy: {
 			'/admin3': {
-				target: `http://localhost:8080`,
+				target: `http://localhost:9099`,
 			},
 		},
 	},

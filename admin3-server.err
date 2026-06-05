@@ -1,0 +1,21 @@
+Exception in thread "main" java.lang.reflect.InvocationTargetException
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:118)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:91)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:53)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:58)
+Caused by: java.lang.NoClassDefFoundError: org/apache/commons/logging/LogAdapter
+	at org.apache.commons.logging.LogFactoryService.getInstance(LogFactoryService.java:52)
+	at org.apache.commons.logging.LogFactoryService.getInstance(LogFactoryService.java:47)
+	at org.apache.commons.logging.LogFactory.getLog(LogFactory.java:655)
+	at org.springframework.boot.SpringApplication.<clinit>(SpringApplication.java:202)
+	at tech.wetech.admin3.Admin3ServerApplication.main(Admin3ServerApplication.java:12)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	... 4 more
+Caused by: java.lang.ClassNotFoundException: org.apache.commons.logging.LogAdapter
+	at java.base/java.net.URLClassLoader.findClass(URLClassLoader.java:445)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:593)
+	at org.springframework.boot.loader.net.protocol.jar.JarUrlClassLoader.loadClass(JarUrlClassLoader.java:104)
+	at org.springframework.boot.loader.launch.LaunchedClassLoader.loadClass(LaunchedClassLoader.java:91)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	... 10 more

@@ -10,12 +10,7 @@ import tech.wetech.admin3.sys.model.Reimbursement;
 import tech.wetech.admin3.sys.repository.AttachmentRepository;
 import tech.wetech.admin3.sys.repository.ReimbursementRepository;
 
-import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -144,6 +139,8 @@ public class OcrService {
 
       // 从 ocr_text 正则提取补充
       String ocrText = data.has("ocr_text") ? data.get("ocr_text").asText() : "";
+      log.debug("OCR ocr_text length: {}, preview: {}", ocrText != null ? ocrText.length() : 0,
+        ocrText != null ? ocrText.substring(0, Math.min(200, ocrText.length())).replace("\n", "\\n") : "null");
       if (ocrText != null && !ocrText.isEmpty()) {
         if (isEmpty(invoiceNo)) invoiceNo = regexExtract(ocrText, "发票号码[：:\\s]*(\\d{8})");
         if (isEmpty(invoiceCode)) invoiceCode = regexExtract(ocrText, "发票代码[：:\\s]*(\\d{12})");
@@ -186,8 +183,20 @@ public class OcrService {
           else if (ocrText.contains("电子发票")) invoiceType = "electronic";
         }
         if (isEmpty(totalAmount) || "0".equals(totalAmount)) {
+          log.debug("Attempting to extract total_amount from ocr_text via regex");
           var m = Pattern.compile("[（(]小写[)）][：:\\s]*[¥￥]?(\\d+\\.?\\d*)").matcher(ocrText);
-          if (m.find()) totalAmount = m.group(1);
+          if (m.find()) {
+            totalAmount = m.group(1);
+            log.debug("Regex extracted total_amount: {}", totalAmount);
+          } else {
+            log.debug("Regex did not match total_amount in ocr_text");
+            // 尝试备选正则：匹配"合计"后面的金额
+            var m2 = Pattern.compile("合计[\\s\\S]{0,20}[¥￥]?(\\d+\\.\\d{2})").matcher(ocrText);
+            if (m2.find()) {
+              totalAmount = m2.group(1);
+              log.debug("Fallback regex extracted total_amount: {}", totalAmount);
+            }
+          }
         }
       }
 
@@ -211,16 +220,25 @@ public class OcrService {
         } catch (DateTimeParseException ignored) {}
       }
 
-      // 更新说明
+      // 更新说明（补全所有匹配到的字段）
       StringBuilder desc = new StringBuilder();
       if (!isEmpty(invoiceNo)) desc.append("发票号码: ").append(invoiceNo).append("\n");
       if (!isEmpty(invoiceCode)) desc.append("发票代码: ").append(invoiceCode).append("\n");
+      if (!isEmpty(date)) desc.append("开票日期: ").append(date).append("\n");
+      if (!isEmpty(buyerName)) desc.append("购买方: ").append(buyerName).append("\n");
       if (!isEmpty(sellerName)) desc.append("销售方: ").append(sellerName).append("\n");
+      if (!isEmpty(buyerTaxId)) desc.append("购买方税号: ").append(buyerTaxId).append("\n");
+      if (!isEmpty(sellerTaxId)) desc.append("销售方税号: ").append(sellerTaxId).append("\n");
+      if (!isEmpty(invoiceType)) desc.append("发票类型: ").append(invoiceType).append("\n");
       if (!isEmpty(totalAmount)) desc.append("金额: ¥").append(totalAmount).append("\n");
       if (desc.length() > 0) {
         r.setDescription(desc.toString().trim());
         updated = true;
       }
+
+      // 保存完整 OCR 原始 JSON 到报销单
+      r.setOcrRawJson(ocrResultJson);
+      updated = true;
 
       if (updated) {
         r.setUpdatedAt(LocalDateTime.now());
@@ -250,64 +268,57 @@ public class OcrService {
   }
 
   /**
-   * 调用本地 OCR MCP 服务的 ocr_invoice_base64 工具
+   * 调用本地 OCR 服务的 HTTP REST 接口识别发票
+   * 通过 multipart/form-data 上传图片文件
    */
   private String callOcrService(String imageBase64, String filename) throws Exception {
-    // 构建 MCP 协议请求体
-    String requestBody = objectMapper.writeValueAsString(
-      java.util.Map.of(
-        "jsonrpc", "2.0",
-        "id", 1,
-        "method", "tools/call",
-        "params", java.util.Map.of(
-          "name", "ocr_invoice_base64",
-          "arguments", java.util.Map.of(
-            "imageBase64", imageBase64,
-            "filename", filename
-          )
-        )
-      )
-    );
+    // 1. 将 Base64 图片数据保存到临时文件
+    byte[] imageBytes = java.util.Base64.getDecoder().decode(imageBase64);
+    Path tempDir = java.nio.file.Paths.get(System.getProperty("java.io.tmpdir"), "reimbursement-ocr");
+    java.nio.file.Files.createDirectories(tempDir);
+    Path tempFile = tempDir.resolve(java.util.UUID.randomUUID().toString() + "_" + filename);
+    java.nio.file.Files.write(tempFile, imageBytes);
+    log.info("OCR temp file saved: {}", tempFile);
 
-    log.debug("Calling OCR service at {}/mcp/v1/message", OCR_SERVER_URL);
+    try {
+      // 2. 构建 multipart/form-data 请求体
+      String boundary = "----" + java.util.UUID.randomUUID().toString();
+      String lineSeparator = "\r\n";
 
-    URL url = new URI(OCR_SERVER_URL + "/mcp/v1/message").toURL();
-    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestMethod("POST");
-    conn.setRequestProperty("Content-Type", "application/json");
-    conn.setRequestProperty("Accept", "application/json, text/event-stream");
-    conn.setDoOutput(true);
-    conn.setConnectTimeout(60000);
-    conn.setReadTimeout(120000);
+      java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+      baos.write(("--" + boundary + lineSeparator).getBytes());
+      baos.write(("Content-Disposition: form-data; name=\"file\"; filename=\"" + filename + "\"" + lineSeparator).getBytes());
+      baos.write(("Content-Type: application/octet-stream" + lineSeparator).getBytes());
+      baos.write(lineSeparator.getBytes());
+      baos.write(imageBytes);
+      baos.write(lineSeparator.getBytes());
+      baos.write(("--" + boundary + "--" + lineSeparator).getBytes());
 
-    try (OutputStream os = conn.getOutputStream()) {
-      os.write(requestBody.getBytes(StandardCharsets.UTF_8));
-    }
+      // 3. 发送 HTTP POST 请求
+      java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
+      java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+        .uri(java.net.URI.create(OCR_SERVER_URL + "/ocr"))
+        .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+        .POST(java.net.http.HttpRequest.BodyPublishers.ofByteArray(baos.toByteArray()))
+        .build();
 
-    int responseCode = conn.getResponseCode();
-    if (responseCode != 200) {
-      String errorBody = new String(conn.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
-      throw new RuntimeException("OCR service returned " + responseCode + ": " + errorBody);
-    }
+      java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+      String responseBody = response.body();
 
-    String responseBody = new String(conn.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-    log.debug("OCR service response: {}", responseBody.length() > 500 ? responseBody.substring(0, 500) + "..." : responseBody);
+      log.info("OCR service response status: {}", response.statusCode());
 
-    // 解析 MCP 响应，提取 result.content[0].text
-    var root = objectMapper.readTree(responseBody);
-    var result = root.get("result");
-    if (result != null && result.has("content") && result.get("content").isArray()) {
-      var content = result.get("content").get(0);
-      if (content != null && content.has("text")) {
-        return content.get("text").asText();
+      if (response.statusCode() != 200) {
+        throw new RuntimeException("OCR服务返回错误状态: " + response.statusCode() + ", body: " + responseBody);
+      }
+
+      return responseBody;
+    } finally {
+      // 4. 清理临时文件
+      try {
+        java.nio.file.Files.deleteIfExists(tempFile);
+      } catch (java.io.IOException e) {
+        log.warn("Failed to delete OCR temp file: {}", tempFile);
       }
     }
-
-    // 如果 MCP 响应格式不对，尝试直接返回原始响应
-    if (root.has("result")) {
-      return root.get("result").toString();
-    }
-
-    return responseBody;
   }
 }
