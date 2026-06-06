@@ -31,20 +31,12 @@ echo [INFO] URL: http://localhost:9099/admin3
 echo [INFO] Log file: %LOG_FILE%
 echo.
 
-start /B "" "%JAVA_HOME%\bin\java" -jar "%JAR_FILE%" ^
+"%JAVA_HOME%\bin\java" -jar "%JAR_FILE%" ^
     -Dspring.datasource.url=jdbc:mysql://127.0.0.1:3306/admin3?characterEncoding=utf8 ^
     -Dspring.datasource.username=root ^
     -Dspring.datasource.password=123456 ^
-    >> "%LOG_FILE%" 2>&1
+    2>&1 | powershell -NoProfile -Command "& { $input | Tee-Object -FilePath '%LOG_FILE%' }"
 
-set "PID="
-for /f "tokens=2 delims=," %%a in ('wmic process where "name='java.exe' and commandline like '%%admin3-server%%'" get processid /format:csv 2^>nul') do set "PID=%%a"
-if defined PID (
-    echo %PID%>"%PID_FILE%"
-    echo [INFO] Service started (PID: %PID%)
-) else (
-    echo [WARN] Could not detect PID, but service should be starting...
-)
-
-echo [INFO] Use stop.bat to stop the service
 echo.
+echo [INFO] Service stopped
+pause

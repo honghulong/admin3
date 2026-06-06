@@ -350,3 +350,126 @@ Standard Commons Logging discovery in action with spring-jcl: please remove comm
 2026-06-05T17:32:33.664+08:00  WARN 23612 --- [admin3] [nio-9099-exec-2] i.m.s.DefaultMcpStatelessServerHandler   : Missing handler for notification type: notifications/initialized
 2026-06-05T17:32:40.994+08:00  INFO 23612 --- [admin3] [nio-9099-exec-1] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/message
 2026-06-05T17:32:40.994+08:00  INFO 23612 --- [admin3] [nio-9099-exec-1] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/message, appId=admin3-leave-app
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-06-06T10:54:46.508+08:00  INFO 15808 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 15808 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by liuxiaobo in D:\hongmengProjects\admin3)
+2026-06-06T10:54:46.511+08:00  INFO 15808 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-06-06T10:54:48.429+08:00  INFO 15808 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-06T10:54:48.763+08:00  INFO 15808 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 320 ms. Found 17 JPA repository interfaces.
+2026-06-06T10:54:50.061+08:00  INFO 15808 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-06-06T10:54:50.082+08:00  INFO 15808 --- [admin3] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-06T10:54:50.082+08:00  INFO 15808 --- [admin3] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-06-06T10:54:50.184+08:00  INFO 15808 --- [admin3] [           main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-06-06T10:54:50.187+08:00  INFO 15808 --- [admin3] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3539 ms
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+2026-06-06T10:54:50.556+08:00  INFO 15808 --- [admin3] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-06T10:54:50.669+08:00  INFO 15808 --- [admin3] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-06-06T10:54:50.752+08:00  INFO 15808 --- [admin3] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-06-06T10:54:51.191+08:00  INFO 15808 --- [admin3] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-06T10:54:51.256+08:00  INFO 15808 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-06T10:54:52.109+08:00  INFO 15808 --- [admin3] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3d3b272a
+2026-06-06T10:54:52.111+08:00  INFO 15808 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-06T10:54:52.197+08:00  WARN 15808 --- [admin3] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-06-06T10:54:54.750+08:00  INFO 15808 --- [admin3] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-06T10:54:55.011+08:00  INFO 15808 --- [admin3] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-06T10:54:55.638+08:00  INFO 15808 --- [admin3] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-06T10:54:58.005+08:00  WARN 15808 --- [admin3] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-06-06T10:54:59.792+08:00  INFO 15808 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-06-06T10:54:59.836+08:00  INFO 15808 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 14.133 seconds (process running for 15.133)
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-06-06T10:55:13.376+08:00  INFO 14716 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 14716 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by liuxiaobo in D:\hongmengProjects\admin3)
+2026-06-06T10:55:13.379+08:00  INFO 14716 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-06-06T10:55:15.291+08:00  INFO 14716 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-06T10:55:15.662+08:00  INFO 14716 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 357 ms. Found 17 JPA repository interfaces.
+2026-06-06T10:55:17.464+08:00  INFO 14716 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-06-06T10:55:17.507+08:00  INFO 14716 --- [admin3] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-06T10:55:17.508+08:00  INFO 14716 --- [admin3] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-06-06T10:55:17.599+08:00  INFO 14716 --- [admin3] [           main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-06-06T10:55:17.600+08:00  INFO 14716 --- [admin3] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4061 ms
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+2026-06-06T10:55:17.943+08:00  INFO 14716 --- [admin3] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-06T10:55:18.099+08:00  INFO 14716 --- [admin3] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-06-06T10:55:18.185+08:00  INFO 14716 --- [admin3] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-06-06T10:55:18.696+08:00  INFO 14716 --- [admin3] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-06T10:55:18.753+08:00  INFO 14716 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-06T10:55:19.368+08:00  INFO 14716 --- [admin3] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2f75a9b1
+2026-06-06T10:55:19.372+08:00  INFO 14716 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-06T10:55:19.477+08:00  WARN 14716 --- [admin3] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-06-06T10:55:22.434+08:00  INFO 14716 --- [admin3] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-06T10:55:22.668+08:00  INFO 14716 --- [admin3] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-06T10:55:23.466+08:00  INFO 14716 --- [admin3] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-06T10:55:25.853+08:00  WARN 14716 --- [admin3] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-06-06T10:55:27.433+08:00  INFO 14716 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-06-06T10:55:27.459+08:00  INFO 14716 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 14.962 seconds (process running for 15.9)
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-06-06T11:15:58.262+08:00  INFO 16748 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 16748 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by liuxiaobo in D:\hongmengProjects\admin3)
+2026-06-06T11:15:58.265+08:00  INFO 16748 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-06-06T11:15:59.776+08:00  INFO 16748 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-06T11:16:00.043+08:00  INFO 16748 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 260 ms. Found 17 JPA repository interfaces.
+2026-06-06T11:16:00.974+08:00  INFO 16748 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-06-06T11:16:00.995+08:00  INFO 16748 --- [admin3] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-06T11:16:00.995+08:00  INFO 16748 --- [admin3] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-06-06T11:16:01.061+08:00  INFO 16748 --- [admin3] [           main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-06-06T11:16:01.063+08:00  INFO 16748 --- [admin3] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2674 ms
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+2026-06-06T11:16:01.409+08:00  INFO 16748 --- [admin3] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-06T11:16:01.536+08:00  INFO 16748 --- [admin3] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-06-06T11:16:01.602+08:00  INFO 16748 --- [admin3] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-06-06T11:16:02.053+08:00  INFO 16748 --- [admin3] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-06T11:16:02.107+08:00  INFO 16748 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-06T11:16:02.734+08:00  INFO 16748 --- [admin3] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@26cdd4af
+2026-06-06T11:16:02.738+08:00  INFO 16748 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-06T11:16:02.822+08:00  WARN 16748 --- [admin3] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-06-06T11:16:05.103+08:00  INFO 16748 --- [admin3] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-06T11:16:05.325+08:00  INFO 16748 --- [admin3] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-06T11:16:05.858+08:00  INFO 16748 --- [admin3] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-06T11:16:08.029+08:00  WARN 16748 --- [admin3] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-06-06T11:16:09.568+08:00  INFO 16748 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-06-06T11:16:09.594+08:00  INFO 16748 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 12.097 seconds (process running for 12.979)
+2026-06-06T11:53:06.527+08:00  INFO 16748 --- [admin3] [nio-9099-exec-6] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-06T11:53:06.527+08:00  INFO 16748 --- [admin3] [nio-9099-exec-6] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-06-06T11:53:06.528+08:00  INFO 16748 --- [admin3] [nio-9099-exec-6] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-06-06T11:53:06.533+08:00  INFO 16748 --- [admin3] [nio-9099-exec-6] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T11:53:06.535+08:00  WARN 16748 --- [admin3] [nio-9099-exec-6] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request missing appId or apiKey header: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T11:53:18.659+08:00  INFO 16748 --- [admin3] [nio-9099-exec-9] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T11:53:18.659+08:00  INFO 16748 --- [admin3] [nio-9099-exec-9] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T11:53:18.739+08:00  INFO 16748 --- [admin3] [nio-9099-exec-9] i.m.server.McpStatelessAsyncServer       : Client initialize request - Protocol: 2025-03-26, Capabilities: ClientCapabilities[experimental=null, roots=RootCapabilities[listChanged=true], sampling=Sampling[], elicitation=null], Info: Implementation[name=mcp-client, title=null, version=1.0.0]
+2026-06-06T11:53:24.558+08:00  INFO 16748 --- [admin3] [io-9099-exec-10] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T11:53:24.558+08:00  INFO 16748 --- [admin3] [io-9099-exec-10] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T11:53:24.561+08:00  WARN 16748 --- [admin3] [io-9099-exec-10] i.m.s.DefaultMcpStatelessServerHandler   : Missing handler for notification type: notifications/initialized
+2026-06-06T11:53:25.368+08:00  INFO 16748 --- [admin3] [nio-9099-exec-1] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T11:53:25.369+08:00  INFO 16748 --- [admin3] [nio-9099-exec-1] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T12:36:56.771+08:00  INFO 16748 --- [admin3] [io-9099-exec-10] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T12:36:56.772+08:00  INFO 16748 --- [admin3] [io-9099-exec-10] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T12:36:56.773+08:00  INFO 16748 --- [admin3] [io-9099-exec-10] i.m.server.McpStatelessAsyncServer       : Client initialize request - Protocol: 2025-03-26, Capabilities: ClientCapabilities[experimental=null, roots=RootCapabilities[listChanged=true], sampling=Sampling[], elicitation=null], Info: Implementation[name=mcp-client, title=null, version=1.0.0]
+2026-06-06T12:36:58.090+08:00  INFO 16748 --- [admin3] [nio-9099-exec-1] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T12:36:58.090+08:00  INFO 16748 --- [admin3] [nio-9099-exec-1] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T12:36:58.091+08:00  WARN 16748 --- [admin3] [nio-9099-exec-1] i.m.s.DefaultMcpStatelessServerHandler   : Missing handler for notification type: notifications/initialized
+2026-06-06T12:36:58.356+08:00  INFO 16748 --- [admin3] [nio-9099-exec-2] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T12:36:58.356+08:00  INFO 16748 --- [admin3] [nio-9099-exec-2] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
