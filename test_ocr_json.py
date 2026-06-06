@@ -27,17 +27,46 @@ def multipart_post(url, file_path):
     resp = conn.getresponse()
     return json.loads(resp.read().decode('utf-8'))
 
-result = multipart_post('http://localhost:8765/ocr', 'test-invoice.png')
+result = multipart_post('http://localhost:8765/ocr', 'd:/hongmengProjects/admin3/test-invoice.png')
 
-# 输出到 stdout
-print(json.dumps(result, indent=2, ensure_ascii=False))
-
-# 也写到文件
+# 原始 JSON 写到文件
 with open('ocr_output2.json', 'w', encoding='utf-8') as f:
     json.dump(result, f, indent=2, ensure_ascii=False)
+print(f'[OK] 原始结果已保存到 ocr_output2.json')
+print()
 
-print('\n--- summary ---')
-print('invoice_fields keys:', list(result.get('invoice_fields', {}).keys()))
-print('status:', result.get('status'))
-print('ocr_raw count:', len(result.get('ocr_raw', [])))
-print('tables count:', len(result.get('tables', [])))
+# 检查状态
+if result.get('status') == 'error':
+    print(f'[ERR] {result.get("error")}')
+    sys.exit(1)
+
+# 输出 OCR 文本块数量
+blocks = result.get('ocr_raw', [])
+print(f'OCR 文本块: {len(blocks)} 个')
+print()
+
+# 输出 OCR 文本内容
+text = result.get('ocr_text', '')
+if text:
+    print('--- OCR 文本内容 ---')
+    for line in text.split('\n')[:30]:
+        print(f'  {line}')
+
+# 输出 KIE 关键字段
+fields = result.get('invoice_fields', {})
+if fields:
+    print()
+    print('--- KIE 关键字段 ---')
+    for k, v in fields.items():
+        print(f'  {k}: {v}')
+else:
+    print()
+    print('--- KIE 关键字段 ---')
+    print('  (无结构化字段)')
+
+print()
+print('--- summary ---')
+print(f'  status: {result.get("status")}')
+print(f'  ocr_raw count: {len(blocks)}')
+print(f'  invoice_fields keys: {list(fields.keys())}')
+print(f'  tables count: {len(result.get("tables", []))}')

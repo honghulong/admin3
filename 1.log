@@ -1,66 +1,383 @@
-026-06-04T16:43:20.981+08:00 ERROR 21068 --- [admin3] [nio-9099-exec-6] t.w.a.c.ExceptionControllerAdvice        : Handle exception, message=Maximum upload size exceeded, requestUrl=/admin3/attachments/upload
+Windows PowerShell
+版权所有（C） Microsoft Corporation。保留所有权利。
 
-org.springframework.web.multipart.MaxUploadSizeExceededException: Maximum upload size exceeded
-        at org.springframework.web.multipart.support.StandardMultipartHttpServletRequest.handleParseFailure(StandardMultipartHttpServletRequest.java:122) ~[spring-web-6.1.4.jar!/:6.1.4]
-        at org.springframework.web.multipart.support.StandardMultipartHttpServletRequest.parseRequest(StandardMultipartHttpServletRequest.java:110) ~[spring-web-6.1.4.jar!/:6.1.4]
-        at org.springframework.web.multipart.support.StandardMultipartHttpServletRequest.<init>(StandardMultipartHttpServletRequest.java:86) ~[spring-web-6.1.4.jar!/:6.1.4]
-        at org.springframework.web.multipart.support.StandardServletMultipartResolver.resolveMultipart(StandardServletMultipartResolver.java:112) ~[spring-web-6.1.4.jar!/:6.1.4]
-        at org.springframework.web.servlet.DispatcherServlet.checkMultipart(DispatcherServlet.java:1227) ~[spring-webmvc-6.1.4.jar!/:6.1.4]
-        at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1061) ~[spring-webmvc-6.1.4.jar!/:6.1.4]
-        at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.4.jar!/:6.1.4]
-        at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.4.jar!/:6.1.4]
-        at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.1.4.jar!/:6.1.4]
-        at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.4.jar!/:6.1.4]
-        at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:205) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.19.jar!/:na]
-        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at tech.wetech.admin3.infra.mcp.xiaoyi.XiaoYiAuthFilter.doFilter(XiaoYiAuthFilter.java:38) ~[!/:0.0.1-SNAPSHOT]
-        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.4.jar!/:6.1.4]
-        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar!/:6.1.4]
-        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.4.jar!/:6.1.4]
-        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar!/:6.1.4]
-        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.4.jar!/:6.1.4]
-        at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.4.jar!/:6.1.4]
-        at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.19.jar!/:na]
+安装最新的 PowerShell，了解新功能和改进！https://aka.ms/PSWindows
+
+加载个人及系统配置文件用了 2692 毫秒。
+(base) PS C:\WINDOWS\system32> d:
+(base) PS D:\> cd .\hongmengProjects\
+(base) PS D:\hongmengProjects> dir
+
+
+    目录: D:\hongmengProjects
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         2026/5/30     17:31                active4j-jsp
+d-----          2026/6/6     19:46                admin3
+d-----         2026/5/30     15:25                forge-admin
+d-----          2026/4/9      9:07                honghuang-android
+d-----          2026/4/9     10:37                honghuang-migration-20260402
+d-----         2026/5/11     16:21                HonghuangVoice-old
+d-----         2026/4/27     19:40                HonghuangVoice_Project_v2
+d-----         2026/5/24     19:18                HonghuangVoice_v3
+d-----         2026/5/11     16:23                HonghuangVoice_v3temp
+d-----         2026/5/30     15:28                lombok-test
+d-----         2026/5/30     18:20                mcp-server-demo
+d-----          2026/6/6     19:40                ocr-invoice-mcp
+-a----         2026/5/30     13:32            221 .gitattributes
+-a----         2026/5/30     10:55             62 .gitignore
+-a----          2026/6/2     22:07          74746 1.png
+-a----          2026/6/2     22:07          74746 1png
+-a----          2026/6/2     22:06          99948 2.png
+-a----         2026/5/30     12:28       15218147 active4j-jsp-20260530bak.rar
+-a----         2026/4/27     19:36       17616043 honghuang-android.rar
+-a----         2026/4/27     19:36        4526693 honghuang-migration-20260402.rar
+-a----         2026/4/27     19:36           5903 HonghuangVoice_Project_v2.zip
+-a----         2026/4/30     12:45          34370 HonghuangVoice_v3.zip
+-a----          2026/5/8     14:39        1510711 HonghuangVoice_v320260508bak.zip
+-a----         2026/5/11      9:51        1852663 HonghuangVoice_v320260511bak-录音和调用服务好用了.zip
+-a----         2026/5/15     15:55        3294433 HonghuangVoice_v320260515bak-基本好用就等后台服务.zip
+-a----         2026/4/27     19:36       24649173 OpenClawVoice-all.tar.gz
+-a----         2026/4/27     19:36      146906102 VolcEngineRTC.zip
+-a----         2026/4/27     19:38          14157 已开发特殊功能清单.md
+-a----         2026/5/31     13:09          36279 微信图片_2026-05-31_130916_988.png
+
+
+(base) PS D:\hongmengProjects> cd admin3
+(base) PS D:\hongmengProjects\admin3> start.ps1
+start.ps1 : 无法将“start.ps1”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确
+保路径正确，然后再试一次。
+所在位置 行:1 字符: 1
++ start.ps1
++ ~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (start.ps1:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+
+Suggestion [3,General]: 找不到命令 start.ps1，但它确实存在于当前位置。默认情况下，Windows PowerShell 不会从当前位置加载命令。如果信任此 命令，请改为键入“.\start.ps1”。有关详细信息，请参阅 "get-help about_Command_Precedence"。
+(base) PS D:\hongmengProjects\admin3> dir *.ps
+(base) PS D:\hongmengProjects\admin3> dir *.ps*
+
+
+    目录: D:\hongmengProjects\admin3
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          2026/6/6     10:25           4079 build.ps1
+-a----          2026/6/6     11:05           1621 start.ps1
+-a----          2026/6/6     11:04            751 stop.ps1
+
+
+(base) PS D:\hongmengProjects\admin3> .\start.ps1
+[INFO] Starting: D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar
+[INFO] URL: http://localhost:9099/admin3
+[INFO] Log file: D:\hongmengProjects\admin3\logs\admin3-server.log
+[INFO] Press Ctrl+C to stop
+
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-06-06T19:47:27.908+08:00  INFO 30928 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 30928 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by liuxiaobo in D:\hongmengProjects\admin3)
+2026-06-06T19:47:27.911+08:00  INFO 30928 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-06-06T19:47:29.508+08:00  INFO 30928 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-06T19:47:29.760+08:00  INFO 30928 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 240 ms. Found 17 JPA repository interfaces.
+2026-06-06T19:47:30.757+08:00  INFO 30928 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-06-06T19:47:30.774+08:00  INFO 30928 --- [admin3] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-06T19:47:30.774+08:00  INFO 30928 --- [admin3] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-06-06T19:47:30.858+08:00  INFO 30928 --- [admin3] [           main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-06-06T19:47:30.858+08:00  INFO 30928 --- [admin3] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2815 ms
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+2026-06-06T19:47:31.099+08:00  INFO 30928 --- [admin3] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-06T19:47:31.205+08:00  INFO 30928 --- [admin3] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-06-06T19:47:31.258+08:00  INFO 30928 --- [admin3] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-06-06T19:47:31.704+08:00  INFO 30928 --- [admin3] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-06T19:47:31.757+08:00  INFO 30928 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-06T19:47:32.309+08:00  INFO 30928 --- [admin3] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@43778371
+2026-06-06T19:47:32.312+08:00  INFO 30928 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-06T19:47:32.393+08:00  WARN 30928 --- [admin3] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-06-06T19:47:34.512+08:00  INFO 30928 --- [admin3] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-06T19:47:34.702+08:00  INFO 30928 --- [admin3] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-06T19:47:35.237+08:00  INFO 30928 --- [admin3] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-06T19:47:37.114+08:00  WARN 30928 --- [admin3] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-06-06T19:47:38.611+08:00  INFO 30928 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-06-06T19:47:38.641+08:00  INFO 30928 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 11.431 seconds (process running for 12.336)
+2026-06-06T19:58:46.016+08:00  INFO 30928 --- [admin3] [nio-9099-exec-3] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-06T19:58:46.017+08:00  INFO 30928 --- [admin3] [nio-9099-exec-3] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-06-06T19:58:46.018+08:00  INFO 30928 --- [admin3] [nio-9099-exec-3] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-06-06T19:58:46.024+08:00  INFO 30928 --- [admin3] [nio-9099-exec-3] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T19:58:46.025+08:00  INFO 30928 --- [admin3] [nio-9099-exec-3] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T19:58:46.465+08:00  INFO 30928 --- [admin3] [nio-9099-exec-5] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T19:58:46.465+08:00  INFO 30928 --- [admin3] [nio-9099-exec-5] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T19:59:08.111+08:00  INFO 30928 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: ocr_upload_reimbursement, filename=test-invoice.png, applicantName=admin
+2026-06-06T19:59:08.133+08:00  INFO 30928 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR temp file saved: C:\Users\LIUXIA~1\AppData\Local\Temp\reimbursement-ocr\ff8e2fd2-a846-485a-a57f-5422285fd4fe_test-invoice.png
+2026-06-06T20:04:14.308+08:00  INFO 30928 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR service response status: 200
+2026-06-06T20:04:14.507+08:00  INFO 30928 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Attachment saved for reimbursement 16: a0f022fa-cc88-4f56-a6b8-288ff4e896b4.png
+
+[INFO] Service stopped
+(base) PS D:\hongmengProjects\admin3> start.ps1
+start.ps1 : 无法将“start.ps1”项识别为 cmdlet、函数、脚本文件或可运行程序的名称。请检查名称的拼写，如果包括路径，请确
+保路径正确，然后再试一次。
+所在位置 行:1 字符: 1
++ start.ps1
++ ~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (start.ps1:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+
+Suggestion [3,General]: 找不到命令 start.ps1，但它确实存在于当前位置。默认情况下，Windows PowerShell 不会从当前位置加载命令。如果信任此 命令，请改为键入“.\start.ps1”。有关详细信息，请参阅 "get-help about_Command_Precedence"。
+(base) PS D:\hongmengProjects\admin3> .\start.ps1
+[INFO] Starting: D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar
+[INFO] URL: http://localhost:9099/admin3
+[INFO] Log file: D:\hongmengProjects\admin3\logs\admin3-server.log
+[INFO] Press Ctrl+C to stop
+
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-06-06T20:17:46.522+08:00  INFO 34956 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 34956 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by liuxiaobo in D:\hongmengProjects\admin3)
+2026-06-06T20:17:46.525+08:00  INFO 34956 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-06-06T20:17:48.171+08:00  INFO 34956 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-06T20:17:48.456+08:00  INFO 34956 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 274 ms. Found 17 JPA repository interfaces.
+2026-06-06T20:17:49.400+08:00  INFO 34956 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-06-06T20:17:49.430+08:00  INFO 34956 --- [admin3] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-06T20:17:49.430+08:00  INFO 34956 --- [admin3] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-06-06T20:17:49.518+08:00  INFO 34956 --- [admin3] [           main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-06-06T20:17:49.519+08:00  INFO 34956 --- [admin3] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2848 ms
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+2026-06-06T20:17:49.743+08:00  INFO 34956 --- [admin3] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-06T20:17:49.834+08:00  INFO 34956 --- [admin3] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-06-06T20:17:49.888+08:00  INFO 34956 --- [admin3] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-06-06T20:17:50.244+08:00  INFO 34956 --- [admin3] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-06T20:17:50.289+08:00  INFO 34956 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-06T20:17:50.753+08:00  INFO 34956 --- [admin3] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3359c3f6
+2026-06-06T20:17:50.755+08:00  INFO 34956 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-06T20:17:50.821+08:00  WARN 34956 --- [admin3] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-06-06T20:17:53.487+08:00  INFO 34956 --- [admin3] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-06T20:17:53.710+08:00  INFO 34956 --- [admin3] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-06T20:17:54.348+08:00  INFO 34956 --- [admin3] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-06T20:17:56.286+08:00  WARN 34956 --- [admin3] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-06-06T20:17:58.172+08:00  INFO 34956 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-06-06T20:17:58.205+08:00  INFO 34956 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 12.382 seconds (process running for 13.166)
+2026-06-06T20:18:35.124+08:00  INFO 34956 --- [admin3] [nio-9099-exec-2] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-06T20:18:35.124+08:00  INFO 34956 --- [admin3] [nio-9099-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-06-06T20:18:35.126+08:00  INFO 34956 --- [admin3] [nio-9099-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-06-06T20:18:35.149+08:00  INFO 34956 --- [admin3] [nio-9099-exec-2] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T20:18:35.149+08:00  INFO 34956 --- [admin3] [nio-9099-exec-2] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T20:18:35.720+08:00  INFO 34956 --- [admin3] [nio-9099-exec-4] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T20:18:35.720+08:00  INFO 34956 --- [admin3] [nio-9099-exec-4] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T20:18:57.212+08:00  INFO 34956 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: ocr_upload_reimbursement, filename=test-invoice.png, applicantName=admin
+2026-06-06T20:18:57.233+08:00  INFO 34956 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR temp file saved: C:\Users\LIUXIA~1\AppData\Local\Temp\reimbursement-ocr\a550d796-c8a2-4cc3-b9d4-f42563f850e9_test-invoice.png
+2026-06-06T20:18:57.306+08:00  INFO 34956 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Sending OCR request to http://localhost:8765/ocr...
+2026-06-06T20:19:57.325+08:00 ERROR 34956 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR service timeout: request timed out
+2026-06-06T20:19:57.327+08:00 ERROR 34956 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP ocr_upload_reimbursement failed: OCR鏈嶅姟杩炴帴瓒呮椂锛岃纭OCR 鏈嶅姟杩愯姝ｅ父
+
+java.lang.RuntimeException: OCR鏈嶅姟杩炴帴瓒呮椂锛岃纭OCR鏈嶅姟杩愯姝ｅ父
+        at tech.wetech.admin3.infra.mcp.xiaoyi.ReimbursementMcpConfig.callOcrService(ReimbursementMcpConfig.java:626) ~[!/:0.0.1-SNAPSHOT]
+        at tech.wetech.admin3.infra.mcp.xiaoyi.ReimbursementMcpConfig.lambda$createOcrUploadTool$0(ReimbursementMcpConfig.java:139) ~[!/:0.0.1-SNAPSHOT]
+        at io.modelcontextprotocol.server.McpStatelessServerFeatures$AsyncToolSpecification.lambda$fromSync$0(McpStatelessServerFeatures.java:215) ~[mcp-core-0.18.2.jar!/:0.18.2]
+        at reactor.core.publisher.MonoCallable.call(MonoCallable.java:72) ~[reactor-core-3.6.3.jar!/:3.6.3]
+        at reactor.core.publisher.FluxSubscribeOnCallable$CallableSubscribeOnSubscription.run(FluxSubscribeOnCallable.java:228) ~[reactor-core-3.6.3.jar!/:3.6.3]
+        at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:68) ~[reactor-core-3.6.3.jar!/:3.6.3]
+        at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28) ~[reactor-core-3.6.3.jar!/:3.6.3]
+        at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+        at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+        at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+        at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
         at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
-Caused by: java.lang.IllegalStateException: org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException: The field file exceeds its maximum permitted size of 1048576 bytes.
-        at org.apache.catalina.connector.Request.parseParts(Request.java:2825) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.connector.Request.getParts(Request.java:2685) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.connector.RequestFacade.getParts(RequestFacade.java:773) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.springframework.web.multipart.support.StandardMultipartHttpServletRequest.parseRequest(StandardMultipartHttpServletRequest.java:93) ~[spring-web-6.1.4.jar!/:6.1.4]
-        ... 46 common frames omitted
-Caused by: org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException: The field file exceeds its maximum permitted size of 1048576 bytes.
-        at org.apache.tomcat.util.http.fileupload.impl.FileItemStreamImpl$1.raiseError(FileItemStreamImpl.java:117) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.tomcat.util.http.fileupload.util.LimitedInputStream.checkLimit(LimitedInputStream.java:76) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.tomcat.util.http.fileupload.util.LimitedInputStream.read(LimitedInputStream.java:135) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at java.base/java.io.FilterInputStream.read(FilterInputStream.java:95) ~[na:na]
-        at org.apache.tomcat.util.http.fileupload.util.Streams.copy(Streams.java:96) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.tomcat.util.http.fileupload.FileUploadBase.parseRequest(FileUploadBase.java:292) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        at org.apache.catalina.connector.Request.parseParts(Request.java:2784) ~[tomcat-embed-core-10.1.19.jar!/:na]
-        ... 49 common frames omitted
+Caused by: java.net.http.HttpTimeoutException: request timed out
+        at java.net.http/jdk.internal.net.http.HttpClientImpl.send(HttpClientImpl.java:953) ~[java.net.http:na]
+        at java.net.http/jdk.internal.net.http.HttpClientFacade.send(HttpClientFacade.java:133) ~[java.net.http:na]
+        at tech.wetech.admin3.infra.mcp.xiaoyi.ReimbursementMcpConfig.callOcrService(ReimbursementMcpConfig.java:620) ~[!/:0.0.1-SNAPSHOT]
+        ... 11 common frames omitted
+
+2026-06-06T20:19:57.949+08:00  INFO 34956 --- [admin3] [nio-9099-exec-7] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T20:19:57.950+08:00  INFO 34956 --- [admin3] [nio-9099-exec-7] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T20:19:57.951+08:00  INFO 34956 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: query_reimbursements_by_username, username=admin
+2026-06-06T20:19:58.090+08:00  INFO 34956 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP query_reimbursements_by_username result: username=admin, count=1
+2026-06-06T20:24:41.111+08:00  INFO 34956 --- [admin3] [io-9099-exec-10] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T20:24:41.111+08:00  INFO 34956 --- [admin3] [io-9099-exec-10] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T20:24:41.523+08:00  INFO 34956 --- [admin3] [nio-9099-exec-2] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T20:24:41.523+08:00  INFO 34956 --- [admin3] [nio-9099-exec-2] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T20:25:03.213+08:00  INFO 34956 --- [admin3] [oundedElastic-2] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: ocr_upload_reimbursement, filename=test-invoice.png, applicantName=admin
+2026-06-06T20:25:03.228+08:00  INFO 34956 --- [admin3] [oundedElastic-2] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR temp file saved: C:\Users\LIUXIA~1\AppData\Local\Temp\reimbursement-ocr\5a58ad22-4ae7-4a2b-81ce-b812921eec58_test-invoice.png
+2026-06-06T20:25:03.235+08:00  INFO 34956 --- [admin3] [oundedElastic-2] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Sending OCR request to http://localhost:8765/ocr...
+2026-06-06T20:26:03.237+08:00 ERROR 34956 --- [admin3] [oundedElastic-2] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR service timeout: request timed out
+2026-06-06T20:26:03.239+08:00 ERROR 34956 --- [admin3] [oundedElastic-2] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP ocr_upload_reimbursement failed: OCR鏈嶅姟杩炴帴瓒呮椂锛岃纭OCR 鏈嶅姟杩愯姝ｅ父
+
+java.lang.RuntimeException: OCR鏈嶅姟杩炴帴瓒呮椂锛岃纭OCR鏈嶅姟杩愯姝ｅ父
+        at tech.wetech.admin3.infra.mcp.xiaoyi.ReimbursementMcpConfig.callOcrService(ReimbursementMcpConfig.java:626) ~[!/:0.0.1-SNAPSHOT]
+        at tech.wetech.admin3.infra.mcp.xiaoyi.ReimbursementMcpConfig.lambda$createOcrUploadTool$0(ReimbursementMcpConfig.java:139) ~[!/:0.0.1-SNAPSHOT]
+        at io.modelcontextprotocol.server.McpStatelessServerFeatures$AsyncToolSpecification.lambda$fromSync$0(McpStatelessServerFeatures.java:215) ~[mcp-core-0.18.2.jar!/:0.18.2]
+        at reactor.core.publisher.MonoCallable.call(MonoCallable.java:72) ~[reactor-core-3.6.3.jar!/:3.6.3]
+        at reactor.core.publisher.FluxSubscribeOnCallable$CallableSubscribeOnSubscription.run(FluxSubscribeOnCallable.java:228) ~[reactor-core-3.6.3.jar!/:3.6.3]
+        at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:68) ~[reactor-core-3.6.3.jar!/:3.6.3]
+        at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28) ~[reactor-core-3.6.3.jar!/:3.6.3]
+        at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+        at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:304) ~[na:na]
+        at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+        at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+        at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+Caused by: java.net.http.HttpTimeoutException: request timed out
+        at java.net.http/jdk.internal.net.http.HttpClientImpl.send(HttpClientImpl.java:953) ~[java.net.http:na]
+        at java.net.http/jdk.internal.net.http.HttpClientFacade.send(HttpClientFacade.java:133) ~[java.net.http:na]
+        at tech.wetech.admin3.infra.mcp.xiaoyi.ReimbursementMcpConfig.callOcrService(ReimbursementMcpConfig.java:620) ~[!/:0.0.1-SNAPSHOT]
+        ... 11 common frames omitted
+
+2026-06-06T20:26:03.624+08:00  INFO 34956 --- [admin3] [nio-9099-exec-5] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T20:26:03.624+08:00  INFO 34956 --- [admin3] [nio-9099-exec-5] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T20:26:03.625+08:00  INFO 34956 --- [admin3] [oundedElastic-2] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: query_reimbursements_by_username, username=admin
+2026-06-06T20:26:03.638+08:00  INFO 34956 --- [admin3] [oundedElastic-2] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP query_reimbursements_by_username result: username=admin, count=1
+2026-06-06T20:32:02.527+08:00  INFO 34956 --- [admin3] [nio-9099-exec-8] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T20:32:02.527+08:00  INFO 34956 --- [admin3] [nio-9099-exec-8] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T20:32:02.989+08:00  INFO 34956 --- [admin3] [io-9099-exec-10] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T20:32:02.989+08:00  INFO 34956 --- [admin3] [io-9099-exec-10] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T20:32:24.638+08:00  INFO 34956 --- [admin3] [oundedElastic-3] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: ocr_upload_reimbursement, filename=test-invoice.png, applicantName=admin
+2026-06-06T20:32:24.649+08:00  INFO 34956 --- [admin3] [oundedElastic-3] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR temp file saved: C:\Users\LIUXIA~1\AppData\Local\Temp\reimbursement-ocr\fe003630-aa4b-4395-8526-93b95d2f830e_test-invoice.png
+2026-06-06T20:32:24.657+08:00  INFO 34956 --- [admin3] [oundedElastic-3] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Sending OCR request to http://localhost:8765/ocr...
+2026-06-06T20:32:55.242+08:00  INFO 34956 --- [admin3] [oundedElastic-3] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR service response status: 200
+2026-06-06T20:32:55.349+08:00  INFO 34956 --- [admin3] [oundedElastic-3] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Attachment saved for reimbursement 17: f5c1525a-236b-44be-b623-ae07d853f500.png
+2026-06-06T20:32:55.797+08:00  INFO 34956 --- [admin3] [nio-9099-exec-2] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T20:32:55.797+08:00  INFO 34956 --- [admin3] [nio-9099-exec-2] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T20:32:55.799+08:00  INFO 34956 --- [admin3] [oundedElastic-3] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [xiaoyi_mcp] confirm_reimbursement called: reimbursementId=17, category=office, title=[MCP] 鍔炲叕璁惧閲囪喘鎶ラ攢 - 娴嬭瘯, amount=null
+2026-06-06T20:32:55.957+08:00  INFO 34956 --- [admin3] [oundedElastic-3] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [xiaoyi_mcp] confirm_reimbursement succeeded: id=17, title=[MCP] 鍔炲叕璁惧閲囪喘鎶ラ 攢 - 娴嬭瘯, category=office, amount=1125.14, applicantName=admin, elapsed=158ms
+2026-06-06T20:32:56.356+08:00  INFO 34956 --- [admin3] [nio-9099-exec-5] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T20:32:56.356+08:00  INFO 34956 --- [admin3] [nio-9099-exec-5] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T20:32:56.357+08:00  INFO 34956 --- [admin3] [oundedElastic-3] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: query_reimbursements_by_username, username=admin
+2026-06-06T20:32:56.367+08:00  INFO 34956 --- [admin3] [oundedElastic-3] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP query_reimbursements_by_username result: username=admin, count=2
+2026-06-06T21:57:10.354+08:00  INFO 34956 --- [admin3] [nio-9099-exec-4] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T21:57:10.355+08:00  INFO 34956 --- [admin3] [nio-9099-exec-4] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T21:57:11.115+08:00  INFO 34956 --- [admin3] [nio-9099-exec-7] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T21:57:11.116+08:00  INFO 34956 --- [admin3] [nio-9099-exec-7] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T21:57:33.451+08:00  INFO 34956 --- [admin3] [oundedElastic-4] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: ocr_upload_reimbursement, filename=test-invoice.png, applicantName=admin
+2026-06-06T21:57:33.462+08:00  INFO 34956 --- [admin3] [oundedElastic-4] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR temp file saved: C:\Users\LIUXIA~1\AppData\Local\Temp\reimbursement-ocr\d651337d-964c-4e11-b917-1d215c3ca132_test-invoice.png
+2026-06-06T21:57:33.467+08:00  INFO 34956 --- [admin3] [oundedElastic-4] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Sending OCR request to http://localhost:8765/ocr...
+2026-06-06T21:57:42.665+08:00  INFO 34956 --- [admin3] [oundedElastic-4] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR service response status: 200
+2026-06-06T21:57:42.709+08:00  INFO 34956 --- [admin3] [oundedElastic-4] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Attachment saved for reimbursement 18: 3b10902f-b570-46f9-a040-ea1489406e74.png
+2026-06-06T21:57:44.214+08:00  INFO 34956 --- [admin3] [nio-9099-exec-9] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T21:57:44.214+08:00  INFO 34956 --- [admin3] [nio-9099-exec-9] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T21:57:44.215+08:00  INFO 34956 --- [admin3] [oundedElastic-4] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [xiaoyi_mcp] confirm_reimbursement called: reimbursementId=18, category=office, title=[MCP] 鍔炲叕璁惧閲囪喘鎶ラ攢 - 娴嬭瘯, amount=null
+2026-06-06T21:57:44.310+08:00  INFO 34956 --- [admin3] [oundedElastic-4] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [xiaoyi_mcp] confirm_reimbursement succeeded: id=18, title=[MCP] 鍔炲叕璁惧閲囪喘鎶ラ 攢 - 娴嬭瘯, category=office, amount=1125.14, applicantName=admin, elapsed=95ms
+2026-06-06T21:57:45.554+08:00  INFO 34956 --- [admin3] [nio-9099-exec-1] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T21:57:45.554+08:00  INFO 34956 --- [admin3] [nio-9099-exec-1] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T21:57:45.555+08:00  INFO 34956 --- [admin3] [oundedElastic-4] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: query_reimbursements_by_username, username=admin
+2026-06-06T21:57:45.564+08:00  INFO 34956 --- [admin3] [oundedElastic-4] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP query_reimbursements_by_username result: username=admin, count=3
+2026-06-06T21:59:13.468+08:00  INFO 34956 --- [admin3] [nio-9099-exec-4] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T21:59:13.468+08:00  INFO 34956 --- [admin3] [nio-9099-exec-4] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T21:59:13.835+08:00  INFO 34956 --- [admin3] [nio-9099-exec-7] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T21:59:13.835+08:00  INFO 34956 --- [admin3] [nio-9099-exec-7] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T21:59:35.573+08:00  INFO 34956 --- [admin3] [oundedElastic-5] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: ocr_upload_reimbursement, filename=test-invoice.png, applicantName=admin
+2026-06-06T21:59:35.581+08:00  INFO 34956 --- [admin3] [oundedElastic-5] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR temp file saved: C:\Users\LIUXIA~1\AppData\Local\Temp\reimbursement-ocr\3f9ccb6d-8846-4e17-aa10-a857cb7d30ce_test-invoice.png
+2026-06-06T21:59:35.587+08:00  INFO 34956 --- [admin3] [oundedElastic-5] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Sending OCR request to http://localhost:8765/ocr...
+2026-06-06T21:59:45.081+08:00  INFO 34956 --- [admin3] [oundedElastic-5] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR service response status: 200
+2026-06-06T21:59:45.122+08:00  INFO 34956 --- [admin3] [oundedElastic-5] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Attachment saved for reimbursement 19: 6b4a6b95-5b90-4d76-8988-65033e703e1a.png
+2026-06-06T21:59:45.730+08:00  INFO 34956 --- [admin3] [nio-9099-exec-9] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T21:59:45.731+08:00  INFO 34956 --- [admin3] [nio-9099-exec-9] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T21:59:45.732+08:00  INFO 34956 --- [admin3] [oundedElastic-5] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [xiaoyi_mcp] confirm_reimbursement called: reimbursementId=19, category=office, title=[MCP] 鍔炲叕璁惧閲囪喘鎶ラ攢 - 娴嬭瘯, amount=null
+2026-06-06T21:59:45.840+08:00  INFO 34956 --- [admin3] [oundedElastic-5] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [xiaoyi_mcp] confirm_reimbursement succeeded: id=19, title=[MCP] 鍔炲叕璁惧閲囪喘鎶ラ 攢 - 娴嬭瘯, category=office, amount=1125.14, applicantName=admin, elapsed=108ms
+2026-06-06T21:59:46.475+08:00  INFO 34956 --- [admin3] [nio-9099-exec-1] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T21:59:46.475+08:00  INFO 34956 --- [admin3] [nio-9099-exec-1] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T21:59:46.476+08:00  INFO 34956 --- [admin3] [oundedElastic-5] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: query_reimbursements_by_username, username=admin
+2026-06-06T21:59:46.486+08:00  INFO 34956 --- [admin3] [oundedElastic-5] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP query_reimbursements_by_username result: username=admin, count=4
+2026-06-06T22:04:13.703+08:00  INFO 34956 --- [admin3] [nio-9099-exec-5] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T22:04:13.703+08:00  INFO 34956 --- [admin3] [nio-9099-exec-5] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T22:04:14.642+08:00  INFO 34956 --- [admin3] [nio-9099-exec-6] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T22:04:14.642+08:00  INFO 34956 --- [admin3] [nio-9099-exec-6] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T22:04:36.793+08:00  INFO 34956 --- [admin3] [oundedElastic-6] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: ocr_upload_reimbursement, filename=test-invoice.png, applicantName=admin
+2026-06-06T22:04:36.802+08:00  INFO 34956 --- [admin3] [oundedElastic-6] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR temp file saved: C:\Users\LIUXIA~1\AppData\Local\Temp\reimbursement-ocr\bffb3bbb-3596-4784-b2e9-a6bc56fe7994_test-invoice.png
+2026-06-06T22:04:36.806+08:00  INFO 34956 --- [admin3] [oundedElastic-6] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Sending OCR request to http://localhost:8765/ocr...
+2026-06-06T22:04:46.074+08:00  INFO 34956 --- [admin3] [oundedElastic-6] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : OCR service response status: 200
+2026-06-06T22:04:46.116+08:00  INFO 34956 --- [admin3] [oundedElastic-6] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Attachment saved for reimbursement 20: 5ed7bd9f-591e-4dcd-ba4d-7d76ec3d9536.png
+2026-06-06T22:04:47.324+08:00  INFO 34956 --- [admin3] [nio-9099-exec-8] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T22:04:47.324+08:00  INFO 34956 --- [admin3] [nio-9099-exec-8] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T22:04:47.325+08:00  INFO 34956 --- [admin3] [oundedElastic-6] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [xiaoyi_mcp] confirm_reimbursement called: reimbursementId=20, category=office, title=[MCP] 鍔炲叕璁惧閲囪喘鎶ラ攢 - 娴嬭瘯, amount=null
+2026-06-06T22:04:47.446+08:00  INFO 34956 --- [admin3] [oundedElastic-6] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [xiaoyi_mcp] confirm_reimbursement succeeded: id=20, title=[MCP] 鍔炲叕璁惧閲囪喘鎶ラ 攢 - 娴嬭瘯, category=office, amount=1125.14, applicantName=admin, elapsed=121ms
+2026-06-06T22:04:48.762+08:00  INFO 34956 --- [admin3] [io-9099-exec-10] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T22:04:48.763+08:00  INFO 34956 --- [admin3] [io-9099-exec-10] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T22:04:48.764+08:00  INFO 34956 --- [admin3] [oundedElastic-6] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: query_reimbursements_by_username, username=admin
+2026-06-06T22:04:48.774+08:00  INFO 34956 --- [admin3] [oundedElastic-6] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP query_reimbursements_by_username result: username=admin, count=5
+(base) PS D:\hongmengProjects\admin3> .\start.ps1
+[INFO] Starting: D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar
+[INFO] URL: http://localhost:9099/admin3
+[INFO] Log file: D:\hongmengProjects\admin3\logs\admin3-server.log
+[INFO] Press Ctrl+C to stop
+
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-06-06T22:18:57.516+08:00  INFO 24592 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 24592 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by liuxiaobo in D:\hongmengProjects\admin3)
+2026-06-06T22:18:57.519+08:00  INFO 24592 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-06-06T22:18:59.094+08:00  INFO 24592 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-06T22:18:59.363+08:00  INFO 24592 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 254 ms. Found 17 JPA repository interfaces.
+2026-06-06T22:19:00.452+08:00  INFO 24592 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-06-06T22:19:00.472+08:00  INFO 24592 --- [admin3] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-06T22:19:00.472+08:00  INFO 24592 --- [admin3] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-06-06T22:19:00.560+08:00  INFO 24592 --- [admin3] [           main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-06-06T22:19:00.563+08:00  INFO 24592 --- [admin3] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2908 ms
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+2026-06-06T22:19:00.797+08:00  INFO 24592 --- [admin3] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-06T22:19:00.890+08:00  INFO 24592 --- [admin3] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-06-06T22:19:00.943+08:00  INFO 24592 --- [admin3] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-06-06T22:19:01.315+08:00  INFO 24592 --- [admin3] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-06T22:19:01.358+08:00  INFO 24592 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-06T22:19:01.869+08:00  INFO 24592 --- [admin3] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4b8a0d03
+2026-06-06T22:19:01.872+08:00  INFO 24592 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-06T22:19:01.947+08:00  WARN 24592 --- [admin3] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-06-06T22:19:04.164+08:00  INFO 24592 --- [admin3] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-06T22:19:04.365+08:00  INFO 24592 --- [admin3] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-06T22:19:04.941+08:00  INFO 24592 --- [admin3] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-06T22:19:06.854+08:00  WARN 24592 --- [admin3] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-06-06T22:19:08.444+08:00  INFO 24592 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-06-06T22:19:08.475+08:00  INFO 24592 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 11.704 seconds (process running for 12.887)
+2026-06-06T22:19:16.029+08:00  INFO 24592 --- [admin3] [nio-9099-exec-2] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-06T22:19:16.029+08:00  INFO 24592 --- [admin3] [nio-9099-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-06-06T22:19:16.029+08:00  INFO 24592 --- [admin3] [nio-9099-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-06-06T22:19:16.037+08:00  INFO 24592 --- [admin3] [nio-9099-exec-2] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T22:19:16.037+08:00  INFO 24592 --- [admin3] [nio-9099-exec-2] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T22:19:16.504+08:00  INFO 24592 --- [admin3] [nio-9099-exec-4] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T22:19:16.504+08:00  INFO 24592 --- [admin3] [nio-9099-exec-4] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T22:19:38.141+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: ocr_upload_reimbursement, filename=test-invoice.png, applicantName=admin
+2026-06-06T22:19:38.156+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [鑰楁椂] Base64瑙ｇ 爜: 15ms
+2026-06-06T22:19:38.163+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [鑰楁椂] OCR淇濆瓨涓存椂鏂囦欢: 6ms, path=C:\Users\LIUXIA~1\AppData\Local\Temp\reimbursement-ocr\786418c2-29aa-4a11-ae23-18936f5c893c_test-invoice.png
+2026-06-06T22:19:38.164+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [鑰楁椂] OCR鏋勫缓璇锋眰浣? 1ms, body_size=2371531
+2026-06-06T22:19:38.241+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Sending OCR request to http://localhost:8765/ocr...
+2026-06-06T22:19:45.048+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [鑰楁椂] OCR HTTP璇 锋眰: 6884ms, status=200, response_size=8449
+2026-06-06T22:19:45.048+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [鑰楁椂] callOcrService 鎬昏€楁椂: 6891ms
+2026-06-06T22:19:45.049+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [鑰楁椂] OCR鏈嶅姟璋冪敤: 6892ms
+2026-06-06T22:19:45.063+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [鑰楁椂] 瑙ｆ瀽OCR缁撴灉+鎻愬彇瀛楁: 12ms, invoice_fields=0, ocr_text_len=627
+2026-06-06T22:19:45.245+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [鑰楁椂] 鍒涘缓鑽夌鎶ラ攢鍗? 177ms, draft_id=21
+2026-06-06T22:19:45.263+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Attachment saved for reimbursement 21: 6c9051f7-b369-44a5-8b59-57831d937b3e.png
+2026-06-06T22:19:45.305+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [鑰楁椂] 淇濆瓨闄勪 欢: 60ms
+2026-06-06T22:19:45.336+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [鑰楁椂] 鍒涘缓涓存 椂鍙戠エ璁板綍: 31ms, invoice_temp_id=6
+2026-06-06T22:19:45.337+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [鑰楁椂] ocr_upload_reimbursement 鎬昏€楁椂: 7196ms
+2026-06-06T22:19:45.806+08:00  INFO 24592 --- [admin3] [nio-9099-exec-6] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T22:19:45.806+08:00  INFO 24592 --- [admin3] [nio-9099-exec-6] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T22:19:45.808+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [xiaoyi_mcp] confirm_reimbursement called: reimbursementId=21, category=office, title=[MCP] 鍔炲叕璁惧閲囪喘鎶ラ攢 - 娴嬭瘯, amount=null
+2026-06-06T22:19:45.955+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : [xiaoyi_mcp] confirm_reimbursement succeeded: id=21, title=[MCP] 鍔炲叕璁惧閲囪喘鎶ラ 攢 - 娴嬭瘯, category=office, amount=1125.14, applicantName=admin, elapsed=147ms
+2026-06-06T22:19:46.307+08:00  INFO 24592 --- [admin3] [nio-9099-exec-8] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP request: POST /admin3/xiaoyi-mcp/reimbursement/message
+2026-06-06T22:19:46.307+08:00  INFO 24592 --- [admin3] [nio-9099-exec-8] t.w.a.infra.mcp.xiaoyi.XiaoYiAuthFilter  : XiaoYi MCP auth success: POST /admin3/xiaoyi-mcp/reimbursement/message, appId=admin3-leave-app
+2026-06-06T22:19:46.309+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP tool called: query_reimbursements_by_username, username=admin
+2026-06-06T22:19:46.323+08:00  INFO 24592 --- [admin3] [oundedElastic-1] t.w.a.i.m.xiaoyi.ReimbursementMcpConfig  : Reimbursement MCP query_reimbursements_by_username result: username=admin, count=6
