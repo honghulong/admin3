@@ -21,6 +21,7 @@ import base64
 import os
 import http.client
 import re
+import time
 import mysql.connector
 
 # 设置输出编码
@@ -115,6 +116,19 @@ def extract_text(result):
     return None
 
 
+def print_step(step_name, func, *args, **kwargs):
+    """带时间度量的步骤执行函数"""
+    print('=' * 60)
+    print(f'  {step_name}')
+    print('=' * 60)
+    t0 = time.time()
+    r = func(*args, **kwargs)
+    elapsed = time.time() - t0
+    print(f'  [耗时] {elapsed:.2f}s')
+    print()
+    return r
+
+
 # ============================================================
 # 测试前：记录数据库初始状态
 # ============================================================
@@ -129,10 +143,7 @@ print()
 # ============================================================
 # 1. tools/list — 列出所有可用的 MCP Tool
 # ============================================================
-print('=' * 60)
-print('  1. tools/list')
-print('=' * 60)
-r = call('tools/list')
+r = print_step('1. tools/list', call, 'tools/list')
 tools = r.get('result', {}).get('tools', [])
 for t in tools:
     print(f"  Tool: {t['name']}")
@@ -143,9 +154,6 @@ print()
 # 2. ocr_upload_reimbursement — OCR 识别并创建草稿报销单
 #    必填参数: imageBase64, filename, applicantName
 # ============================================================
-print('=' * 60)
-print('  2. ocr_upload_reimbursement')
-print('=' * 60)
 img_path = 'test-invoice.png'
 if not os.path.exists(img_path):
     print(f"  [ERR] 文件不存在: {img_path}")
@@ -156,7 +164,7 @@ with open(img_path, 'rb') as f:
 print(f"  图片: {img_path} ({len(b64)} bytes base64)")
 print()
 
-r = call('tools/call', {
+r = print_step('2. ocr_upload_reimbursement', call, 'tools/call', {
     'name': 'ocr_upload_reimbursement',
     'arguments': {
         'imageBase64': b64,
@@ -164,11 +172,19 @@ r = call('tools/call', {
         'applicantName': 'admin',
     },
 })
+
+# 打印原始 JSON 响应
+print('  [原始响应]')
+print(json.dumps(r, indent=2, ensure_ascii=False))
+print()
+
+# 提取并打印所有字段
 text = extract_text(r)
 if text:
+    print('  [提取文本]')
     print(text)
 else:
-    print(json.dumps(r, indent=2, ensure_ascii=False))
+    print('  [无文本内容]')
 print()
 
 # ============================================================
@@ -176,10 +192,6 @@ print()
 #    必填参数: reimbursementId, category
 #    可选参数: title, amount
 # ============================================================
-print('=' * 60)
-print('  3. confirm_reimbursement')
-print('=' * 60)
-
 # 从步骤 2 的返回文本中提取草稿 ID
 draft_id_match = re.search(r'草稿报销单 ID:\s*(\d+)', text) if text else None
 if draft_id_match:
@@ -187,7 +199,7 @@ if draft_id_match:
     print(f"  从 OCR 结果中提取到草稿 ID: {draft_id}")
     print()
 
-    r = call('tools/call', {
+    r = print_step('3. confirm_reimbursement', call, 'tools/call', {
         'name': 'confirm_reimbursement',
         'arguments': {
             'reimbursementId': draft_id,
@@ -208,10 +220,7 @@ print()
 # 4. query_reimbursements_by_username — 查询报销单
 #    必填参数: username
 # ============================================================
-print('=' * 60)
-print('  4. query_reimbursements_by_username (admin)')
-print('=' * 60)
-r = call('tools/call', {
+r = print_step('4. query_reimbursements_by_username (admin)', call, 'tools/call', {
     'name': 'query_reimbursements_by_username',
     'arguments': {'username': 'admin'},
 })

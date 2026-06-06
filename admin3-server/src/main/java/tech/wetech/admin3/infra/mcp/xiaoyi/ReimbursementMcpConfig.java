@@ -26,6 +26,7 @@ import tech.wetech.admin3.sys.repository.ReimbursementRepository;
 import tech.wetech.admin3.sys.service.ReimbursementService;
 import tech.wetech.admin3.sys.service.dto.ReimbursementDTO;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -129,15 +130,21 @@ public class ReimbursementMcpConfig {
         String filename = String.valueOf(request.arguments().get("filename"));
         String applicantName = String.valueOf(request.arguments().get("applicantName"));
 
+        long tStart = System.currentTimeMillis();
         log.info("Reimbursement MCP tool called: ocr_upload_reimbursement, filename={}, applicantName={}", filename, applicantName);
 
         // 1. 解码 Base64 图片
+        long t1 = System.currentTimeMillis();
         byte[] imageBytes = Base64.getDecoder().decode(imageBase64);
+        log.info("[耗时] Base64解码: {}ms", System.currentTimeMillis() - t1);
 
         // 2. 调用本地 OCR 服务识别发票
+        long t2 = System.currentTimeMillis();
         String ocrResultJson = callOcrService(imageBytes, filename);
+        log.info("[耗时] OCR服务调用: {}ms", System.currentTimeMillis() - t2);
 
         // 3. 解析 OCR 结果，提取发票字段
+        long t3 = System.currentTimeMillis();
         ObjectMapper mapper = new ObjectMapper();
         var ocrResult = mapper.readTree(ocrResultJson);
 
@@ -173,6 +180,7 @@ public class ReimbursementMcpConfig {
 
         // 如果 KIE 没提取到，从 ocr_text 中正则提取
         String ocrText = ocrResult.has("ocr_text") ? ocrResult.get("ocr_text").asText() : "";
+        log.info("[耗时] 解析OCR结果+提取字段: {}ms, invoice_fields={}, ocr_text_len={}", System.currentTimeMillis() - t3, invoiceFields != null ? invoiceFields.size() : 0, ocrText.length());
         if (invoiceNo.isEmpty() && ocrText.contains("发票号码")) {
           var m = java.util.regex.Pattern.compile("发票号码[：:\\s]*(\\d{8})").matcher(ocrText);
           if (m.find()) invoiceNo = m.group(1);
@@ -263,6 +271,7 @@ public class ReimbursementMcpConfig {
 
         // MCP 上下文没有 Session，使用调用方传入的用户信息创建草稿报销单
         // 同时传入 OCR 识别的发票字段，确保报销单正式字段有数据
+        long t4 = System.currentTimeMillis();
         ReimbursementDTO draft = reimbursementService.createReimbursement(
           title, "other", amount, description, null, 0L, applicantName,
           invoiceNo.isEmpty() ? null : invoiceNo,
@@ -276,8 +285,10 @@ public class ReimbursementMcpConfig {
           "normal",
           ocrResultJson
         );
+        log.info("[耗时] 创建草稿报销单: {}ms, draft_id={}", System.currentTimeMillis() - t4, draft.id());
 
         // 4. 保存图片到附件目录并创建 Attachment 记录
+        long t5 = System.currentTimeMillis();
         try {
           Files.createDirectories(uploadDir);
           String ext = "";
@@ -307,8 +318,10 @@ public class ReimbursementMcpConfig {
         } catch (IOException e) {
           log.warn("Failed to save attachment for reimbursement {}: {}", draft.id(), e.getMessage());
         }
+        log.info("[耗时] 保存附件: {}ms", System.currentTimeMillis() - t5);
 
         // 5. 创建临时发票记录，保存 OCR 识别结果
+        long t6 = System.currentTimeMillis();
         InvoiceTemp invoiceTemp = reimbursementService.createInvoiceTemp(draft.id(), null, 0L);
         reimbursementService.updateInvoiceTempOcrResult(
           invoiceTemp.getId(), ocrResultJson,
@@ -324,8 +337,11 @@ public class ReimbursementMcpConfig {
           "normal",
           0L
         );
+        log.info("[耗时] 创建临时发票记录: {}ms, invoice_temp_id={}", System.currentTimeMillis() - t6, invoiceTemp.getId());
 
-        // 5. 返回识别结果给用户确认
+        // 6. 返回识别结果给用户确认
+        long tTotal = System.currentTimeMillis() - tStart;
+        log.info("[耗时] ocr_upload_reimbursement 总耗时: {}ms", tTotal);
         String result = String.format("""
           OCR识别完成，已创建草稿报销单，请确认以下信息：
 
@@ -579,15 +595,18 @@ public class ReimbursementMcpConfig {
    * 流程: 保存 Base64 图片到临时文件 → 调用 POST /ocr 上传文件 → 返回识别结果 JSON
    */
   private String callOcrService(byte[] imageBytes, String filename) throws Exception {
+    long t0 = System.currentTimeMillis();
+
     // 1. 将图片数据保存到临时文件
     Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"), "reimbursement-ocr");
     Files.createDirectories(tempDir);
     Path tempFile = tempDir.resolve(UUID.randomUUID().toString() + "_" + filename);
     Files.write(tempFile, imageBytes);
-    log.info("OCR temp file saved: {}", tempFile);
+    log.info("[耗时] OCR保存临时文件: {}ms, path={}", System.currentTimeMillis() - t0, tempFile);
 
     try {
       // 2. 构建 multipart/form-data 请求体
+      long t1 = System.currentTimeMillis();
       String boundary = "----" + UUID.randomUUID().toString();
       String lineSeparator = "\r\n";
 
@@ -601,24 +620,41 @@ public class ReimbursementMcpConfig {
       baos.write(lineSeparator.getBytes());
       // 结束
       baos.write(("--" + boundary + "--" + lineSeparator).getBytes());
+      log.info("[耗时] OCR构建请求体: {}ms, body_size={}", System.currentTimeMillis() - t1, baos.size());
 
-      // 3. 发送 HTTP POST 请求
-      HttpClient client = HttpClient.newHttpClient();
+      // 3. 发送 HTTP POST 请求（带超时）
+      long t2 = System.currentTimeMillis();
+      HttpClient client = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(10))
+        .build();
       HttpRequest request = HttpRequest.newBuilder()
         .uri(URI.create(OCR_SERVER_URL + "/ocr"))
         .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+        .timeout(Duration.ofSeconds(60))
         .POST(HttpRequest.BodyPublishers.ofByteArray(baos.toByteArray()))
         .build();
 
-      HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      log.info("Sending OCR request to {}...", OCR_SERVER_URL + "/ocr");
+      HttpResponse<String> response;
+      try {
+        response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      } catch (java.net.ConnectException e) {
+        log.error("OCR service connection refused: {}", e.getMessage());
+        throw new RuntimeException("OCR服务连接失败，请确认OCR服务已启动 (http://localhost:8765)", e);
+      } catch (java.net.http.HttpTimeoutException e) {
+        log.error("OCR service timeout: {}", e.getMessage());
+        throw new RuntimeException("OCR服务连接超时，请确认OCR服务运行正常", e);
+      }
+      long tHttp = System.currentTimeMillis() - t2;
       String responseBody = response.body();
 
-      log.info("OCR service response status: {}", response.statusCode());
+      log.info("[耗时] OCR HTTP请求: {}ms, status={}, response_size={}", tHttp, response.statusCode(), responseBody.length());
 
       if (response.statusCode() != 200) {
         throw new RuntimeException("OCR服务返回错误状态: " + response.statusCode() + ", body: " + responseBody);
       }
 
+      log.info("[耗时] callOcrService 总耗时: {}ms", System.currentTimeMillis() - t0);
       return responseBody;
     } finally {
       // 4. 清理临时文件
