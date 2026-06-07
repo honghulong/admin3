@@ -368,7 +368,7 @@ public class ReimbursementMcpConfig {
         String result = String.format("""
           OCR识别完成，已创建草稿报销单，请确认以下信息：
 
-          【草稿报销单 ID: %s】
+          【草稿报销单ID:%s】
           【临时发票 ID: %s】
           标题: %s
           金额: ¥%s
