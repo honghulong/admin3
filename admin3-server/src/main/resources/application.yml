@@ -36,6 +36,11 @@ xiaoyi:
       appId: admin3-leave-app
       apiKey: admin3-leave-api-key-2026
 
+logging:
+  charset:
+    console: GBK
+    file: UTF-8
+
 server:
   port: 9099
   servlet:

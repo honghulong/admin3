@@ -31,11 +31,14 @@ echo [INFO] URL: http://localhost:9099/admin3
 echo [INFO] Log file: %LOG_FILE%
 echo.
 
+echo [INFO] Log file: %LOG_FILE%
+echo [INFO] Ctrl+C to stop service
+echo.
+
 "%JAVA_HOME%\bin\java" -jar "%JAR_FILE%" ^
     -Dspring.datasource.url=jdbc:mysql://127.0.0.1:3306/admin3?characterEncoding=utf8 ^
     -Dspring.datasource.username=root ^
-    -Dspring.datasource.password=123456 ^
-    2>&1 | powershell -NoProfile -Command "& { $input | Tee-Object -FilePath '%LOG_FILE%' }"
+    -Dspring.datasource.password=123456
 
 echo.
 echo [INFO] Service stopped
