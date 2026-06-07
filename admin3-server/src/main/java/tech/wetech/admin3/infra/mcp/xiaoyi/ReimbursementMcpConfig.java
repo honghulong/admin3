@@ -133,10 +133,32 @@ public class ReimbursementMcpConfig {
         long tStart = System.currentTimeMillis();
         log.info("Reimbursement MCP tool called: ocr_upload_reimbursement, filename={}, applicantName={}", filename, applicantName);
 
-        // 1. 解码 Base64 图片
+        // 1. 获取图片字节：支持 Base64 编码或图片 URL
         long t1 = System.currentTimeMillis();
-        byte[] imageBytes = Base64.getDecoder().decode(imageBase64);
-        log.info("[耗时] Base64解码: {}ms", System.currentTimeMillis() - t1);
+        byte[] imageBytes;
+        String imageSourceDesc;
+        if (imageBase64.startsWith("http://") || imageBase64.startsWith("https://")) {
+          // 图片 URL：下载图片
+          log.info("imageBase64 is a URL, downloading from: {}", imageBase64);
+          HttpClient downloadClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build();
+          HttpRequest downloadRequest = HttpRequest.newBuilder()
+            .uri(URI.create(imageBase64))
+            .timeout(Duration.ofSeconds(30))
+            .GET()
+            .build();
+          HttpResponse<byte[]> downloadResponse = downloadClient.send(downloadRequest, HttpResponse.BodyHandlers.ofByteArray());
+          imageBytes = downloadResponse.body();
+          imageSourceDesc = "URL下载";
+          log.info("[耗时] 图片URL下载: {}ms, size={}bytes", System.currentTimeMillis() - t1, imageBytes.length);
+        } else {
+          // Base64 编码：直接解码
+          imageBytes = Base64.getDecoder().decode(imageBase64);
+          imageSourceDesc = "Base64解码";
+          log.info("[耗时] Base64解码: {}ms, size={}bytes", System.currentTimeMillis() - t1, imageBytes.length);
+        }
 
         // 2. 调用本地 OCR 服务识别发票
         long t2 = System.currentTimeMillis();
@@ -298,6 +320,7 @@ public class ReimbursementMcpConfig {
           String storedName = UUID.randomUUID().toString() + ext;
           Path targetPath = uploadDir.resolve(storedName);
           Files.write(targetPath, imageBytes);
+          log.info("图片附件已保存: absolutePath={}, size={}bytes, source={}", targetPath.toAbsolutePath(), imageBytes.length, imageSourceDesc);
 
           Attachment attachment = new Attachment();
           attachment.setReimbursementId(draft.id());
@@ -405,36 +428,26 @@ public class ReimbursementMcpConfig {
           "type": "object",
           "properties": {
             "reimbursementId": {
-              "type": "number",
+              "type": "string",
               "description": "草稿报销单ID（从 ocr_upload_reimbursement 返回中获取）"
             },
-            "title": {
+            "memo": {
               "type": "string",
-              "description": "报销标题（可选，不传则使用草稿中的标题）"
-            },
-            "category": {
-              "type": "string",
-              "description": "报销分类: travel(差旅), office(办公), entertainment(招待), other(其他)"
-            },
-            "amount": {
-              "type": "string",
-              "description": "报销金额（可选，不传则使用OCR识别的金额）"
+              "description": "备注说明（可选）"
             }
           },
-          "required": ["reimbursementId", "category"]
+          "required": ["reimbursementId"]
         }
         """)
       .build();
     return new McpStatelessServerFeatures.SyncToolSpecification(tool, (ctx, request) -> {
       long startTime = System.currentTimeMillis();
       try {
-        Long reimbursementId = Long.valueOf(String.valueOf(request.arguments().get("reimbursementId")));
-        String category = String.valueOf(request.arguments().get("category"));
-        String title = request.arguments().containsKey("title") ? String.valueOf(request.arguments().get("title")) : null;
-        String amountStr = request.arguments().containsKey("amount") ? String.valueOf(request.arguments().get("amount")) : null;
+        Long reimbursementId = Long.valueOf(String.valueOf(request.arguments().get("reimbursementId")).trim());
+        String memo = request.arguments().containsKey("memo") ? String.valueOf(request.arguments().get("memo")) : null;
 
-        log.info("[xiaoyi_mcp] confirm_reimbursement called: reimbursementId={}, category={}, title={}, amount={}",
-          reimbursementId, category, title, amountStr);
+        log.info("[xiaoyi_mcp] confirm_reimbursement called: reimbursementId={}, memo={}",
+          reimbursementId, memo);
 
         // 获取草稿报销单
         ReimbursementDTO draft = reimbursementService.findReimbursementById(reimbursementId);
@@ -443,21 +456,17 @@ public class ReimbursementMcpConfig {
           return new McpSchema.CallToolResult("该报销单不是草稿状态，无法提交", true);
         }
 
-        // 更新报销信息
-        if (title == null) title = draft.title();
-        BigDecimal amount;
-        if (amountStr != null) {
-          try {
-            amount = new BigDecimal(amountStr);
-          } catch (NumberFormatException e) {
-            amount = draft.amount();
-          }
-        } else {
-          amount = draft.amount();
-        }
+        // 使用草稿中的信息
+        String title = draft.title();
+        String category = draft.category();
+        BigDecimal amount = draft.amount();
 
-        // 更新报销单基本信息
-        reimbursementService.updateReimbursement(reimbursementId, title, category, amount, draft.description(), null);
+        // 更新报销单基本信息（带上 memo 备注）
+        String description = draft.description();
+        if (memo != null && !memo.isEmpty()) {
+          description = (description != null ? description + "\n" : "") + "[用户备注]: " + memo;
+        }
+        reimbursementService.updateReimbursement(reimbursementId, title, category, amount, description, null);
 
         // 确认最新的待确认临时发票，将 OCR 数据同步到正式报销单
         var invoiceTemps = reimbursementService.findInvoiceTempsByReimbursementId(reimbursementId);
@@ -649,6 +658,7 @@ public class ReimbursementMcpConfig {
       String responseBody = response.body();
 
       log.info("[耗时] OCR HTTP请求: {}ms, status={}, response_size={}", tHttp, response.statusCode(), responseBody.length());
+      log.info("OCR response body: {}", responseBody);
 
       if (response.statusCode() != 200) {
         throw new RuntimeException("OCR服务返回错误状态: " + response.statusCode() + ", body: " + responseBody);
