@@ -132,6 +132,7 @@ public class ReimbursementMcpConfig {
 
         long tStart = System.currentTimeMillis();
         log.info("Reimbursement MCP tool called: ocr_upload_reimbursement, filename={}, applicantName={}", filename, applicantName);
+        log.info(">>> [DEBUG] ocr_upload_reimbursement params: imageBase64={}, filename={}, applicantName={}", imageBase64, filename, applicantName);
 
         // 1. 获取图片字节：支持 Base64 编码或图片 URL
         long t1 = System.currentTimeMillis();

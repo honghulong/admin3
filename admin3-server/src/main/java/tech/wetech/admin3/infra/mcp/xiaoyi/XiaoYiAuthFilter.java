@@ -13,6 +13,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
+import tech.wetech.admin3.common.SessionItemHolder;
 import java.io.IOException;
 
 @Order(1)
@@ -61,6 +62,17 @@ public class XiaoYiAuthFilter implements Filter {
     }
 
     log.info("XiaoYi MCP auth success: {} {}, appId={}", request.getMethod(), path, appId);
-    filterChain.doFilter(request, response);
+
+    String agentLoginSessionId = request.getHeader("agentLoginSessionId");
+    if (agentLoginSessionId != null && !agentLoginSessionId.isBlank()) {
+      SessionItemHolder.setItem("XIAOYI_AGENT_LOGIN_SESSION_ID", agentLoginSessionId);
+      log.info("XiaoYi MCP agentLoginSessionId: {}", agentLoginSessionId);
+    }
+
+    try {
+      filterChain.doFilter(request, response);
+    } finally {
+      SessionItemHolder.clear();
+    }
   }
 }

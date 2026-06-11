@@ -84,6 +84,39 @@ public class XiaoYiAuthService {
     return session;
   }
 
+  /**
+   * ?? agentLoginSessionId ??????
+   * ??????????? MCP ???????????
+   */
+  public CheckBindingResult checkBindingStatus(String agentLoginSessionId) {
+    if (agentLoginSessionId == null || agentLoginSessionId.isBlank()) {
+      log.warn("XiaoYi checkBindingStatus: agentLoginSessionId is null or empty");
+      return CheckBindingResult.invalidSession("agentLoginSessionId 为空");
+    }
+
+    Optional<XiaoYiUserSession> sessionOpt = sessionRepository.findByAgentLoginSessionId(agentLoginSessionId);
+    if (sessionOpt.isEmpty()) {
+      log.warn("XiaoYi checkBindingStatus: session not found for agentLoginSessionId={}", agentLoginSessionId);
+      return CheckBindingResult.invalidSession("会话不存在，请重新授权");
+    }
+
+    XiaoYiUserSession session = sessionOpt.get();
+    if (session.isExpired()) {
+      log.warn("XiaoYi checkBindingStatus: session expired for agentLoginSessionId={}", agentLoginSessionId);
+      return CheckBindingResult.invalidSession("会话已过期，请重新授权");
+    }
+
+    User user = session.getUser();
+    if (user == null) {
+      log.warn("XiaoYi checkBindingStatus: session found but no user bound, agentLoginSessionId={}", agentLoginSessionId);
+      return CheckBindingResult.unbound("用户尚未绑定员工身份，请先使用 bind_employee 工具完成绑定");
+    }
+
+    log.info("XiaoYi checkBindingStatus: bound, agentLoginSessionId={}, username={}, xEmployeeId={}",
+      agentLoginSessionId, user.getUsername(), user.getXEmployeeId());
+    return CheckBindingResult.bound(user.getUsername(), user.getXEmployeeId());
+  }
+
   private String extractPhoneFromAuthCode(String authCode) {
     if (authCode == null || authCode.isBlank()) {
       return null;
@@ -112,6 +145,30 @@ public class XiaoYiAuthService {
 
     public static DeauthorizeResult failure(String errorMessage) {
       return new DeauthorizeResult(false, errorMessage);
+    }
+  }
+
+  /**
+   * 绑定状态检查结果
+   */
+  public record CheckBindingResult(String status, String username, String xEmployeeId, String message) {
+    /** 会话有效且已绑定内部员工 */
+    public static CheckBindingResult bound(String username, String xEmployeeId) {
+      return new CheckBindingResult("bound", username, xEmployeeId, null);
+    }
+
+    /** 会话有效但尚未绑定内部员工 */
+    public static CheckBindingResult unbound(String message) {
+      return new CheckBindingResult("unbound", null, null, message);
+    }
+
+    /** 会话无效（不存在或已过期） */
+    public static CheckBindingResult invalidSession(String message) {
+      return new CheckBindingResult("invalid", null, null, message);
+    }
+
+    public boolean isBound() {
+      return "bound".equals(status);
     }
   }
 }
