@@ -66,6 +66,7 @@ public class XiaoYiAuthFilter implements Filter {
     String agentLoginSessionId = request.getHeader("agentLoginSessionId");
     if (agentLoginSessionId != null && !agentLoginSessionId.isBlank()) {
       SessionItemHolder.setItem("XIAOYI_AGENT_LOGIN_SESSION_ID", agentLoginSessionId);
+      request.setAttribute("XIAOYI_AGENT_LOGIN_SESSION_ID", agentLoginSessionId);
       log.info("XiaoYi MCP agentLoginSessionId: {}", agentLoginSessionId);
     }
 
