@@ -1,19 +1,24 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-测试 XiaoYi MCP check_binding_status 工具
+测试 XiaoYi MCP binding 服务（check_binding_status + bind_employee）
 
 前置条件:
   1) python init_userbindtest_data.py    # 先插入测试数据
   2) .\start.ps1                 # 再启动服务
   3) python test_check_binding.py
 
-5 个测试场景:
+check_binding_status 测试场景（5 个）:
   bound    - 有效 session + 已绑定员工
   unbound  - 有效 session + 未绑定员工
   invalid  - sessionId 不存在
   expired  - session 已过期
   no_header - 不传 agentLoginSessionId header
+
+bind_employee 测试场景（3 个）:
+  正常绑定  - 用 unbound session 绑定有效员工ID
+  重复绑定  - 已绑定的 session 再次绑定
+  无效员工ID - 绑定不存在的员工ID
 """
 import sys
 import json
@@ -27,7 +32,7 @@ BASE_HOST = "localhost"
 BASE_PORT = 9099
 BASE_URL = f"{BASE_HOST}:{BASE_PORT}"
 CONTEXT_PATH = "/admin3"
-MCP_AUTH_PATH = f"{CONTEXT_PATH}/xiaoyi-mcp/auth/message"
+MCP_BINDING_PATH = f"{CONTEXT_PATH}/xiaoyi-mcp/binding/message"
 AUTH_HEADERS = {
     "Content-Type": "application/json",
     "Accept": "application/json, text/event-stream",
@@ -44,24 +49,25 @@ DB_CONFIG = {
 }
 
 
-def call_mcp(session_id):
-    """调用 check_binding_status MCP 工具"""
+def call_mcp(session_id, tool_name="check_binding_status", arguments=None):
+    """调用 MCP 工具（模拟小艺：sessionId 放 Header）"""
     headers = dict(AUTH_HEADERS)
-
-    args = {}
     if session_id:
-        args["agentLoginSessionId"] = session_id
+        headers["agentLoginSessionId"] = session_id
+
+    if arguments is None:
+        arguments = {}
 
     body = json.dumps({
         "jsonrpc": "2.0",
         "id": 1,
         "method": "tools/call",
-        "params": {"name": "check_binding_status", "arguments": args},
+        "params": {"name": tool_name, "arguments": arguments},
     })
 
     conn = http.client.HTTPConnection(BASE_URL, timeout=10)
     try:
-        conn.request("POST", MCP_AUTH_PATH, body, headers)
+        conn.request("POST", MCP_BINDING_PATH, body, headers)
         resp = conn.getresponse()
         raw_data = resp.read().decode("utf-8")
         return json.loads(raw_data), resp.status
@@ -83,13 +89,18 @@ def parse_result(data):
     return json.dumps(data, ensure_ascii=False), False
 
 
+def call_bind_employee(session_id, x_employee_id):
+    """调用 bind_employee MCP 工具"""
+    return call_mcp(session_id, "bind_employee", {"xEmployeeId": x_employee_id})
+
+
 def check_server():
     """检查 MCP 服务"""
     headers = dict(AUTH_HEADERS)
     body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}})
     conn = http.client.HTTPConnection(BASE_URL, timeout=5)
     try:
-        conn.request("POST", MCP_AUTH_PATH, body, headers)
+        conn.request("POST", MCP_BINDING_PATH, body, headers)
         resp = conn.getresponse()
         if resp.status != 200:
             return False, f"HTTP {resp.status}"
@@ -148,7 +159,7 @@ def main():
     print("  "+chr(0x255a)+chr(0x2550)*56+chr(0x255d))
 
     # Step 1: 检查服务
-    print(f"\n  [Step 1] 检查服务 http://{BASE_URL}{MCP_AUTH_PATH}")
+    print(f"\n  [Step 1] 检查服务 http://{BASE_URL}{MCP_BINDING_PATH}")
     ok, info = check_server()
     if not ok:
         print(f"  {chr(0x2717)} 服务不可用: {info}")
@@ -196,6 +207,116 @@ def main():
     run_test("场景 3: invalid sessionId 不存在",          "nonexistent_session_00001", "invalid")
     run_test("场景 4: expired session 已过期",             sid_map["expired"], "invalid")
     run_test("场景 5: no_header 不传 agentLoginSessionId", None,              "invalid")
+
+    # ============================================================
+    # Step 4: 测试 bind_employee
+    # ============================================================
+    print(f"\n")
+    print(f"  {'='*56}")
+    print(f"  bind_employee 测试")
+    print(f"  {'='*56}")
+
+    unbound_sid = sid_map["unbound"]
+
+    # 从数据库查一个有效的 xEmployeeId
+    emp_id = None
+    try:
+        cnx = mysql.connector.connect(**DB_CONFIG)
+        cursor = cnx.cursor()
+        cursor.execute("SELECT x_employee_id FROM sys_user WHERE x_employee_id IS NOT NULL LIMIT 1")
+        row = cursor.fetchone()
+        cursor.close()
+        cnx.close()
+        if row:
+            emp_id = row[0]
+    except Exception as e:
+        print(f"  [bind_employee] 查询员工ID失败: {e}")
+
+    # 场景 6: 正常绑定
+    print()
+    print(f"  {'='*56}")
+    print(f"  [场景 6: bind_employee 正常绑定]")
+    print(f"  {'='*56}")
+    if emp_id:
+        t0 = time.time()
+        data, http_code = call_bind_employee(unbound_sid, emp_id)
+        elapsed = time.time() - t0
+        text, is_ok = parse_result(data)
+        http_flag = chr(0x2713) if http_code == 200 else chr(0x2717)
+        print(f"  HTTP: {http_code} {http_flag}  |  耗时: {elapsed:.2f}s")
+        print(f"  Header: agentLoginSessionId={unbound_sid[:24]}...")
+        print(f"  参数: xEmployeeId={emp_id}")
+        print(f"  返回:")
+        for line in text.split("\\n"):
+            print(f"    {line}")
+        if "绑定成功" in text:
+            print(f"  {chr(0x2500)*4} 验证: {chr(0x2713)} 绑定成功")
+        else:
+            print(f"  {chr(0x2500)*4} 验证: {chr(0x26a0)} 绑定失败")
+    else:
+        print(f"  [跳过] 未找到有 xEmployeeId 的用户")
+
+    # 场景 7: 重复绑定（已绑定的 session 再次绑定）
+    print()
+    print(f"  {'='*56}")
+    print(f"  [场景 7: bind_employee 重复绑定]")
+    print(f"  {'='*56}")
+    if emp_id:
+        t0 = time.time()
+        data, http_code = call_bind_employee(unbound_sid, emp_id)
+        elapsed = time.time() - t0
+        text, is_ok = parse_result(data)
+        http_flag = chr(0x2713) if http_code == 200 else chr(0x2717)
+        print(f"  HTTP: {http_code} {http_flag}  |  耗时: {elapsed:.2f}s")
+        print(f"  Header: agentLoginSessionId={unbound_sid[:24]}...")
+        print(f"  参数: xEmployeeId={emp_id}")
+        print(f"  返回:")
+        for line in text.split("\\n"):
+            print(f"    {line}")
+        if "绑定成功" in text:
+            print(f"  {chr(0x2500)*4} 验证: {chr(0x2713)} 重复绑定成功（更新绑定关系）")
+        else:
+            print(f"  {chr(0x2500)*4} 验证: {chr(0x26a0)} 重复绑定结果异常")
+
+    # 场景 8: 无效员工ID
+    print()
+    print(f"  {'='*56}")
+    print(f"  [场景 8: bind_employee 无效员工ID]")
+    print(f"  {'='*56}")
+    t0 = time.time()
+    data, http_code = call_bind_employee(unbound_sid, "NONEXISTENT_EMP_999")
+    elapsed = time.time() - t0
+    text, is_ok = parse_result(data)
+    http_flag = chr(0x2713) if http_code == 200 else chr(0x2717)
+    print(f"  HTTP: {http_code} {http_flag}  |  耗时: {elapsed:.2f}s")
+    print(f"  Header: agentLoginSessionId={unbound_sid[:24]}...")
+    print(f"  参数: xEmployeeId=NONEXISTENT_EMP_999")
+    print(f"  返回:")
+    for line in text.split("\\n"):
+        print(f"    {line}")
+    if "员工ID不存在" in text:
+        print(f"  {chr(0x2500)*4} 验证: {chr(0x2713)} 正确拒绝无效员工ID")
+    else:
+        print(f"  {chr(0x2500)*4} 验证: {chr(0x26a0)} 未按预期拒绝")
+
+    # 验证绑定后 check_binding_status 返回 bound
+    print()
+    print(f"  {'='*56}")
+    print(f"  [验证] 绑定后 check_binding_status")
+    print(f"  {'='*56}")
+    t0 = time.time()
+    data, http_code = call_mcp(unbound_sid)
+    elapsed = time.time() - t0
+    text, is_ok = parse_result(data)
+    http_flag = chr(0x2713) if http_code == 200 else chr(0x2717)
+    print(f"  HTTP: {http_code} {http_flag}  |  耗时: {elapsed:.2f}s")
+    print(f"  返回:")
+    for line in text.split("\\n"):
+        print(f"    {line}")
+    if "bound" in text:
+        print(f"  {chr(0x2500)*4} 验证: {chr(0x2713)} 绑定后状态变为 bound")
+    else:
+        print(f"  {chr(0x2500)*4} 验证: {chr(0x26a0)} 状态未变为 bound")
 
     print(f"\n  {'='*56}")
     print(f"  所有测试完成")

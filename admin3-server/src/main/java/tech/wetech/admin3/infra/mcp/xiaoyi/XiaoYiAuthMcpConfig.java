@@ -9,7 +9,6 @@ import io.modelcontextprotocol.server.McpStatelessSyncServer;
 import io.modelcontextprotocol.server.transport.ServerTransportSecurityValidator;
 import io.modelcontextprotocol.server.transport.WebMvcStatelessServerTransport;
 import io.modelcontextprotocol.spec.McpSchema;
-import tech.wetech.admin3.common.SessionItemHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -55,60 +54,83 @@ public class XiaoYiAuthMcpConfig {
         .tools(true)
         .logging()
         .build())
-      .tools(createCheckBindingStatusTool(authService, jsonMapper))
+      .tools(
+        createAuthorizeTool(authService, jsonMapper),
+        createDeauthorizeTool(authService, jsonMapper))
       .build();
   }
 
-  private McpStatelessServerFeatures.SyncToolSpecification createCheckBindingStatusTool(
+  private McpStatelessServerFeatures.SyncToolSpecification createAuthorizeTool(
     XiaoYiAuthService authService, McpJsonMapper jsonMapper) {
     McpSchema.Tool tool = McpSchema.Tool.builder()
-      .name("check_binding_status")
-      .description("检查当前小艺会话的身份绑定状态。可选参数 agentLoginSessionId，不传则自动从请求头读取。返回 bound(已绑定)/unbound(未绑定)/invalid(无效)")
+      .name("authorize")
+      .description("用户授权登录。接收华为账号授权码 authCode，返回 agentLoginSessionId。小艺用户在智能体内点击账号授权后调用此工具。")
+      .inputSchema(jsonMapper, """
+        {
+          "type": "object",
+          "properties": {
+            "authCode": {
+              "type": "string",
+              "description": "华为账号授权码（必填），由小艺客户端在用户授权后提供"
+            }
+          },
+          "required": ["authCode"]
+        }
+        """)
+      .build();
+    return new McpStatelessServerFeatures.SyncToolSpecification(tool, (ctx, request) -> {
+      String authCode = request.arguments() != null ? String.valueOf(request.arguments().get("authCode")) : null;
+      log.info("XiaoYi MCP tool called: authorize, authCode={}", authCode);
+
+      XiaoYiAuthService.AuthorizeResult result = authService.authorize(authCode);
+
+      String responseText;
+      if (result.success()) {
+        responseText = String.format("授权成功\nagentLoginSessionId: %s", result.agentLoginSessionId());
+        log.info("authorize success: agentLoginSessionId={}", result.agentLoginSessionId());
+      } else {
+        responseText = "授权失败\n提示: " + result.errorMessage();
+        log.warn("authorize failed: {}", result.errorMessage());
+      }
+
+      return new McpSchema.CallToolResult(responseText, !result.success());
+    });
+  }
+
+  private McpStatelessServerFeatures.SyncToolSpecification createDeauthorizeTool(
+    XiaoYiAuthService authService, McpJsonMapper jsonMapper) {
+    McpSchema.Tool tool = McpSchema.Tool.builder()
+      .name("deauthorize")
+      .description("用户解授权。清除指定 agentLoginSessionId 的会话。小艺用户在智能体内点击解绑账号时调用此工具。")
       .inputSchema(jsonMapper, """
         {
           "type": "object",
           "properties": {
             "agentLoginSessionId": {
               "type": "string",
-              "description": "会话ID（可选，不传则自动从请求头读取）"
+              "description": "要清除的会话ID（必填）"
             }
-          }
+          },
+          "required": ["agentLoginSessionId"]
         }
         """)
       .build();
     return new McpStatelessServerFeatures.SyncToolSpecification(tool, (ctx, request) -> {
-      // 优先从工具参数读取，其次从请求头(ThreadLocal)读取
-      String sessionId = null;
-      if (request.arguments() != null && request.arguments().containsKey("agentLoginSessionId")) {
-        sessionId = String.valueOf(request.arguments().get("agentLoginSessionId"));
-      }
-      if (sessionId == null || sessionId.isBlank() || "null".equals(sessionId)) {
-        sessionId = (String) SessionItemHolder.getItem("XIAOYI_AGENT_LOGIN_SESSION_ID");
-      }
-      log.info("XiaoYi MCP tool called: check_binding_status, agentLoginSessionId={}", sessionId);
+      String agentLoginSessionId = request.arguments() != null ? String.valueOf(request.arguments().get("agentLoginSessionId")) : null;
+      log.info("XiaoYi MCP tool called: deauthorize, agentLoginSessionId={}", agentLoginSessionId);
 
-      XiaoYiAuthService.CheckBindingResult result = authService.checkBindingStatus(sessionId);
+      XiaoYiAuthService.DeauthorizeResult result = authService.deauthorize(agentLoginSessionId);
 
       String responseText;
-      switch (result.status()) {
-        case "bound":
-          responseText = String.format("绑定状态: bound\n用户名: %s\n员工ID: %s",
-            result.username(), result.xEmployeeId());
-          log.info("check_binding_status: bound, username={}, xEmployeeId={}",
-            result.username(), result.xEmployeeId());
-          break;
-        case "unbound":
-          responseText = "绑定状态: unbound\n提示: " + result.message();
-          log.warn("check_binding_status: unbound, agentLoginSessionId={}", sessionId);
-          break;
-        default:
-          responseText = "绑定状态: invalid\n提示: " + result.message();
-          log.warn("check_binding_status: invalid, agentLoginSessionId={}, reason={}",
-            sessionId, result.message());
-          break;
+      if (result.ok()) {
+        responseText = "解授权成功";
+        log.info("deauthorize success: agentLoginSessionId={}", agentLoginSessionId);
+      } else {
+        responseText = "解授权失败\n提示: " + result.errorMessage();
+        log.warn("deauthorize failed: {}", result.errorMessage());
       }
 
-      return new McpSchema.CallToolResult(responseText, !result.isBound());
+      return new McpSchema.CallToolResult(responseText, !result.ok());
     });
   }
 }
