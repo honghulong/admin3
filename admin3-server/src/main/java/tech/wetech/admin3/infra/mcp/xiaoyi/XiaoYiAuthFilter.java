@@ -13,8 +13,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
-import tech.wetech.admin3.common.SessionItemHolder;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.TreeMap;
 
 @Order(1)
 @Configuration
@@ -22,6 +23,9 @@ import java.io.IOException;
 public class XiaoYiAuthFilter implements Filter {
 
   private static final Logger log = LoggerFactory.getLogger(XiaoYiAuthFilter.class);
+
+  /** 请求属性名，存储从 x-request-id 提取的 sessionId */
+  public static final String ATTR_SESSION_ID = "XIAOYI_SESSION_ID_FROM_X_REQUEST_ID";
 
   private final XiaoYiAuthProperties authProperties;
 
@@ -41,6 +45,41 @@ public class XiaoYiAuthFilter implements Filter {
     }
 
     log.info("XiaoYi MCP request: {} {}", request.getMethod(), path);
+
+    // 记录所有请求头
+    Enumeration<String> headerNames = request.getHeaderNames();
+    TreeMap<String, String> sortedHeaders = new TreeMap<>();
+    while (headerNames != null && headerNames.hasMoreElements()) {
+      String name = headerNames.nextElement();
+      sortedHeaders.put(name, request.getHeader(name));
+    }
+    StringBuilder sb = new StringBuilder("XiaoYi MCP full headers: {");
+    sortedHeaders.forEach((k, v) -> sb.append(k).append('=').append(v).append(", "));
+    if (!sortedHeaders.isEmpty()) sb.setLength(sb.length() - 2);
+    sb.append('}');
+    log.info(sb.toString());
+
+    // 从 x-request-id 提取 sessionId（格式：sessionId&1-random-uuid）
+    String xRequestId = request.getHeader("x-request-id");
+    if (xRequestId != null && !xRequestId.isBlank()) {
+      int ampIndex = xRequestId.indexOf('&');
+      String sessionIdFromHeader = (ampIndex > 0) ? xRequestId.substring(0, ampIndex) : xRequestId;
+      if (!sessionIdFromHeader.isBlank()) {
+        request.setAttribute(ATTR_SESSION_ID, sessionIdFromHeader);
+        log.info("XiaoYi extracted sessionId from x-request-id: {}", sessionIdFromHeader);
+      }
+    }
+
+    // 重点关注小艺平台透传的用户上下文 header
+    String xUserId = request.getHeader("x-user-id");
+    String xDeviceId = request.getHeader("x-device-id");
+    String xSessionId = request.getHeader("x-session-id");
+    String xTimestamp = request.getHeader("x-timestamp");
+    String xSignature = request.getHeader("x-signature");
+    if (xUserId != null || xDeviceId != null || xSessionId != null) {
+      log.info("XiaoYi context - x-user-id={}, x-device-id={}, x-session-id={}, x-timestamp={}, x-signature={}",
+        xUserId, xDeviceId, xSessionId, xTimestamp, xSignature);
+    }
 
     String appId = request.getHeader("appId");
     String apiKey = request.getHeader("apiKey");
@@ -63,17 +102,6 @@ public class XiaoYiAuthFilter implements Filter {
 
     log.info("XiaoYi MCP auth success: {} {}, appId={}", request.getMethod(), path, appId);
 
-    String agentLoginSessionId = request.getHeader("agentLoginSessionId");
-    if (agentLoginSessionId != null && !agentLoginSessionId.isBlank()) {
-      SessionItemHolder.setItem("XIAOYI_AGENT_LOGIN_SESSION_ID", agentLoginSessionId);
-      request.setAttribute("XIAOYI_AGENT_LOGIN_SESSION_ID", agentLoginSessionId);
-      log.info("XiaoYi MCP agentLoginSessionId: {}", agentLoginSessionId);
-    }
-
-    try {
-      filterChain.doFilter(request, response);
-    } finally {
-      SessionItemHolder.clear();
-    }
+    filterChain.doFilter(request, response);
   }
 }

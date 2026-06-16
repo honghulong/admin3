@@ -26,14 +26,14 @@ public class XiaoYiBindingService {
   }
 
   /**
-   * 绑定员工：将 agentLoginSessionId 与 xEmployeeId 对应的 User 关联
+   * 绑定员工：将设备标识（sid/sessionId）与 xEmployeeId 对应的 User 关联
    */
   @Transactional
-  public BindEmployeeResult bindEmployee(String agentLoginSessionId, String xEmployeeId) {
-    log.info("XiaoYi bindEmployee: agentLoginSessionId={}, xEmployeeId={}", agentLoginSessionId, xEmployeeId);
+  public BindEmployeeResult bindEmployee(String sid, String sessionId, String xEmployeeId) {
+    log.info("XiaoYi bindEmployee: sid={}, sessionId={}, xEmployeeId={}", sid, sessionId, xEmployeeId);
 
-    if (agentLoginSessionId == null || agentLoginSessionId.isBlank()) {
-      return BindEmployeeResult.failure("agentLoginSessionId 为空");
+    if ((sid == null || sid.isBlank()) && (sessionId == null || sessionId.isBlank())) {
+      return BindEmployeeResult.failure("无法获取设备标识，请重试");
     }
     if (xEmployeeId == null || xEmployeeId.isBlank()) {
       return BindEmployeeResult.failure("员工ID不能为空");
@@ -46,30 +46,44 @@ public class XiaoYiBindingService {
       return BindEmployeeResult.failure("员工ID不存在，请检查输入的员工ID是否正确");
     }
 
-    // 2. 查找或创建 XiaoYiUserSession
-    Optional<XiaoYiUserSession> sessionOpt = sessionRepository.findByAgentLoginSessionId(agentLoginSessionId);
+    // 2. 确定设备标识（优先 sid）
+    String deviceKey = (sid != null && !sid.isBlank()) ? sid : sessionId;
+
+    // 3. 查找或创建 XiaoYiUserSession
+    Optional<XiaoYiUserSession> existingOpt = Optional.empty();
+    if (sid != null && !sid.isBlank()) {
+      existingOpt = sessionRepository.findBySid(sid);
+    }
+    if (existingOpt.isEmpty() && sessionId != null && !sessionId.isBlank()) {
+      existingOpt = sessionRepository.findBySessionId(sessionId);
+    }
+
     XiaoYiUserSession session;
-    if (sessionOpt.isPresent()) {
-      session = sessionOpt.get();
+    if (existingOpt.isPresent()) {
+      session = existingOpt.get();
       if (session.isExpired()) {
-        log.warn("XiaoYi bindEmployee: session expired, agentLoginSessionId={}", agentLoginSessionId);
-        return BindEmployeeResult.failure("会话已过期，请重新授权");
+        log.warn("XiaoYi bindEmployee: session expired, deviceKey={}", deviceKey);
+        return BindEmployeeResult.failure("会话已过期，请重新绑定");
       }
+      // 更新 sid/sessionId（以防之前只有其中一个）
+      if (sid != null && !sid.isBlank()) session.setSid(sid);
+      if (sessionId != null && !sessionId.isBlank()) session.setSessionId(sessionId);
     } else {
-      // 如果 session 不存在，创建一个新的（设置30天过期）
+      // 创建新 session
       session = new XiaoYiUserSession();
-      session.setAgentLoginSessionId(agentLoginSessionId);
+      session.setSid(sid);
+      session.setSessionId(sessionId);
       session.setCreatedTime(LocalDateTime.now());
       session.setExpireTime(LocalDateTime.now().plusDays(SESSION_EXPIRE_DAYS));
     }
 
-    // 3. 绑定员工
+    // 4. 绑定员工
     User user = userOpt.get();
     session.setUser(user);
     sessionRepository.save(session);
 
-    log.info("XiaoYi bindEmployee success: agentLoginSessionId={}, xEmployeeId={}, username={}",
-      agentLoginSessionId, xEmployeeId, user.getUsername());
+    log.info("XiaoYi bindEmployee success: deviceKey={}, sid={}, sessionId={}, xEmployeeId={}, username={}",
+      deviceKey, sid, sessionId, xEmployeeId, user.getUsername());
     return BindEmployeeResult.success(user.getUsername(), user.getXEmployeeId());
   }
 
