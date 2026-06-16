@@ -11,7 +11,16 @@ import java.time.LocalDateTime;
 @Entity
 public class XiaoYiUserSession extends BaseEntity {
 
-  @Column(nullable = false, unique = true)
+  // 小艺设备标识（deviceInfo.sid），设备唯一标识，有则优先使用
+  @Column(unique = true)
+  private String sid;
+
+  // 小艺会话ID（session.sessionId），每次会话不同
+  @Column
+  private String sessionId;
+
+  // 保留原 agentLoginSessionId 字段（华为授权后才有，目前未使用）
+  @Column
   private String agentLoginSessionId;
 
   @Column
@@ -39,6 +48,22 @@ public class XiaoYiUserSession extends BaseEntity {
     this.user = user;
     this.createdTime = LocalDateTime.now();
     this.expireTime = expireTime;
+  }
+
+  public String getSid() {
+    return sid;
+  }
+
+  public void setSid(String sid) {
+    this.sid = sid;
+  }
+
+  public String getSessionId() {
+    return sessionId;
+  }
+
+  public void setSessionId(String sessionId) {
+    this.sessionId = sessionId;
   }
 
   public String getAgentLoginSessionId() {

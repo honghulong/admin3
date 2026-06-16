@@ -436,3 +436,36 @@ CREATE TABLE IF NOT EXISTS invoice_temp (
 
 -- 重新启用外键约束检查
 set foreign_key_checks = 1;
+
+-- ============================================================
+-- XiaoYi MCP 设备标识迁移（v2：从 agentLoginSessionId 改为 sid/sessionId）
+-- 注意：如重复执行会报错，请先检查列是否存在或用 IF NOT EXISTS
+-- ============================================================
+
+-- 1. 新增 sid 列（设备唯一标识）
+ALTER TABLE xiao_yi_user_session
+    ADD COLUMN sid VARCHAR(255) NULL COMMENT '小艺设备标识(deviceInfo.sid)',
+    ADD UNIQUE INDEX idx_xiao_yi_user_session_sid (sid);
+
+-- 2. 新增 session_id 列（小艺会话ID）
+ALTER TABLE xiao_yi_user_session
+    ADD COLUMN session_id VARCHAR(255) NULL COMMENT '小艺会话ID(session.sessionId)',
+    ADD INDEX idx_xiao_yi_user_session_session_id (session_id);
+
+-- 3. 原 agentLoginSessionId 的唯一约束改为普通索引，并允许 NULL
+ALTER TABLE xiao_yi_user_session
+    DROP INDEX UK_nl85vwa792w9m15wjxvl64jk8;
+ALTER TABLE xiao_yi_user_session
+    MODIFY COLUMN agent_login_session_id VARCHAR(255) NULL COMMENT '华为授权sessionID（暂未使用）';
+
+-- 4. 旧数据填充：将现有 agentLoginSessionId 回填到 sid
+UPDATE xiao_yi_user_session SET sid = agent_login_session_id WHERE sid IS NULL;
+UPDATE xiao_yi_user_session SET session_id = agent_login_session_id WHERE session_id IS NULL;
+
+-- 5. XiaoYi 测试数据初始化
+DELETE FROM xiao_yi_user_session WHERE sid LIKE 'test_%';
+INSERT INTO xiao_yi_user_session (sid, session_id, agent_login_session_id, user_id, created_time, expire_time)
+VALUES
+    ('test_sid_bound_001',   'test_session_bound_001',   'test_bound_001',   1, NOW(), DATE_ADD(NOW(), INTERVAL 24 HOUR)),
+    ('test_sid_unbound_001', 'test_session_unbound_001', 'test_unbound_001', NULL, NOW(), DATE_ADD(NOW(), INTERVAL 24 HOUR)),
+    ('test_sid_expired_001', 'test_session_expired_001', 'test_expired_001', 1, NOW(), DATE_ADD(NOW(), INTERVAL -1 HOUR));

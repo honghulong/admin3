@@ -10,6 +10,10 @@ public interface XiaoYiUserSessionRepository extends JpaRepository<XiaoYiUserSes
 
   Optional<XiaoYiUserSession> findByAgentLoginSessionId(String agentLoginSessionId);
 
+  Optional<XiaoYiUserSession> findBySid(String sid);
+
+  Optional<XiaoYiUserSession> findBySessionId(String sessionId);
+
   Optional<XiaoYiUserSession> findByPhoneNumber(String phoneNumber);
 
   Optional<XiaoYiUserSession> findByHuaweiOpenId(String huaweiOpenId);
