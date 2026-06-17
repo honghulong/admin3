@@ -235,7 +235,7 @@ def main():
     run_test("场景 4: expired     sid 已过期",
              sid_map["expired"][0], sid_map["expired"][1], "invalid")
     run_test("场景 5: no_id       不传任何标识",
-             None, None, "invalid")
+             None, None, "unbound")
     # 场景 6: 模拟小艺不传 deviceInfo（只传 x-request-id header）
     # x-request-id 格式: sessionId&1-random-uuid
     fallback_session_id = sid_map["unbound"][1]
