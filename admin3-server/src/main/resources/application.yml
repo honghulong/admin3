@@ -17,9 +17,7 @@ spring:
   sql:
     init:
       encoding: utf8
-      data-locations: classpath:data.sql
-      mode: always
-      continue-on-error: true
+      mode: never
   data:
     web:
       pageable:
