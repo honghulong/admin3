@@ -34,6 +34,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     loginInterceptor.excludePathPatterns(
       "/storage/fetch/**",
       "/storage/download/**",
+      "/attachments/*/download",
       "/login",
       "/swagger-ui.html",
       "/swagger-ui/**",

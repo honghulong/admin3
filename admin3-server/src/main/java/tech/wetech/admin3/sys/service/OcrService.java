@@ -86,7 +86,9 @@ public class OcrService {
     } catch (Exception e) {
       log.error("OCR failed for attachment {}: {}", attachmentId, e.getMessage(), e);
       attachment.setOcrStatus("failed");
-      attachment.setOcrResult("{\"error\":\"" + e.getMessage().replace("\"", "'") + "\"}");
+      String errMsg = e.getMessage();
+      if (errMsg == null) errMsg = e.getClass().getSimpleName();
+      attachment.setOcrResult("{\"error\":\"" + errMsg.replace("\"", "'") + "\"}");
       attachmentRepository.save(attachment);
     }
   }

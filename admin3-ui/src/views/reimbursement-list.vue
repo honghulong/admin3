@@ -23,24 +23,38 @@
       </div>
       <el-table :data="tableData" border class="table" header-cell-class-name="table-header">
         <el-table-column prop="id" label="ID" width="55" align="center"></el-table-column>
-        <el-table-column prop="title" label="报销标题" min-width="150"></el-table-column>
-        <el-table-column prop="category" label="类别" width="80" align="center">
+        <el-table-column prop="title" label="报销标题" width="140">
+          <template #default="{ row }">
+            <span style="display: inline-block; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" :title="row.title">{{ row.title }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="category" label="类别" width="70" align="center">
           <template #default="{ row }">
             <span>{{ getCategoryLabel(row.category) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="amount" label="金额" width="120" align="right">
+        <el-table-column prop="invoiceNo" label="发票号码" width="130">
+          <template #default="{ row }">
+            <span>{{ row.invoiceNo || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="sellerName" label="销售方" width="130">
+          <template #default="{ row }">
+            <span style="display: inline-block; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" :title="row.sellerName">{{ row.sellerName || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="amount" label="金额" width="110" align="right">
           <template #default="{ row }">
             <span>¥{{ row.amount.toFixed(2) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="applicantName" label="申请人" width="100"></el-table-column>
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column prop="applicantName" label="申请人" width="90"></el-table-column>
+        <el-table-column prop="status" label="状态" width="80" align="center">
           <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)">{{ getStatusLabel(row.status) }}</el-tag>
+            <el-tag :type="getStatusType(row.status)" style="font-size: 12px;">{{ getStatusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createdAt" label="创建时间" width="160"></el-table-column>
+        <el-table-column prop="createdAt" label="创建时间" width="150"></el-table-column>
         <el-table-column label="操作" width="350" fixed="right">
           <template #default="scope">
             <el-button text :icon="View" @click="handleDetail(scope.row)" v-action:reimbursement:view>详情</el-button>
@@ -67,8 +81,10 @@
 
     <!-- 新建/编辑对话框 -->
     <el-dialog :title="isEdit ? '编辑报销' : '新建报销'" v-model="dialogVisible" width="60%">
-      <el-form label-width="110px">
-        <el-row :gutter="20">
+      <el-form label-width="110px" class="edit-form">
+        <div class="form-section">
+          <div class="form-section-title">报销信息</div>
+          <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="报销标题">
               <el-input v-model="form.title" placeholder="请输入报销标题"></el-input>
@@ -90,6 +106,12 @@
               <el-input v-model="form.amount" type="number" step="0.01" min="0.01" placeholder="请输入金额"></el-input>
             </el-form-item>
           </el-col>
+          </el-row>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">发票信息</div>
+          <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="发票号码">
               <el-input v-model="form.invoiceNo" placeholder="发票号码"></el-input>
@@ -145,18 +167,20 @@
               </el-select>
             </el-form-item>
           </el-col>
-        </el-row>
-        <el-form-item label="报销说明">
-          <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入报销说明"></el-input>
-        </el-form-item>
-        <el-form-item label="OCR原始数据">
-          <el-input :model-value="form.ocrRawJson" type="textarea" :rows="8" readonly placeholder="OCR识别完成后，完整JSON将显示在此处"></el-input>
-        </el-form-item>
-        <el-form-item label="OCR识别文本" v-if="form.ocrText">
-          <el-input :model-value="form.ocrText" type="textarea" :rows="6" readonly placeholder="OCR识别完成后，完整识别文本将显示在此处"></el-input>
-        </el-form-item>
-        <el-form-item label="上传凭证">
-          <div style="width: 100%">
+          </el-row>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">补充信息</div>
+          <el-form-item label="报销说明">
+            <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入报销说明"></el-input>
+          </el-form-item>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">上传凭证</div>
+          <el-form-item label="凭证文件">
+            <div class="upload-content">
             <!-- 文件列表 -->
             <div v-for="file in fileList" :key="file.id || file.uid" class="file-item">
               <div class="file-item-header">
@@ -174,7 +198,10 @@
                 <el-button text size="small" type="primary" @click="toggleOcrJson(file)" v-if="file.ocrResult">
                   {{ file.showOcrJson ? '收起' : '查看JSON' }}
                 </el-button>
-                <el-button text size="small" type="danger" @click="handleRemoveUploadedFile(file)">
+                <el-button text size="small" type="primary" @click="previewImage(file)">
+                  <el-icon><ZoomIn /></el-icon>
+                </el-button>
+                <el-button text size="small" type="danger" @click="handleDeleteAttachment(file)">
                   <el-icon><Delete /></el-icon>
                 </el-button>
               </div>
@@ -199,8 +226,9 @@
                 <el-button type="primary" :icon="Plus">选择文件</el-button>
               </template>
             </el-upload>
-          </div>
-        </el-form-item>
+            </div>
+          </el-form-item>
+        </div>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -211,69 +239,83 @@
     </el-dialog>
 
     <!-- 详情对话框 -->
-    <el-dialog title="报销详情" v-model="detailVisible" width="60%">
-      <div v-if="detailData">
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="ID">{{ detailData.id }}</el-descriptions-item>
-          <el-descriptions-item label="状态">
-            <el-tag :type="getStatusType(detailData.status)">{{ getStatusLabel(detailData.status) }}</el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="标题" :span="2">{{ detailData.title }}</el-descriptions-item>
-          <el-descriptions-item label="类别">{{ getCategoryLabel(detailData.category) }}</el-descriptions-item>
-          <el-descriptions-item label="金额">¥{{ detailData.amount.toFixed(2) }}</el-descriptions-item>
-          <el-descriptions-item label="申请人">{{ detailData.applicantName }}</el-descriptions-item>
-          <el-descriptions-item label="创建时间">{{ detailData.createdAt }}</el-descriptions-item>
-          <el-descriptions-item label="发票号码">{{ detailData.invoiceNo || '无' }}</el-descriptions-item>
-          <el-descriptions-item label="发票代码">{{ detailData.invoiceCode || '无' }}</el-descriptions-item>
-          <el-descriptions-item label="开票日期">{{ detailData.invoiceDate || '无' }}</el-descriptions-item>
-          <el-descriptions-item label="购买方名称">{{ detailData.buyerName || '无' }}</el-descriptions-item>
-          <el-descriptions-item label="销售方名称">{{ detailData.sellerName || '无' }}</el-descriptions-item>
-          <el-descriptions-item label="购买方税号">{{ detailData.buyerTaxId || '无' }}</el-descriptions-item>
-          <el-descriptions-item label="销售方税号">{{ detailData.sellerTaxId || '无' }}</el-descriptions-item>
-          <el-descriptions-item label="发票类型">{{ detailData.invoiceType || '无' }}</el-descriptions-item>
-          <el-descriptions-item label="发票状态">{{ detailData.invoiceStatus || '无' }}</el-descriptions-item>
-          <el-descriptions-item label="说明" :span="2">{{ detailData.description || '无' }}</el-descriptions-item>
-          <el-descriptions-item label="OCR原始数据" :span="2">
-            <div v-if="detailData.ocrRawJson" style="max-height: 200px; overflow-y: auto; background: #f5f7fa; padding: 8px; border-radius: 4px; font-size: 12px;">
-              <pre style="margin: 0; white-space: pre-wrap; word-break: break-all;">{{ formatOcrJson(detailData.ocrRawJson) }}</pre>
-            </div>
-            <span v-else style="color: #999">无</span>
-          </el-descriptions-item>
-          <el-descriptions-item label="OCR识别文本" :span="2" v-if="detailData.ocrText">
-            <div style="max-height: 200px; overflow-y: auto; background: #f5f7fa; padding: 8px; border-radius: 4px; font-size: 12px;">
-              <pre style="margin: 0; white-space: pre-wrap; word-break: break-all;">{{ detailData.ocrText }}</pre>
-            </div>
-          </el-descriptions-item>
-          <el-descriptions-item label="审批人" v-if="detailData.approverName">{{ detailData.approverName }}</el-descriptions-item>
-          <el-descriptions-item label="审批时间" v-if="detailData.approveTime">{{ detailData.approveTime }}</el-descriptions-item>
-          <el-descriptions-item label="审批意见" :span="2" v-if="detailData.approveComment">{{ detailData.approveComment }}</el-descriptions-item>
-        </el-descriptions>
-
-        <h4 style="margin-top: 20px">附件</h4>
-        <div v-if="detailData.attachments && detailData.attachments.length > 0">
-          <el-tag v-for="att in detailData.attachments" :key="att.id" style="margin: 5px" closable @close="handleDeleteAttachment(att)">
-            {{ att.fileName }}
-            <el-tag v-if="att.ocrStatus === 'pending'" size="small" type="info" style="margin-left: 4px">待识别</el-tag>
-            <el-tag v-else-if="att.ocrStatus === 'processing'" size="small" type="warning" style="margin-left: 4px">识别中</el-tag>
-            <el-tag v-else-if="att.ocrStatus === 'completed'" size="small" type="success" style="margin-left: 4px">已识别</el-tag>
-            <el-tag v-else-if="att.ocrStatus === 'failed'" size="small" type="danger" style="margin-left: 4px">识别失败</el-tag>
-          </el-tag>
+    <el-dialog title="报销详情" v-model="detailVisible" width="60%" class="detail-dialog">
+      <div v-if="detailData" class="detail-content">
+        <div class="detail-section">
+          <div class="detail-section-title">报销信息</div>
+          <el-form label-width="110px" class="detail-form">
+            <el-row :gutter="20">
+              <el-col :span="12"><el-form-item label="报销标题"><div class="detail-value">{{ detailData.title }}</div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="报销类别"><div class="detail-value">{{ getCategoryLabel(detailData.category) }}</div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="报销金额"><div class="detail-value detail-amount">¥{{ detailData.amount.toFixed(2) }}</div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="当前状态"><div class="detail-value"><el-tag :type="getStatusType(detailData.status)">{{ getStatusLabel(detailData.status) }}</el-tag></div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="申请人"><div class="detail-value">{{ detailData.applicantName }}</div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="创建时间"><div class="detail-value">{{ detailData.createdAt }}</div></el-form-item></el-col>
+            </el-row>
+          </el-form>
         </div>
-        <div v-else style="color: #999">暂无附件</div>
 
-        <h4 style="margin-top: 20px">审批日志</h4>
-        <el-timeline v-if="detailData.approvalLogs && detailData.approvalLogs.length > 0">
-          <el-timeline-item
-            v-for="log in detailData.approvalLogs"
-            :key="log.id"
-            :timestamp="log.createdAt"
-            :type="getLogType(log.action)">
-            <b>{{ log.operatorName }}</b>
-            {{ getLogActionLabel(log.action) }}
-            <span v-if="log.comment">：{{ log.comment }}</span>
-          </el-timeline-item>
-        </el-timeline>
-        <div v-else style="color: #999">暂无审批日志</div>
+        <div class="detail-section">
+          <div class="detail-section-title">发票信息</div>
+          <el-form label-width="110px" class="detail-form">
+            <el-row :gutter="20">
+              <el-col :span="12"><el-form-item label="发票号码"><div class="detail-value">{{ detailData.invoiceNo || '无' }}</div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="发票代码"><div class="detail-value">{{ detailData.invoiceCode || '无' }}</div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="开票日期"><div class="detail-value">{{ detailData.invoiceDate || '无' }}</div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="发票类型"><div class="detail-value">{{ detailData.invoiceType || '无' }}</div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="购买方名称"><div class="detail-value">{{ detailData.buyerName || '无' }}</div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="销售方名称"><div class="detail-value">{{ detailData.sellerName || '无' }}</div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="购买方税号"><div class="detail-value">{{ detailData.buyerTaxId || '无' }}</div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="销售方税号"><div class="detail-value">{{ detailData.sellerTaxId || '无' }}</div></el-form-item></el-col>
+              <el-col :span="12"><el-form-item label="发票状态"><div class="detail-value">{{ detailData.invoiceStatus || '无' }}</div></el-form-item></el-col>
+            </el-row>
+          </el-form>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">补充信息</div>
+          <el-form label-width="110px" class="detail-form">
+            <el-form-item label="报销说明"><div class="detail-value detail-value-multiline">{{ detailData.description || '无' }}</div></el-form-item>
+            <el-row :gutter="20" v-if="detailData.approverName || detailData.approveTime">
+              <el-col :span="12" v-if="detailData.approverName"><el-form-item label="审批人"><div class="detail-value">{{ detailData.approverName }}</div></el-form-item></el-col>
+              <el-col :span="12" v-if="detailData.approveTime"><el-form-item label="审批时间"><div class="detail-value">{{ detailData.approveTime }}</div></el-form-item></el-col>
+            </el-row>
+            <el-form-item label="审批意见" v-if="detailData.approveComment"><div class="detail-value detail-value-multiline">{{ detailData.approveComment }}</div></el-form-item>
+          </el-form>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">附件</div>
+          <div v-if="detailData.attachments && detailData.attachments.length > 0" class="detail-attachment-list">
+            <div v-for="att in detailData.attachments" :key="att.id" class="detail-attachment-item">
+              <span class="detail-attachment-name" :title="att.fileName">{{ att.fileName }}</span>
+              <el-tag v-if="att.ocrStatus === 'pending'" size="small" type="info">待识别</el-tag>
+              <el-tag v-else-if="att.ocrStatus === 'processing'" size="small" type="warning">识别中</el-tag>
+              <el-tag v-else-if="att.ocrStatus === 'completed'" size="small" type="success">已识别</el-tag>
+              <el-tag v-else-if="att.ocrStatus === 'failed'" size="small" type="danger">识别失败</el-tag>
+              <el-button text size="small" type="primary" @click="previewAttachment(att)">
+                <el-icon><ZoomIn /></el-icon>
+              </el-button>
+            </div>
+          </div>
+          <div v-else class="detail-empty">暂无附件</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">审批日志</div>
+          <el-timeline v-if="detailData.approvalLogs && detailData.approvalLogs.length > 0" class="detail-timeline">
+            <el-timeline-item
+              v-for="log in detailData.approvalLogs"
+              :key="log.id"
+              :timestamp="log.createdAt"
+              :type="getLogType(log.action)">
+              <b>{{ log.operatorName }}</b>
+              {{ getLogActionLabel(log.action) }}
+              <span v-if="log.comment">：{{ log.comment }}</span>
+            </el-timeline-item>
+          </el-timeline>
+          <div v-else class="detail-empty">暂无审批日志</div>
+        </div>
       </div>
       <template #footer>
         <span class="dialog-footer">
@@ -969,12 +1011,16 @@ function handlePictureCardPreview(file: any) {
   window.open(file.url, '_blank');
 }
 
-/** 从上传列表中移除（不删除后端文件） */
-function handleRemoveUploadedFile(file: any) {
-  fileList.value = fileList.value.filter(f => f.uid !== file.uid && f.id !== file.id);
-  if (file.id) {
-    uploadedAttachmentIds.value = uploadedAttachmentIds.value.filter(id => id !== file.id);
-  }
+/** 预览图片（编辑弹窗） */
+function previewImage(file: any) {
+  const url = file.url;
+  if (url) window.open(url, '_blank');
+}
+
+/** 预览图片（详情弹窗） */
+function previewAttachment(att: any) {
+  const url = '/admin3' + att.fileUrl;
+  if (att.fileUrl) window.open(url, '_blank');
 }
 
 async function handleDeleteAttachment(att: any) {
@@ -1065,6 +1111,97 @@ loadData();
   margin-top: 4px;
   font-size: 12px;
   color: #f56c6c;
+}
+.detail-content,
+.edit-form {
+  max-height: 65vh;
+  overflow-y: auto;
+  padding: 2px 6px 2px 0;
+}
+.detail-section,
+.form-section {
+  margin-bottom: 18px;
+  padding: 16px 18px 2px;
+  background: #fafafa;
+  border: 1px solid #ebeef5;
+  border-radius: 6px;
+}
+.detail-section:last-child,
+.form-section:last-child {
+  margin-bottom: 0;
+}
+.detail-section-title,
+.form-section-title {
+  margin-bottom: 16px;
+  padding-left: 9px;
+  border-left: 3px solid #409eff;
+  color: #303133;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 18px;
+}
+.edit-form :deep(.el-form-item) {
+  margin-bottom: 14px;
+}
+.upload-content {
+  width: 100%;
+}
+.detail-form :deep(.el-form-item) {
+  margin-bottom: 14px;
+}
+.detail-form :deep(.el-form-item__label) {
+  color: #606266;
+}
+.detail-value {
+  width: 100%;
+  min-height: 32px;
+  box-sizing: border-box;
+  padding: 5px 11px;
+  color: #303133;
+  line-height: 20px;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  word-break: break-word;
+}
+.detail-value-multiline {
+  min-height: 72px;
+  white-space: pre-wrap;
+}
+.detail-amount {
+  color: #f56c6c;
+  font-weight: 600;
+}
+.detail-attachment-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding-bottom: 16px;
+}
+.detail-attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 10px;
+  background: #fff;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+}
+.detail-attachment-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.detail-empty {
+  padding: 2px 0 16px;
+  color: #909399;
+  text-align: center;
+}
+.detail-timeline {
+  padding: 4px 0 0 8px;
 }
 .ocr-animation {
   display: inline-flex;

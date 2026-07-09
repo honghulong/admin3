@@ -113,10 +113,10 @@ public class AttachmentController {
     log.info("Deleting attachment: id={}, file={}, reimbursementId={}", id, attachment.getFileName(), attachment.getReimbursementId());
     // 删除物理文件
     try {
-      String storedName = attachment.getFileUrl().substring(
-        attachment.getFileUrl().lastIndexOf("/") + 1,
-        attachment.getFileUrl().lastIndexOf("/download")
-      );
+      String fileUrl = attachment.getFileUrl();
+      int downloadSuffixIndex = fileUrl.lastIndexOf("/download");
+      int fileNameStartIndex = fileUrl.lastIndexOf("/", downloadSuffixIndex - 1) + 1;
+      String storedName = fileUrl.substring(fileNameStartIndex, downloadSuffixIndex);
       Path filePath = uploadDir.resolve(storedName);
       Files.deleteIfExists(filePath);
       log.debug("Deleted physical file: {}", storedName);
