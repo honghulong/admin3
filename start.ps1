@@ -37,7 +37,7 @@ Write-Host "[INFO] Log file: $LogFile"
 Write-Host "[INFO] Press Ctrl+C to stop"
 Write-Host ""
 
-& $JavaExe -jar $JarFile --server.port=$Port -Dspring.datasource.url="jdbc:mysql://127.0.0.1:3306/admin3?characterEncoding=utf8" -Dspring.datasource.username=root -Dspring.datasource.password=123456 2>&1 | ForEach-Object { $_; $_ | Out-File -FilePath $LogFile -Encoding utf8 -Append }
+& $JavaExe -Dspring.datasource.url="jdbc:mysql://127.0.0.1:3306/admin3?characterEncoding=utf8" -Dspring.datasource.username=root -Dspring.datasource.password=123456 -jar $JarFile --server.port=$Port 2>&1 | ForEach-Object { $_; $_ | Out-File -FilePath $LogFile -Encoding utf8 -Append }
 
 Write-Host ""
 Write-Host "[INFO] Service stopped"

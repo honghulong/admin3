@@ -16,45 +16,54 @@ public class Reimbursement extends BaseEntity {
   @Column(nullable = false, precision = 10, scale = 2)
   private BigDecimal amount;
 
-  /** 发票号码（OCR识别） */
+  @Column(nullable = false)
+  private Integer invoiceCount = 0;
+
+  @Column(nullable = false, precision = 10, scale = 2)
+  private BigDecimal invoiceTotalAmount = BigDecimal.ZERO;
+
+  /** 鍙戠エ鍙风爜锛圤CR璇嗗埆锛?*/
   @Column(length = 50)
   private String invoiceNo;
 
-  /** 发票代码（OCR识别） */
+  /** 鍙戠エ浠ｇ爜锛圤CR璇嗗埆锛?*/
   @Column(length = 50)
   private String invoiceCode;
 
-  /** 开票日期（OCR识别） */
+  /** 寮€绁ㄦ棩鏈燂紙OCR璇嗗埆锛?*/
   private LocalDateTime invoiceDate;
 
-  /** 购买方名称（OCR识别） */
+  /** 璐拱鏂瑰悕绉帮紙OCR璇嗗埆锛?*/
   @Column(length = 200)
   private String buyerName;
 
-  /** 销售方名称（OCR识别） */
+  /** 閿€鍞柟鍚嶇О锛圤CR璇嗗埆锛?*/
   @Column(length = 200)
   private String sellerName;
 
-  /** 购买方税号（OCR识别） */
+  /** 璐拱鏂圭◣鍙凤紙OCR璇嗗埆锛?*/
   @Column(length = 50)
   private String buyerTaxId;
 
-  /** 销售方税号（OCR识别） */
+  /** 閿€鍞柟绋庡彿锛圤CR璇嗗埆锛?*/
   @Column(length = 50)
   private String sellerTaxId;
 
-  /** 发票类型（关联字典 reimbursement_invoice_type） */
+  /** 鍙戠エ绫诲瀷锛堝叧鑱斿瓧鍏?reimbursement_invoice_type锛?*/
   @Column(length = 50)
   private String invoiceType;
 
-  /** 发票状态（关联字典 reimbursement_invoice_status） */
+  /** 鍙戠エ鐘舵€侊紙鍏宠仈瀛楀吀 reimbursement_invoice_status锛?*/
   @Column(length = 50)
   private String invoiceStatus;
 
   @Column(columnDefinition = "TEXT")
   private String description;
 
-  /** OCR 原始返回 JSON（最后一次有效识别的完整结果） */
+  @Column(columnDefinition = "TEXT")
+  private String matterDescription;
+
+  /** OCR 鍘熷杩斿洖 JSON锛堟渶鍚庝竴娆℃湁鏁堣瘑鍒殑瀹屾暣缁撴灉锛?*/
   @Column(columnDefinition = "MEDIUMTEXT")
   private String ocrRawJson;
 
@@ -77,13 +86,13 @@ public class Reimbursement extends BaseEntity {
 
   private LocalDateTime approveTime;
 
-  /** 创建人ID（审计字段） */
+  /** 鍒涘缓浜篒D锛堝璁″瓧娈碉級 */
   private Long createdBy;
 
   @Column(nullable = false)
   private LocalDateTime createdAt;
 
-  /** 修改人ID（审计字段） */
+  /** 淇敼浜篒D锛堝璁″瓧娈碉級 */
   private Long updatedBy;
 
   @Column(nullable = false)
@@ -111,6 +120,22 @@ public class Reimbursement extends BaseEntity {
 
   public void setAmount(BigDecimal amount) {
     this.amount = amount;
+  }
+
+  public Integer getInvoiceCount() {
+    return invoiceCount;
+  }
+
+  public void setInvoiceCount(Integer invoiceCount) {
+    this.invoiceCount = invoiceCount;
+  }
+
+  public BigDecimal getInvoiceTotalAmount() {
+    return invoiceTotalAmount;
+  }
+
+  public void setInvoiceTotalAmount(BigDecimal invoiceTotalAmount) {
+    this.invoiceTotalAmount = invoiceTotalAmount;
   }
 
   public String getInvoiceNo() {
@@ -191,6 +216,14 @@ public class Reimbursement extends BaseEntity {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getMatterDescription() {
+    return matterDescription;
+  }
+
+  public void setMatterDescription(String matterDescription) {
+    this.matterDescription = matterDescription;
   }
 
   public String getOcrRawJson() {
@@ -289,3 +322,4 @@ public class Reimbursement extends BaseEntity {
     this.updatedAt = updatedAt;
   }
 }
+

@@ -6,8 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tech.wetech.admin3.sys.model.Attachment;
+import tech.wetech.admin3.sys.model.Invoice;
 import tech.wetech.admin3.sys.model.Reimbursement;
 import tech.wetech.admin3.sys.repository.AttachmentRepository;
+import tech.wetech.admin3.sys.repository.InvoiceRepository;
 import tech.wetech.admin3.sys.repository.ReimbursementRepository;
 
 import java.math.BigDecimal;
@@ -17,31 +19,29 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Base64;
+import java.util.List;
 import java.util.regex.Pattern;
 
-/**
- * OCR 识别服务，封装对本地 OCR MCP 服务的调用
- */
 @Service
 public class OcrService {
 
   private static final Logger log = LoggerFactory.getLogger(OcrService.class);
-
   private static final String OCR_SERVER_URL = "http://localhost:8765";
 
   private final AttachmentRepository attachmentRepository;
   private final ReimbursementRepository reimbursementRepository;
+  private final InvoiceRepository invoiceRepository;
   private final ObjectMapper objectMapper;
 
-  public OcrService(AttachmentRepository attachmentRepository, ReimbursementRepository reimbursementRepository, ObjectMapper objectMapper) {
+  public OcrService(AttachmentRepository attachmentRepository, ReimbursementRepository reimbursementRepository,
+                    InvoiceRepository invoiceRepository, ObjectMapper objectMapper) {
     this.attachmentRepository = attachmentRepository;
     this.reimbursementRepository = reimbursementRepository;
+    this.invoiceRepository = invoiceRepository;
     this.objectMapper = objectMapper;
   }
 
-  /**
-   * 对附件执行 OCR 识别（异步调用），更新附件状态和报销单字段
-   */
   public void recognizeAttachmentAsync(Long attachmentId, Path imagePath) {
     Thread.startVirtualThread(() -> {
       try {
@@ -52,9 +52,6 @@ public class OcrService {
     });
   }
 
-  /**
-   * 对附件执行 OCR 识别（同步调用），更新附件状态和报销单字段
-   */
   public void recognizeAttachment(Long attachmentId, Path imagePath) {
     Attachment attachment = attachmentRepository.findById(attachmentId).orElse(null);
     if (attachment == null) {
@@ -67,36 +64,27 @@ public class OcrService {
     attachmentRepository.save(attachment);
 
     try {
-      // 读取图片文件并转为 Base64
       byte[] imageBytes = Files.readAllBytes(imagePath);
-      String base64 = java.util.Base64.getEncoder().encodeToString(imageBytes);
-
-      // 调用 OCR 服务
+      String base64 = Base64.getEncoder().encodeToString(imageBytes);
       String ocrResultJson = callOcrService(base64, attachment.getFileName());
       log.info("OCR completed for attachment {}, result length: {}", attachmentId, ocrResultJson.length());
 
-      // 更新附件状态
       attachment.setOcrStatus("completed");
       attachment.setOcrResult(ocrResultJson);
       attachmentRepository.save(attachment);
-      log.info("Attachment {} OCR status updated to completed", attachmentId);
 
-      // 自动更新关联的报销单字段
-      updateReimbursementFromOcr(attachment.getReimbursementId(), ocrResultJson);
+      updateReimbursementFromOcr(attachment, ocrResultJson);
     } catch (Exception e) {
       log.error("OCR failed for attachment {}: {}", attachmentId, e.getMessage(), e);
       attachment.setOcrStatus("failed");
-      String errMsg = e.getMessage();
-      if (errMsg == null) errMsg = e.getClass().getSimpleName();
+      String errMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
       attachment.setOcrResult("{\"error\":\"" + errMsg.replace("\"", "'") + "\"}");
       attachmentRepository.save(attachment);
     }
   }
 
-  /**
-   * 从 OCR 结果中提取发票字段，自动更新报销单
-   */
-  private void updateReimbursementFromOcr(Long reimbursementId, String ocrResultJson) {
+  private void updateReimbursementFromOcr(Attachment attachment, String ocrResultJson) {
+    Long reimbursementId = attachment.getReimbursementId();
     if (reimbursementId == null) {
       log.debug("Attachment not linked to any reimbursement, skip auto-update");
       return;
@@ -108,26 +96,8 @@ public class OcrService {
     }
 
     try {
-      var root = objectMapper.readTree(ocrResultJson);
-      // 解析 MCP 响应格式：result.content[0].text
-      String innerText = null;
-      if (root.has("result") && root.get("result").has("content") && root.get("result").get("content").isArray()) {
-        var content = root.get("result").get("content").get(0);
-        if (content != null && content.has("text")) {
-          innerText = content.get("text").asText();
-        }
-      }
-      // 尝试解析内层 JSON
-      JsonNode data;
-      if (innerText != null) {
-        try {
-          data = objectMapper.readTree(innerText);
-        } catch (Exception e) {
-          data = root;
-        }
-      } else {
-        data = root;
-      }
+      JsonNode data = unwrapOcrData(objectMapper.readTree(ocrResultJson));
+      String ocrText = data.has("ocr_text") ? data.get("ocr_text").asText() : "";
 
       String invoiceNo = getJsonField(data, "invoice_no");
       String invoiceCode = getJsonField(data, "invoice_code");
@@ -138,126 +108,181 @@ public class OcrService {
       String buyerTaxId = getJsonField(data, "buyer_tax_id");
       String sellerTaxId = getJsonField(data, "seller_tax_id");
       String invoiceType = getJsonField(data, "invoice_type");
+      String invoiceStatus = getJsonField(data, "invoice_status");
+      String amountBeforeTax = getJsonField(data, "amount_before_tax");
+      String taxRate = getJsonField(data, "tax_rate");
+      String taxAmount = getJsonField(data, "tax_amount");
+      String payee = getJsonField(data, "payee");
+      String reviewer = getJsonField(data, "reviewer");
+      String issuer = getJsonField(data, "issuer");
+      String buyerAddressPhone = getJsonField(data, "buyer_address_phone");
+      String buyerBankInfo = getJsonField(data, "buyer_bank_info");
+      String sellerAddressPhone = getJsonField(data, "seller_address_phone");
+      String sellerBankInfo = getJsonField(data, "seller_bank_info");
+      String remarks = getJsonField(data, "remarks");
 
-      // 从 ocr_text 正则提取补充
-      String ocrText = data.has("ocr_text") ? data.get("ocr_text").asText() : "";
-      log.debug("OCR ocr_text length: {}, preview: {}", ocrText != null ? ocrText.length() : 0,
-        ocrText != null ? ocrText.substring(0, Math.min(200, ocrText.length())).replace("\n", "\\n") : "null");
-      if (ocrText != null && !ocrText.isEmpty()) {
-        if (isEmpty(invoiceNo)) invoiceNo = regexExtract(ocrText, "发票号码[：:\\s]*(\\d{8})");
-        if (isEmpty(invoiceCode)) invoiceCode = regexExtract(ocrText, "发票代码[：:\\s]*(\\d{12})");
+      if (!isEmpty(ocrText)) {
+        if (isEmpty(invoiceNo)) invoiceNo = regexExtract(ocrText, "发票号码[：:\\s]*(\\d{8,20})");
+        if (isEmpty(invoiceCode)) invoiceCode = regexExtract(ocrText, "发票代码[：:\\s]*(\\d{10,20})");
         if (isEmpty(date)) date = regexExtract(ocrText, "开票日期[：:\\s]*(\\d{4}年\\d{1,2}月\\d{1,2}日)");
-        if (isEmpty(buyerName)) {
-          int idx = ocrText.indexOf("购买方");
-          if (idx >= 0) {
-            String after = ocrText.substring(idx);
-            var m = Pattern.compile("称[：:\\s]*([^\\n]{2,50})").matcher(after);
-            if (m.find()) buyerName = m.group(1).trim();
-          }
-        }
-        if (isEmpty(sellerName)) {
-          int idx = ocrText.indexOf("销售方");
-          if (idx >= 0) {
-            String after = ocrText.substring(idx);
-            var m = Pattern.compile("称[：:\\s]*([^\\n]{2,50})").matcher(after);
-            if (m.find()) sellerName = m.group(1).trim();
-          }
-        }
-        if (isEmpty(buyerTaxId)) {
-          int idx = ocrText.indexOf("购买方");
-          if (idx >= 0) {
-            String after = ocrText.substring(idx);
-            var m = Pattern.compile("纳税人识别号[：:\\s]*([\\dA-Za-z]{15,20})").matcher(after);
-            if (m.find()) buyerTaxId = m.group(1).trim();
-          }
-        }
-        if (isEmpty(sellerTaxId)) {
-          int idx = ocrText.indexOf("销售方");
-          if (idx >= 0) {
-            String after = ocrText.substring(idx);
-            var m = Pattern.compile("纳税人识别号[：:\\s]*([\\dA-Za-z]{15,20})").matcher(after);
-            if (m.find()) sellerTaxId = m.group(1).trim();
-          }
-        }
-        if (isEmpty(invoiceType)) {
-          if (ocrText.contains("增值税专用发票")) invoiceType = "special";
-          else if (ocrText.contains("增值税普通发票")) invoiceType = "normal";
-          else if (ocrText.contains("电子发票")) invoiceType = "electronic";
-        }
-        if (isEmpty(totalAmount) || "0".equals(totalAmount)) {
-          log.debug("Attempting to extract total_amount from ocr_text via regex");
-          var m = Pattern.compile("[（(]小写[)）][：:\\s]*[¥￥]?(\\d+\\.?\\d*)").matcher(ocrText);
-          if (m.find()) {
-            totalAmount = m.group(1);
-            log.debug("Regex extracted total_amount: {}", totalAmount);
-          } else {
-            log.debug("Regex did not match total_amount in ocr_text");
-            // 尝试备选正则：匹配"合计"后面的金额
-            var m2 = Pattern.compile("合计[\\s\\S]{0,20}[¥￥]?(\\d+\\.\\d{2})").matcher(ocrText);
-            if (m2.find()) {
-              totalAmount = m2.group(1);
-              log.debug("Fallback regex extracted total_amount: {}", totalAmount);
-            }
-          }
+        if (isEmpty(totalAmount)) {
+          totalAmount = regexExtract(ocrText, "(?:价税合计|小写|合计)[\\s\\S]{0,20}[¥￥]?\\s*(\\d+(?:\\.\\d{1,2})?)");
         }
       }
 
-      // 更新报销单字段
-      boolean updated = false;
-      if (!isEmpty(invoiceNo)) { r.setInvoiceNo(invoiceNo); updated = true; }
-      if (!isEmpty(invoiceCode)) { r.setInvoiceCode(invoiceCode); updated = true; }
-      if (!isEmpty(buyerName)) { r.setBuyerName(buyerName); updated = true; }
-      if (!isEmpty(sellerName)) { r.setSellerName(sellerName); updated = true; }
-      if (!isEmpty(buyerTaxId)) { r.setBuyerTaxId(buyerTaxId); updated = true; }
-      if (!isEmpty(sellerTaxId)) { r.setSellerTaxId(sellerTaxId); updated = true; }
-      if (!isEmpty(invoiceType)) { r.setInvoiceType(invoiceType); updated = true; }
-      if (!isEmpty(totalAmount)) {
-        try { r.setAmount(new BigDecimal(totalAmount)); updated = true; } catch (NumberFormatException ignored) {}
-      }
-      if (!isEmpty(date)) {
-        try {
-          var formatter = DateTimeFormatter.ofPattern("yyyy年M月d日");
-          r.setInvoiceDate(LocalDate.parse(date, formatter).atStartOfDay());
-          updated = true;
-        } catch (DateTimeParseException ignored) {}
-      }
-
-      // 更新说明（补全所有匹配到的字段）
-      StringBuilder desc = new StringBuilder();
-      if (!isEmpty(invoiceNo)) desc.append("发票号码: ").append(invoiceNo).append("\n");
-      if (!isEmpty(invoiceCode)) desc.append("发票代码: ").append(invoiceCode).append("\n");
-      if (!isEmpty(date)) desc.append("开票日期: ").append(date).append("\n");
-      if (!isEmpty(buyerName)) desc.append("购买方: ").append(buyerName).append("\n");
-      if (!isEmpty(sellerName)) desc.append("销售方: ").append(sellerName).append("\n");
-      if (!isEmpty(buyerTaxId)) desc.append("购买方税号: ").append(buyerTaxId).append("\n");
-      if (!isEmpty(sellerTaxId)) desc.append("销售方税号: ").append(sellerTaxId).append("\n");
-      if (!isEmpty(invoiceType)) desc.append("发票类型: ").append(invoiceType).append("\n");
-      if (!isEmpty(totalAmount)) desc.append("金额: ¥").append(totalAmount).append("\n");
-      if (desc.length() > 0) {
-        r.setDescription(desc.toString().trim());
-        updated = true;
-      }
-
-      // 保存完整 OCR 原始 JSON 到报销单
-      r.setOcrRawJson(ocrResultJson);
-      updated = true;
-
-      if (updated) {
+      LocalDateTime invoiceDate = parseInvoiceDate(date);
+      boolean hasInvoiceData = hasInvoiceData(invoiceNo, invoiceCode, totalAmount, date, buyerName, sellerName,
+        buyerTaxId, sellerTaxId, invoiceType, amountBeforeTax, taxAmount);
+      Invoice invoice = invoiceRepository.findByAttachmentIdAndDeletedFalse(attachment.getId()).orElse(null);
+      if (!hasInvoiceData) {
+        if (invoice != null) {
+          invoice.setDeleted(true);
+          invoice.setDeletedAt(LocalDateTime.now());
+          invoice.setUpdatedBy(attachment.getUploadedBy());
+          invoice.setUpdatedAt(LocalDateTime.now());
+          invoiceRepository.save(invoice);
+        }
+        if (!isEmpty(ocrText)) r.setDescription(ocrText);
+        r.setOcrRawJson(ocrResultJson);
+        updateInvoiceSummary(r);
         r.setUpdatedAt(LocalDateTime.now());
         reimbursementRepository.save(r);
-        log.info("Reimbursement {} auto-updated from OCR result: invoiceNo={}, sellerName={}, amount={}",
-          reimbursementId, invoiceNo, sellerName, totalAmount);
+        log.info("OCR attachment {} has no invoice fields, skipped formal invoice creation", attachment.getId());
+        return;
       }
+      if (invoice == null) {
+        invoice = new Invoice();
+        invoice.setReimbursementId(reimbursementId);
+        invoice.setAttachmentId(attachment.getId());
+        invoice.setStatus("confirmed");
+        invoice.setDeleted(false);
+        invoice.setCreatedBy(attachment.getUploadedBy());
+        invoice.setCreatedAt(LocalDateTime.now());
+      }
+      invoice.setImagePath(attachment.getFileUrl());
+      invoice.setOcrRawJson(ocrResultJson);
+      invoice.setInvoiceNo(invoiceNo);
+      invoice.setInvoiceCode(invoiceCode);
+      invoice.setInvoiceDate(invoiceDate);
+      invoice.setBuyerName(buyerName);
+      invoice.setSellerName(sellerName);
+      invoice.setBuyerTaxId(buyerTaxId);
+      invoice.setSellerTaxId(sellerTaxId);
+      invoice.setTotalAmount(toBigDecimal(totalAmount));
+      invoice.setInvoiceType(invoiceType);
+      invoice.setInvoiceStatus(invoiceStatus);
+      invoice.setAmountBeforeTax(toBigDecimal(amountBeforeTax));
+      invoice.setTaxRate(taxRate);
+      invoice.setTaxAmount(toBigDecimal(taxAmount));
+      invoice.setPayee(payee);
+      invoice.setReviewer(reviewer);
+      invoice.setIssuer(issuer);
+      invoice.setBuyerAddressPhone(buyerAddressPhone);
+      invoice.setBuyerBankInfo(buyerBankInfo);
+      invoice.setSellerAddressPhone(sellerAddressPhone);
+      invoice.setSellerBankInfo(sellerBankInfo);
+      invoice.setRemarks(remarks);
+      invoice.setUpdatedBy(attachment.getUploadedBy());
+      invoice.setUpdatedAt(LocalDateTime.now());
+      invoiceRepository.save(invoice);
+
+      if (!isEmpty(invoiceNo) && isEmpty(r.getInvoiceNo())) r.setInvoiceNo(invoiceNo);
+      if (!isEmpty(invoiceCode) && isEmpty(r.getInvoiceCode())) r.setInvoiceCode(invoiceCode);
+      if (invoiceDate != null && r.getInvoiceDate() == null) r.setInvoiceDate(invoiceDate);
+      if (!isEmpty(buyerName) && isEmpty(r.getBuyerName())) r.setBuyerName(buyerName);
+      if (!isEmpty(sellerName) && isEmpty(r.getSellerName())) r.setSellerName(sellerName);
+      if (!isEmpty(buyerTaxId) && isEmpty(r.getBuyerTaxId())) r.setBuyerTaxId(buyerTaxId);
+      if (!isEmpty(sellerTaxId) && isEmpty(r.getSellerTaxId())) r.setSellerTaxId(sellerTaxId);
+      if (!isEmpty(invoiceType) && isEmpty(r.getInvoiceType())) r.setInvoiceType(invoiceType);
+      if (!isEmpty(invoiceStatus) && isEmpty(r.getInvoiceStatus())) r.setInvoiceStatus(invoiceStatus);
+      if (!isEmpty(ocrText)) r.setDescription(ocrText);
+      r.setOcrRawJson(ocrResultJson);
+      updateInvoiceSummary(r);
+      r.setUpdatedAt(LocalDateTime.now());
+      reimbursementRepository.save(r);
+
+      log.info("Reimbursement {} updated from OCR attachment {}, invoiceNo={}, amount={}",
+        reimbursementId, attachment.getId(), invoiceNo, totalAmount);
     } catch (Exception e) {
       log.error("Failed to auto-update reimbursement {} from OCR result: {}", reimbursementId, e.getMessage(), e);
     }
   }
 
+  private JsonNode unwrapOcrData(JsonNode root) {
+    JsonNode content = null;
+    if (root.has("result") && root.get("result").has("content")) {
+      content = root.get("result").get("content");
+    } else if (root.has("content")) {
+      content = root.get("content");
+    }
+    if (content != null && content.isArray() && !content.isEmpty() && content.get(0).has("text")) {
+      try {
+        return objectMapper.readTree(content.get(0).get("text").asText());
+      } catch (Exception ignored) {
+        return root;
+      }
+    }
+    return root;
+  }
+
   private String getJsonField(JsonNode node, String field) {
     if (node.has("invoice_fields") && node.get("invoice_fields").has(field)) {
-      return node.get("invoice_fields").get(field).asText();
+      JsonNode value = node.get("invoice_fields").get(field);
+      return value == null || value.isNull() ? "" : value.asText();
+    }
+    if (node.has(field)) {
+      JsonNode value = node.get(field);
+      return value == null || value.isNull() ? "" : value.asText();
     }
     return "";
+  }
+
+  private LocalDateTime parseInvoiceDate(String date) {
+    if (isEmpty(date)) return null;
+    List<DateTimeFormatter> formatters = List.of(
+      DateTimeFormatter.ofPattern("yyyy年M月d日"),
+      DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+      DateTimeFormatter.ofPattern("yyyy/MM/dd")
+    );
+    for (DateTimeFormatter formatter : formatters) {
+      try {
+        return LocalDate.parse(date, formatter).atStartOfDay();
+      } catch (DateTimeParseException ignored) {}
+    }
+    try {
+      return LocalDateTime.parse(date);
+    } catch (DateTimeParseException ignored) {
+      return null;
+    }
+  }
+
+  private BigDecimal toBigDecimal(String value) {
+    if (isEmpty(value)) return null;
+    String normalized = value.replace("¥", "").replace("￥", "").replace(",", "").trim();
+    try {
+      return new BigDecimal(normalized);
+    } catch (NumberFormatException ignored) {
+      return null;
+    }
+  }
+
+  private void updateInvoiceSummary(Reimbursement r) {
+    List<Invoice> invoices = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(r.getId());
+    BigDecimal total = invoices.stream()
+      .map(Invoice::getTotalAmount)
+      .filter(amount -> amount != null)
+      .reduce(BigDecimal.ZERO, BigDecimal::add);
+    r.setInvoiceCount(invoices.size());
+    r.setInvoiceTotalAmount(total);
+  }
+
+  private boolean hasInvoiceData(String... values) {
+    for (String value : values) {
+      if (!isEmpty(value) && !"0".equals(value.trim()) && !"0.00".equals(value.trim())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private String regexExtract(String text, String pattern) {
@@ -266,27 +291,20 @@ public class OcrService {
   }
 
   private boolean isEmpty(String s) {
-    return s == null || s.isEmpty();
+    return s == null || s.isBlank();
   }
 
-  /**
-   * 调用本地 OCR 服务的 HTTP REST 接口识别发票
-   * 通过 multipart/form-data 上传图片文件
-   */
   private String callOcrService(String imageBase64, String filename) throws Exception {
-    // 1. 将 Base64 图片数据保存到临时文件
-    byte[] imageBytes = java.util.Base64.getDecoder().decode(imageBase64);
+    byte[] imageBytes = Base64.getDecoder().decode(imageBase64);
     Path tempDir = java.nio.file.Paths.get(System.getProperty("java.io.tmpdir"), "reimbursement-ocr");
-    java.nio.file.Files.createDirectories(tempDir);
-    Path tempFile = tempDir.resolve(java.util.UUID.randomUUID().toString() + "_" + filename);
-    java.nio.file.Files.write(tempFile, imageBytes);
+    Files.createDirectories(tempDir);
+    Path tempFile = tempDir.resolve(java.util.UUID.randomUUID() + "_" + filename);
+    Files.write(tempFile, imageBytes);
     log.info("OCR temp file saved: {}", tempFile);
 
     try {
-      // 2. 构建 multipart/form-data 请求体
-      String boundary = "----" + java.util.UUID.randomUUID().toString();
+      String boundary = "----" + java.util.UUID.randomUUID();
       String lineSeparator = "\r\n";
-
       java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
       baos.write(("--" + boundary + lineSeparator).getBytes());
       baos.write(("Content-Disposition: form-data; name=\"file\"; filename=\"" + filename + "\"" + lineSeparator).getBytes());
@@ -296,7 +314,6 @@ public class OcrService {
       baos.write(lineSeparator.getBytes());
       baos.write(("--" + boundary + "--" + lineSeparator).getBytes());
 
-      // 3. 发送 HTTP POST 请求
       java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
       java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
         .uri(java.net.URI.create(OCR_SERVER_URL + "/ocr"))
@@ -305,19 +322,13 @@ public class OcrService {
         .build();
 
       java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
-      String responseBody = response.body();
-
-      log.info("OCR service response status: {}", response.statusCode());
-
       if (response.statusCode() != 200) {
-        throw new RuntimeException("OCR服务返回错误状态: " + response.statusCode() + ", body: " + responseBody);
+        throw new RuntimeException("OCR service returned status " + response.statusCode() + ", body: " + response.body());
       }
-
-      return responseBody;
+      return response.body();
     } finally {
-      // 4. 清理临时文件
       try {
-        java.nio.file.Files.deleteIfExists(tempFile);
+        Files.deleteIfExists(tempFile);
       } catch (java.io.IOException e) {
         log.warn("Failed to delete OCR temp file: {}", tempFile);
       }

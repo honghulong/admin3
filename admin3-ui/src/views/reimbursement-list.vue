@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div>
     <div class="container">
       <!-- DEBUG: reimbursement-list.vue 模板已渲染 -->
@@ -28,19 +28,24 @@
             <span style="display: inline-block; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" :title="row.title">{{ row.title }}</span>
           </template>
         </el-table-column>
+        <el-table-column prop="matterDescription" label="报销事项详细描述" min-width="180">
+          <template #default="{ row }">
+            <span style="display: inline-block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" :title="row.matterDescription">{{ row.matterDescription || '-' }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="category" label="类别" width="70" align="center">
           <template #default="{ row }">
             <span>{{ getCategoryLabel(row.category) }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="invoiceNo" label="发票号码" width="130">
+        <el-table-column prop="invoiceCount" label="发票数" width="80" align="center">
           <template #default="{ row }">
-            <span>{{ row.invoiceNo || '-' }}</span>
+            <span>{{ row.invoiceCount || 0 }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="sellerName" label="销售方" width="130">
+        <el-table-column prop="invoiceTotalAmount" label="发票合计" width="110" align="right">
           <template #default="{ row }">
-            <span style="display: inline-block; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" :title="row.sellerName">{{ row.sellerName || '-' }}</span>
+            <span>¥{{ formatMoney(row.invoiceTotalAmount) }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="amount" label="金额" width="110" align="right">
@@ -106,74 +111,67 @@
               <el-input v-model="form.amount" type="number" step="0.01" min="0.01" placeholder="请输入金额"></el-input>
             </el-form-item>
           </el-col>
-          </el-row>
-        </div>
-
-        <div class="form-section">
-          <div class="form-section-title">发票信息</div>
-          <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="发票号码">
-              <el-input v-model="form.invoiceNo" placeholder="发票号码"></el-input>
+          <el-col :span="24">
+            <el-form-item label="报销事项详细描述">
+              <el-input v-model="form.matterDescription" type="textarea" :rows="3" placeholder="请输入报销事项详细描述"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="发票代码">
-              <el-input v-model="form.invoiceCode" placeholder="发票代码"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="开票日期">
-              <el-date-picker v-model="form.invoiceDate" type="date" placeholder="选择日期" style="width: 100%" value-format="YYYY-MM-DDTHH:mm:ss"></el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="购买方名称">
-              <el-input v-model="form.buyerName" placeholder="购买方名称"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="销售方名称">
-              <el-input v-model="form.sellerName" placeholder="销售方名称"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="购买方税号">
-              <el-input v-model="form.buyerTaxId" placeholder="购买方税号"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="销售方税号">
-              <el-input v-model="form.sellerTaxId" placeholder="销售方税号"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="发票类型">
-              <el-select v-model="form.invoiceType" placeholder="发票类型" clearable style="width: 100%">
-                <el-option label="增值税专用发票" value="special"></el-option>
-                <el-option label="增值税普通发票" value="normal"></el-option>
-                <el-option label="电子发票" value="electronic"></el-option>
-                <el-option label="定额发票" value="fixed"></el-option>
-                <el-option label="机动车发票" value="vehicle"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="发票状态">
-              <el-select v-model="form.invoiceStatus" placeholder="发票状态" clearable style="width: 100%">
-                <el-option label="正常" value="normal"></el-option>
-                <el-option label="作废" value="voided"></el-option>
-                <el-option label="红冲" value="red"></el-option>
-              </el-select>
+            <el-form-item label="有效发票数">
+              <el-input v-model="form.invoiceCount" disabled placeholder="自动计算" style="color: #909399"></el-input>
             </el-form-item>
           </el-col>
           </el-row>
         </div>
 
         <div class="form-section">
-          <div class="form-section-title">补充信息</div>
-          <el-form-item label="报销说明">
-            <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入报销说明"></el-input>
+          <div class="form-section-title">发票列表</div>
+          <el-table v-if="invoiceList.length > 0" :data="invoiceList" border size="small" style="width: 100%">
+            <el-table-column type="expand">
+              <template #default="{ row }">
+                <div class="invoice-expand-detail">
+                  <el-row :gutter="16">
+                    <el-col :span="6"><span class="expand-label">购买方：</span>{{ row.buyerName }}</el-col>
+                    <el-col :span="6"><span class="expand-label">购买方税号：</span>{{ row.buyerTaxId }}</el-col>
+                    <el-col :span="6"><span class="expand-label">销售方：</span>{{ row.sellerName }}</el-col>
+                    <el-col :span="6"><span class="expand-label">销售方税号：</span>{{ row.sellerTaxId }}</el-col>
+                    <el-col :span="6"><span class="expand-label">金额(不含税)：</span>¥{{ row.amountBeforeTax }}</el-col>
+                    <el-col :span="6"><span class="expand-label">税率：</span>{{ row.taxRate }}</el-col>
+                    <el-col :span="6"><span class="expand-label">税额：</span>¥{{ row.taxAmount }}</el-col>
+                    <el-col :span="6"><span class="expand-label">发票类型：</span>{{ row.invoiceType }}</el-col>
+                    <el-col :span="6"><span class="expand-label">收款人：</span>{{ row.payee }}</el-col>
+                    <el-col :span="6"><span class="expand-label">复核人：</span>{{ row.reviewer }}</el-col>
+                    <el-col :span="6"><span class="expand-label">开票人：</span>{{ row.issuer }}</el-col>
+                    <el-col :span="12"><span class="expand-label">购买方地址/电话：</span>{{ row.buyerAddressPhone }}</el-col>
+                    <el-col :span="12"><span class="expand-label">购买方开户行/账号：</span>{{ row.buyerBankInfo }}</el-col>
+                    <el-col :span="12"><span class="expand-label">销售方地址/电话：</span>{{ row.sellerAddressPhone }}</el-col>
+                    <el-col :span="12"><span class="expand-label">销售方开户行/账号：</span>{{ row.sellerBankInfo }}</el-col>
+                    <el-col :span="24"><span class="expand-label">备注：</span>{{ row.remarks }}</el-col>
+                  </el-row>
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="invoiceNo" label="发票号码" width="120"></el-table-column>
+            <el-table-column prop="invoiceCode" label="发票代码" width="120"></el-table-column>
+            <el-table-column prop="invoiceDate" label="开票日期" width="140"></el-table-column>
+            <el-table-column prop="sellerName" label="销售方" width="150"></el-table-column>
+            <el-table-column prop="totalAmount" label="金额" width="100" align="right">
+              <template #default="{ row }">¥{{ formatMoney(row.totalAmount) }}</template>
+            </el-table-column>
+            <el-table-column label="操作" width="140">
+              <template #default="{ row, $index }">
+                <el-button text size="small" type="primary" @click="editInvoice(row)">编辑</el-button>
+                <el-button text size="small" type="danger" @click="removeInvoice($index)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <div v-if="invoiceList.length === 0" style="padding: 20px 0; color: #909399; text-align: center;">
+            暂无发票，请选择文件上传并识别
+          </div>
+        </div><div class="form-section">
+          <div class="form-section-title">当前识别结果信息</div>
+          <el-form-item label="凭证识别说明">
+            <el-input v-model="form.description" type="textarea" :rows="4" placeholder="选择文件上传识别后自动填入，也可手动调整"></el-input>
           </el-form-item>
         </div>
 
@@ -238,6 +236,52 @@
       </template>
     </el-dialog>
 
+    <!-- 发票编辑对话框 -->
+    <el-dialog title="编辑发票" v-model="invoiceEditVisible" width="45%">
+      <el-form label-width="110px">
+        <el-row :gutter="20">
+          <el-col :span="12"><el-form-item label="发票号码"><el-input v-model="invoiceEditForm.invoiceNo"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="发票代码"><el-input v-model="invoiceEditForm.invoiceCode"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="开票日期"><el-date-picker v-model="invoiceEditForm.invoiceDate" type="date" style="width:100%" value-format="YYYY-MM-DDTHH:mm:ss"></el-date-picker></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="价税合计"><el-input v-model="invoiceEditForm.totalAmount"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="金额(不含税)"><el-input v-model="invoiceEditForm.amountBeforeTax"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="税率"><el-input v-model="invoiceEditForm.taxRate"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="税额"><el-input v-model="invoiceEditForm.taxAmount"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="购买方名称"><el-input v-model="invoiceEditForm.buyerName"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="销售方名称"><el-input v-model="invoiceEditForm.sellerName"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="购买方税号"><el-input v-model="invoiceEditForm.buyerTaxId"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="销售方税号"><el-input v-model="invoiceEditForm.sellerTaxId"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="发票类型">
+            <el-select v-model="invoiceEditForm.invoiceType" style="width:100%">
+              <el-option label="增值税专用发票" value="special"></el-option>
+              <el-option label="增值税普通发票" value="normal"></el-option>
+              <el-option label="电子发票" value="electronic"></el-option>
+              <el-option label="定额发票" value="fixed"></el-option>
+              <el-option label="机动车发票" value="vehicle"></el-option>
+            </el-select>
+          </el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="发票状态">
+            <el-select v-model="invoiceEditForm.invoiceStatus" style="width:100%">
+              <el-option label="正常" value="normal"></el-option>
+              <el-option label="作废" value="voided"></el-option>
+              <el-option label="红冲" value="red"></el-option>
+            </el-select>
+          </el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="收款人"><el-input v-model="invoiceEditForm.payee"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="复核人"><el-input v-model="invoiceEditForm.reviewer"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="开票人"><el-input v-model="invoiceEditForm.issuer"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="购买方地址电话"><el-input v-model="invoiceEditForm.buyerAddressPhone"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="购买方开户行账号"><el-input v-model="invoiceEditForm.buyerBankInfo"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="销售方地址电话"><el-input v-model="invoiceEditForm.sellerAddressPhone"></el-input></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="销售方开户行账号"><el-input v-model="invoiceEditForm.sellerBankInfo"></el-input></el-form-item></el-col>
+          <el-col :span="24"><el-form-item label="备注"><el-input v-model="invoiceEditForm.remarks" type="textarea" :rows="2"></el-input></el-form-item></el-col>
+        </el-row>
+      </el-form>
+      <template #footer>
+        <span><el-button @click="invoiceEditVisible = false">取消</el-button><el-button type="primary" @click="saveInvoiceEdit">保存</el-button></span>
+      </template>
+    </el-dialog>
+
     <!-- 详情对话框 -->
     <el-dialog title="报销详情" v-model="detailVisible" width="60%" class="detail-dialog">
       <div v-if="detailData" class="detail-content">
@@ -249,6 +293,7 @@
               <el-col :span="12"><el-form-item label="报销类别"><div class="detail-value">{{ getCategoryLabel(detailData.category) }}</div></el-form-item></el-col>
               <el-col :span="12"><el-form-item label="报销金额"><div class="detail-value detail-amount">¥{{ detailData.amount.toFixed(2) }}</div></el-form-item></el-col>
               <el-col :span="12"><el-form-item label="当前状态"><div class="detail-value"><el-tag :type="getStatusType(detailData.status)">{{ getStatusLabel(detailData.status) }}</el-tag></div></el-form-item></el-col>
+              <el-col :span="24"><el-form-item label="报销事项详细描述"><div class="detail-value detail-value-multiline">{{ detailData.matterDescription || '无' }}</div></el-form-item></el-col>
               <el-col :span="12"><el-form-item label="申请人"><div class="detail-value">{{ detailData.applicantName }}</div></el-form-item></el-col>
               <el-col :span="12"><el-form-item label="创建时间"><div class="detail-value">{{ detailData.createdAt }}</div></el-form-item></el-col>
             </el-row>
@@ -256,26 +301,23 @@
         </div>
 
         <div class="detail-section">
-          <div class="detail-section-title">发票信息</div>
-          <el-form label-width="110px" class="detail-form">
-            <el-row :gutter="20">
-              <el-col :span="12"><el-form-item label="发票号码"><div class="detail-value">{{ detailData.invoiceNo || '无' }}</div></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="发票代码"><div class="detail-value">{{ detailData.invoiceCode || '无' }}</div></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="开票日期"><div class="detail-value">{{ detailData.invoiceDate || '无' }}</div></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="发票类型"><div class="detail-value">{{ detailData.invoiceType || '无' }}</div></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="购买方名称"><div class="detail-value">{{ detailData.buyerName || '无' }}</div></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="销售方名称"><div class="detail-value">{{ detailData.sellerName || '无' }}</div></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="购买方税号"><div class="detail-value">{{ detailData.buyerTaxId || '无' }}</div></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="销售方税号"><div class="detail-value">{{ detailData.sellerTaxId || '无' }}</div></el-form-item></el-col>
-              <el-col :span="12"><el-form-item label="发票状态"><div class="detail-value">{{ detailData.invoiceStatus || '无' }}</div></el-form-item></el-col>
-            </el-row>
-          </el-form>
+          <div class="detail-section-title">发票列表</div>
+          <el-table v-if="detailData.invoices && detailData.invoices.length > 0" :data="detailData.invoices" border size="small">
+            <el-table-column prop="invoiceNo" label="发票号码" width="130"></el-table-column>
+            <el-table-column prop="invoiceCode" label="发票代码" width="130"></el-table-column>
+            <el-table-column prop="invoiceDate" label="开票日期" width="160"></el-table-column>
+            <el-table-column prop="sellerName" label="销售方" min-width="160"></el-table-column>
+            <el-table-column prop="totalAmount" label="金额" width="110" align="right">
+              <template #default="{ row }">¥{{ formatMoney(row.totalAmount) }}</template>
+            </el-table-column>
+          </el-table>
+          <div v-else class="detail-empty">暂无发票</div>
         </div>
 
         <div class="detail-section">
-          <div class="detail-section-title">补充信息</div>
+          <div class="detail-section-title">当前识别结果信息</div>
           <el-form label-width="110px" class="detail-form">
-            <el-form-item label="报销说明"><div class="detail-value detail-value-multiline">{{ detailData.description || '无' }}</div></el-form-item>
+            <el-form-item label="凭证识别说明"><div class="detail-value detail-value-multiline">{{ detailData.description || '无' }}</div></el-form-item>
             <el-row :gutter="20" v-if="detailData.approverName || detailData.approveTime">
               <el-col :span="12" v-if="detailData.approverName"><el-form-item label="审批人"><div class="detail-value">{{ detailData.approverName }}</div></el-form-item></el-col>
               <el-col :span="12" v-if="detailData.approveTime"><el-form-item label="审批时间"><div class="detail-value">{{ detailData.approveTime }}</div></el-form-item></el-col>
@@ -365,6 +407,9 @@ interface TableItem {
   category: string;
   amount: number;
   description: string;
+  matterDescription?: string;
+  invoiceCount?: number;
+  invoiceTotalAmount?: number;
   status: string;
   applicantId: number;
   applicantName: string;
@@ -381,6 +426,20 @@ interface TableItem {
 interface DetailData extends TableItem {
   attachments: any[];
   approvalLogs: any[];
+  invoiceNo?: string;
+  invoiceCode?: string;
+  invoiceDate?: string;
+  buyerName?: string;
+  sellerName?: string;
+  buyerTaxId?: string;
+  sellerTaxId?: string;
+  invoiceType?: string;
+  invoiceStatus?: string;
+  invoiceCount?: number;
+  invoiceTotalAmount?: number;
+  ocrRawJson?: string;
+  invoices?: any[];
+  invoiceTemps?: any[];
 }
 
 const tableData = ref<TableItem[]>([]);
@@ -409,6 +468,7 @@ const form = reactive({
   category: '',
   amount: 0.01,
   description: '',
+  matterDescription: '',
   ocrRawJson: '',
   ocrText: '',
   invoiceNo: '',
@@ -419,7 +479,46 @@ const form = reactive({
   buyerTaxId: '',
   sellerTaxId: '',
   invoiceType: '',
-  invoiceStatus: ''
+  invoiceStatus: '',
+  invoiceCount: 0,
+  amountBeforeTax: '',
+  taxRate: '',
+  taxAmount: '',
+  payee: '',
+  reviewer: '',
+  issuer: '',
+  buyerAddressPhone: '',
+  buyerBankInfo: '',
+  sellerAddressPhone: '',
+  sellerBankInfo: '',
+  remarks: ''
+});
+
+const invoiceList = ref<any[]>([]);
+const invoiceEditVisible = ref(false);
+const editingInvoiceIndex = ref(-1);
+const invoiceEditForm = reactive({
+  invoiceNo: '',
+  invoiceCode: '',
+  invoiceDate: '',
+  invoiceType: '',
+  invoiceStatus: '',
+  totalAmount: '',
+  amountBeforeTax: '',
+  taxRate: '',
+  taxAmount: '',
+  buyerName: '',
+  sellerName: '',
+  buyerTaxId: '',
+  sellerTaxId: '',
+  payee: '',
+  reviewer: '',
+  issuer: '',
+  buyerAddressPhone: '',
+  buyerBankInfo: '',
+  sellerAddressPhone: '',
+  sellerBankInfo: '',
+  remarks: ''
 });
 
 const categoryMap: Record<string, string> = {
@@ -551,6 +650,7 @@ async function handleAdd() {
   form.category = '';
   form.amount = 0.01;
   form.description = '';
+  form.matterDescription = '';
   form.ocrRawJson = '';
   form.ocrText = '';
   form.invoiceNo = '';
@@ -562,6 +662,18 @@ async function handleAdd() {
   form.sellerTaxId = '';
   form.invoiceType = '';
   form.invoiceStatus = '';
+  form.amountBeforeTax = '';
+  form.taxRate = '';
+  form.taxAmount = '';
+  form.payee = '';
+  form.reviewer = '';
+  form.issuer = '';
+  form.buyerAddressPhone = '';
+  form.buyerBankInfo = '';
+  form.sellerAddressPhone = '';
+  form.sellerBankInfo = '';
+  form.remarks = '';
+  invoiceList.value = [];
   fileList.value = [];
   uploadedAttachmentIds.value = [];
   dialogVisible.value = true;
@@ -573,6 +685,7 @@ async function handleAdd() {
       category: 'other',
       amount: 0.01,
       description: '',
+      matterDescription: '',
       attachmentIds: []
     });
     editId.value = res.data.id;
@@ -592,6 +705,7 @@ async function handleEdit(row: TableItem) {
   form.category = data.category;
   form.amount = data.amount;
   form.description = data.description || '';
+  form.matterDescription = data.matterDescription || '';
   form.ocrRawJson = data.ocrRawJson || '';
   form.ocrText = data.ocrText || '';
   form.invoiceNo = data.invoiceNo || '';
@@ -603,12 +717,24 @@ async function handleEdit(row: TableItem) {
   form.sellerTaxId = data.sellerTaxId || '';
   form.invoiceType = data.invoiceType || '';
   form.invoiceStatus = data.invoiceStatus || '';
+  form.amountBeforeTax = data.amountBeforeTax || '';
+  form.taxRate = data.taxRate || '';
+  form.taxAmount = data.taxAmount || '';
+  form.payee = data.payee || '';
+  form.reviewer = data.reviewer || '';
+  form.issuer = data.issuer || '';
+  form.buyerAddressPhone = data.buyerAddressPhone || '';
+  form.buyerBankInfo = data.buyerBankInfo || '';
+  form.sellerAddressPhone = data.sellerAddressPhone || '';
+  form.sellerBankInfo = data.sellerBankInfo || '';
+  form.remarks = data.remarks || '';
   fileList.value = [];
   uploadedAttachmentIds.value = [];
   if (data.attachments) {
     fileList.value = data.attachments.map((a: any) => ({name: a.fileName, url: '/admin3' + a.fileUrl, id: a.id, size: a.fileSize, ocrStatus: a.ocrStatus, ocrResult: a.ocrResult || '', showOcrJson: false}));
     uploadedAttachmentIds.value = data.attachments.map((a: any) => a.id);
   }
+  invoiceList.value = data.invoices || [];
   dialogVisible.value = true;
 }
 
@@ -664,6 +790,10 @@ function startOcrPolling() {
       if (data.ocrRawJson) {
         form.ocrRawJson = data.ocrRawJson;
       }
+      if (data.description) {
+        form.description = data.description;
+      }
+      invoiceList.value = data.invoices || invoiceList.value;
       // 更新 fileList 中的 OCR 状态
       for (const att of attachments) {
         const item = fileList.value.find(f => f.id === att.id);
@@ -737,6 +867,7 @@ function handleOcrSuccess(att: any) {
       if (invoiceFields.buyer_tax_id) fields.buyerTaxId = invoiceFields.buyer_tax_id;
       if (invoiceFields.seller_tax_id) fields.sellerTaxId = invoiceFields.seller_tax_id;
       if (invoiceFields.invoice_type) fields.invoiceType = mapInvoiceType(invoiceFields.invoice_type);
+      if (invoiceFields.invoice_status) fields.invoiceStatus = invoiceFields.invoice_status;
     }
     // 从 ocr_text 正则提取补充
     if (ocrText) {
@@ -769,7 +900,6 @@ function handleOcrSuccess(att: any) {
     // 填充表单
     if (fields.invoiceNo) form.invoiceNo = fields.invoiceNo;
     if (fields.invoiceCode) form.invoiceCode = fields.invoiceCode;
-    if (fields.amount) form.amount = fields.amount;
     if (fields.invoiceDate) form.invoiceDate = fields.invoiceDate;
     if (fields.buyerName) form.buyerName = fields.buyerName;
     if (fields.sellerName) form.sellerName = fields.sellerName;
@@ -787,7 +917,9 @@ function handleOcrSuccess(att: any) {
     if (fields.sellerTaxId) descParts.push(`销售方税号: ${fields.sellerTaxId}`);
     if (fields.invoiceType) descParts.push(`发票类型: ${fields.invoiceType}`);
     if (fields.amount) descParts.push(`金额: ¥${fields.amount}`);
-    if (descParts.length > 0) {
+    if (ocrText) {
+      form.description = ocrText;
+    } else if (descParts.length > 0) {
       form.description = descParts.join('\n');
     }
     // 更新 OCR 原始 JSON（取最后一次有效识别的完整结果）
@@ -857,15 +989,8 @@ async function saveReimbursement() {
     category: form.category,
     amount: form.amount,
     description: form.description,
-    invoiceNo: form.invoiceNo || undefined,
-    invoiceCode: form.invoiceCode || undefined,
-    invoiceDate: form.invoiceDate || undefined,
-    buyerName: form.buyerName || undefined,
-    sellerName: form.sellerName || undefined,
-    buyerTaxId: form.buyerTaxId || undefined,
-    sellerTaxId: form.sellerTaxId || undefined,
-    invoiceType: form.invoiceType || undefined,
-    invoiceStatus: form.invoiceStatus || undefined,
+    matterDescription: form.matterDescription,
+    invoiceList: invoiceList.value,
     attachmentIds: uploadedAttachmentIds.value
   };
   try {
@@ -910,6 +1035,10 @@ async function pollOcrResults() {
     if (data.ocrRawJson) {
       form.ocrRawJson = data.ocrRawJson;
     }
+    if (data.description) {
+      form.description = data.description;
+    }
+    invoiceList.value = data.invoices || invoiceList.value;
     // 更新 fileList 中的 OCR 状态
     for (const att of attachments) {
       const item = fileList.value.find(f => f.id === att.id);
@@ -940,6 +1069,37 @@ async function pollOcrResults() {
   }
   ElMessage.warning('OCR 识别超时，请稍后查看详情');
 }
+function formatMoney(value: any): string {
+  const num = Number(value || 0);
+  return Number.isFinite(num) ? num.toFixed(2) : '0.00';
+}
+
+function addInvoice() {
+  editingInvoiceIndex.value = -1;
+  invoiceEditVisible.value = true;
+}
+
+function editInvoice(row: any) {
+  const idx = invoiceList.value.indexOf(row);
+  editingInvoiceIndex.value = idx;
+  Object.assign(invoiceEditForm, row);
+  invoiceEditVisible.value = true;
+}
+
+function saveInvoiceEdit() {
+  const invoice = {...invoiceEditForm};
+  if (editingInvoiceIndex.value >= 0) {
+    invoiceList.value[editingInvoiceIndex.value] = invoice;
+  } else {
+    invoiceList.value.push(invoice);
+  }
+  invoiceEditVisible.value = false;
+}
+
+function removeInvoice(index: number) {
+  invoiceList.value.splice(index, 1);
+}
+
 
 async function handleSubmit(row: TableItem) {
   try {
@@ -1049,6 +1209,17 @@ loadData();
 </script>
 
 <style scoped>
+.invoice-expand-detail {
+  padding: 8px 16px;
+  font-size: 13px;
+  line-height: 2.2;
+}
+.invoice-expand-detail .expand-label {
+  color: #606266;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
 .handle-box {
   margin-bottom: 20px;
 }
@@ -1219,3 +1390,4 @@ loadData();
   100% { content: ''; }
 }
 </style>
+

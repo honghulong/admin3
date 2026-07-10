@@ -46,6 +46,7 @@ export function createReimbursement(data: {
     category: string;
     amount: number;
     description?: string;
+    matterDescription?: string;
     invoiceNo?: string;
     invoiceCode?: string;
     invoiceDate?: string;
@@ -55,6 +56,17 @@ export function createReimbursement(data: {
     sellerTaxId?: string;
     invoiceType?: string;
     invoiceStatus?: string;
+    amountBeforeTax?: any;
+    taxRate?: string;
+    taxAmount?: any;
+    payee?: string;
+    reviewer?: string;
+    issuer?: string;
+    buyerAddressPhone?: string;
+    buyerBankInfo?: string;
+    sellerAddressPhone?: string;
+    sellerBankInfo?: string;
+    remarks?: string;
     attachmentIds?: number[];
 }) {
     return request({
@@ -69,6 +81,7 @@ export function updateReimbursement(id: number, data: {
     category: string;
     amount: number;
     description?: string;
+    matterDescription?: string;
     invoiceNo?: string;
     invoiceCode?: string;
     invoiceDate?: string;
@@ -78,6 +91,17 @@ export function updateReimbursement(id: number, data: {
     sellerTaxId?: string;
     invoiceType?: string;
     invoiceStatus?: string;
+    amountBeforeTax?: any;
+    taxRate?: string;
+    taxAmount?: any;
+    payee?: string;
+    reviewer?: string;
+    issuer?: string;
+    buyerAddressPhone?: string;
+    buyerBankInfo?: string;
+    sellerAddressPhone?: string;
+    sellerBankInfo?: string;
+    remarks?: string;
     attachmentIds?: number[];
 }) {
     return request({
@@ -90,6 +114,13 @@ export function updateReimbursement(id: number, data: {
 export function deleteReimbursement(id: number) {
     return request({
         url: `${BASE_URI}/reimbursements/${id}`,
+        method: 'delete'
+    });
+};
+
+export function deleteInvoice(reimbursementId: number, invoiceId: number) {
+    return request({
+        url: `${BASE_URI}/reimbursements/${reimbursementId}/invoices/${invoiceId}`,
         method: 'delete'
     });
 };

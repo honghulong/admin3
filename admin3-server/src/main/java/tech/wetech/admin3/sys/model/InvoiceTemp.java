@@ -60,6 +60,50 @@ public class InvoiceTemp extends BaseEntity {
   /** 发票状态（关联字典 reimbursement_invoice_status） */
   @Column(length = 50)
   private String invoiceStatus;
+  /** 金额（不含税） */
+  @Column(precision = 10, scale = 2)
+  private BigDecimal amountBeforeTax;
+
+  /** 税率 */
+  @Column(length = 20)
+  private String taxRate;
+
+  /** 税额 */
+  @Column(precision = 10, scale = 2)
+  private BigDecimal taxAmount;
+
+  /** 收款人 */
+  @Column(length = 100)
+  private String payee;
+
+  /** 复核人 */
+  @Column(length = 100)
+  private String reviewer;
+
+  /** 开票人 */
+  @Column(length = 100)
+  private String issuer;
+
+  /** 购买方地址、电话 */
+  @Column(length = 500)
+  private String buyerAddressPhone;
+
+  /** 购买方开户行及账号 */
+  @Column(length = 500)
+  private String buyerBankInfo;
+
+  /** 销售方地址、电话 */
+  @Column(length = 500)
+  private String sellerAddressPhone;
+
+  /** 销售方开户行及账号 */
+  @Column(length = 500)
+  private String sellerBankInfo;
+
+  /** 备注 */
+  @Column(columnDefinition = "TEXT")
+  private String remarks;
+
 
   /** 状态: pending=待确认, confirmed=已确认, discarded=已废弃 */
   @Column(nullable = false, length = 20)
@@ -180,6 +224,39 @@ public class InvoiceTemp extends BaseEntity {
   public void setInvoiceStatus(String invoiceStatus) {
     this.invoiceStatus = invoiceStatus;
   }
+  public BigDecimal getAmountBeforeTax() { return amountBeforeTax; }
+  public void setAmountBeforeTax(BigDecimal amountBeforeTax) { this.amountBeforeTax = amountBeforeTax; }
+
+  public String getTaxRate() { return taxRate; }
+  public void setTaxRate(String taxRate) { this.taxRate = taxRate; }
+
+  public BigDecimal getTaxAmount() { return taxAmount; }
+  public void setTaxAmount(BigDecimal taxAmount) { this.taxAmount = taxAmount; }
+
+  public String getPayee() { return payee; }
+  public void setPayee(String payee) { this.payee = payee; }
+
+  public String getReviewer() { return reviewer; }
+  public void setReviewer(String reviewer) { this.reviewer = reviewer; }
+
+  public String getIssuer() { return issuer; }
+  public void setIssuer(String issuer) { this.issuer = issuer; }
+
+  public String getBuyerAddressPhone() { return buyerAddressPhone; }
+  public void setBuyerAddressPhone(String buyerAddressPhone) { this.buyerAddressPhone = buyerAddressPhone; }
+
+  public String getBuyerBankInfo() { return buyerBankInfo; }
+  public void setBuyerBankInfo(String buyerBankInfo) { this.buyerBankInfo = buyerBankInfo; }
+
+  public String getSellerAddressPhone() { return sellerAddressPhone; }
+  public void setSellerAddressPhone(String sellerAddressPhone) { this.sellerAddressPhone = sellerAddressPhone; }
+
+  public String getSellerBankInfo() { return sellerBankInfo; }
+  public void setSellerBankInfo(String sellerBankInfo) { this.sellerBankInfo = sellerBankInfo; }
+
+  public String getRemarks() { return remarks; }
+  public void setRemarks(String remarks) { this.remarks = remarks; }
+
 
   public String getStatus() {
     return status;

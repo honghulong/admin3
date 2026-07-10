@@ -186,6 +186,7 @@ public class ReimbursementMcpConfig {
         String buyerTaxId = "";
         String sellerTaxId = "";
         String invoiceType = "";
+        String invoiceStatus = "";
 
         // 优先从 invoice_fields 取
         var invoiceFields = ocrResult.get("invoice_fields");
@@ -199,6 +200,7 @@ public class ReimbursementMcpConfig {
           if (invoiceFields.has("buyer_tax_id")) buyerTaxId = invoiceFields.get("buyer_tax_id").asText();
           if (invoiceFields.has("seller_tax_id")) sellerTaxId = invoiceFields.get("seller_tax_id").asText();
           if (invoiceFields.has("invoice_type")) invoiceType = invoiceFields.get("invoice_type").asText();
+          if (invoiceFields.has("invoice_status")) invoiceStatus = invoiceFields.get("invoice_status").asText();
         }
 
         // 如果 KIE 没提取到，从 ocr_text 中正则提取
@@ -255,6 +257,11 @@ public class ReimbursementMcpConfig {
           else if (ocrText.contains("定额发票")) invoiceType = "fixed";
           else if (ocrText.contains("机动车")) invoiceType = "vehicle";
         }
+        if (invoiceStatus.isEmpty()) {
+          if (ocrText.contains("作废")) invoiceStatus = "voided";
+          else if (ocrText.contains("红冲") || ocrText.contains("红字")) invoiceStatus = "red";
+          else if (ocrText.contains("正常")) invoiceStatus = "normal";
+        }
         if ("0".equals(totalAmount) && ocrText.contains("小写")) {
           var m = java.util.regex.Pattern.compile("[（(]小写[)）][：:\\s]*[¥￥]?(\\d+\\.?\\d*)").matcher(ocrText);
           if (m.find()) totalAmount = m.group(1);
@@ -296,7 +303,7 @@ public class ReimbursementMcpConfig {
         // 同时传入 OCR 识别的发票字段，确保报销单正式字段有数据
         long t4 = System.currentTimeMillis();
         ReimbursementDTO draft = reimbursementService.createReimbursement(
-          title, "other", amount, description, null, 0L, applicantName,
+          title, "other", amount, description, null, null, 0L, applicantName,
           invoiceNo.isEmpty() ? null : invoiceNo,
           invoiceCode.isEmpty() ? null : invoiceCode,
           invoiceDate,
@@ -358,7 +365,7 @@ public class ReimbursementMcpConfig {
           sellerTaxId.isEmpty() ? null : sellerTaxId,
           amount,
           invoiceType.isEmpty() ? null : invoiceType,
-          "normal",
+          invoiceStatus.isEmpty() ? null : invoiceStatus,
           0L
         );
         log.info("[耗时] 创建临时发票记录: {}ms, invoice_temp_id={}", System.currentTimeMillis() - t6, invoiceTemp.getId());

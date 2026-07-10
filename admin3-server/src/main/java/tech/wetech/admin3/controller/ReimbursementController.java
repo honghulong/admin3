@@ -71,7 +71,7 @@ public class ReimbursementController {
   public ResponseEntity<ReimbursementDTO> createReimbursement(@RequestBody @Valid CreateReimbursementRequest request) {
     return new ResponseEntity<>(
       reimbursementService.createReimbursement(request.title(), request.category(), request.amount(), request.description(),
-        request.invoiceNo(), request.invoiceCode(), request.invoiceDate(), request.buyerName(), request.sellerName(),
+        request.matterDescription(), request.invoiceNo(), request.invoiceCode(), request.invoiceDate(), request.buyerName(), request.sellerName(),
         request.buyerTaxId(), request.sellerTaxId(), request.invoiceType(), request.invoiceStatus(), request.attachmentIds()),
       HttpStatus.CREATED);
   }
@@ -81,7 +81,7 @@ public class ReimbursementController {
   public ResponseEntity<ReimbursementDTO> updateReimbursement(@PathVariable Long id, @RequestBody @Valid CreateReimbursementRequest request) {
     return ResponseEntity.ok(
       reimbursementService.updateReimbursement(id, request.title(), request.category(), request.amount(), request.description(),
-        request.invoiceNo(), request.invoiceCode(), request.invoiceDate(), request.buyerName(), request.sellerName(),
+        request.matterDescription(), request.invoiceNo(), request.invoiceCode(), request.invoiceDate(), request.buyerName(), request.sellerName(),
         request.buyerTaxId(), request.sellerTaxId(), request.invoiceType(), request.invoiceStatus(), request.attachmentIds()));
   }
 
@@ -121,6 +121,7 @@ public class ReimbursementController {
     @NotBlank String category,
     @NotNull BigDecimal amount,
     String description,
+    String matterDescription,
     String invoiceNo,
     String invoiceCode,
     String invoiceDate,

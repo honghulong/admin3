@@ -9,10 +9,12 @@ import tech.wetech.admin3.common.CommonResultStatus;
 import tech.wetech.admin3.common.SessionItemHolder;
 import tech.wetech.admin3.sys.model.Attachment;
 import tech.wetech.admin3.sys.model.ApprovalLog;
+import tech.wetech.admin3.sys.model.Invoice;
 import tech.wetech.admin3.sys.model.InvoiceTemp;
 import tech.wetech.admin3.sys.model.Reimbursement;
 import tech.wetech.admin3.sys.repository.AttachmentRepository;
 import tech.wetech.admin3.sys.repository.ApprovalLogRepository;
+import tech.wetech.admin3.sys.repository.InvoiceRepository;
 import tech.wetech.admin3.sys.repository.InvoiceTempRepository;
 import tech.wetech.admin3.sys.repository.ReimbursementRepository;
 import tech.wetech.admin3.sys.service.dto.PageDTO;
@@ -34,15 +36,18 @@ public class ReimbursementService {
   private final ReimbursementRepository reimbursementRepository;
   private final AttachmentRepository attachmentRepository;
   private final ApprovalLogRepository approvalLogRepository;
+  private final InvoiceRepository invoiceRepository;
   private final InvoiceTempRepository invoiceTempRepository;
 
   public ReimbursementService(ReimbursementRepository reimbursementRepository,
                               AttachmentRepository attachmentRepository,
                               ApprovalLogRepository approvalLogRepository,
+                              InvoiceRepository invoiceRepository,
                               InvoiceTempRepository invoiceTempRepository) {
     this.reimbursementRepository = reimbursementRepository;
     this.attachmentRepository = attachmentRepository;
     this.approvalLogRepository = approvalLogRepository;
+    this.invoiceRepository = invoiceRepository;
     this.invoiceTempRepository = invoiceTempRepository;
   }
 
@@ -85,20 +90,22 @@ public class ReimbursementService {
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
     List<Attachment> attachments = attachmentRepository.findByReimbursementIdOrderByCreatedAtAsc(id);
     List<ApprovalLog> logs = approvalLogRepository.findByReimbursementIdOrderByCreatedAtAsc(id);
+    List<Invoice> invoices = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(id);
     List<InvoiceTemp> invoiceTemps = invoiceTempRepository.findByReimbursementIdOrderByCreatedAtDesc(id);
-    return ReimbursementDTO.of(r, attachments, logs, invoiceTemps);
+    return ReimbursementDTO.of(r, attachments, logs, invoices, invoiceTemps);
   }
 
   public ReimbursementDTO createReimbursement(String title, String category, BigDecimal amount,
                                               String description, List<Long> attachmentIds) {
     UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
-    return createReimbursement(title, category, amount, description, attachmentIds,
+    return createReimbursement(title, category, amount, description, null, attachmentIds,
       userInfo.userId(), userInfo.username(), null, null, null,
       null, null, null, null, null, null, null);
   }
 
   public ReimbursementDTO createReimbursement(String title, String category, BigDecimal amount,
                                               String description,
+                                              String matterDescription,
                                               String invoiceNo, String invoiceCode, String invoiceDate,
                                               String buyerName, String sellerName,
                                               String buyerTaxId, String sellerTaxId,
@@ -106,7 +113,7 @@ public class ReimbursementService {
                                               List<Long> attachmentIds) {
     UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
     LocalDateTime date = invoiceDate != null ? LocalDateTime.parse(invoiceDate) : null;
-    return createReimbursement(title, category, amount, description, attachmentIds,
+    return createReimbursement(title, category, amount, description, matterDescription, attachmentIds,
       userInfo.userId(), userInfo.username(), invoiceNo, invoiceCode, date,
       buyerName, sellerName, buyerTaxId, sellerTaxId, invoiceType, invoiceStatus,
       null);
@@ -116,7 +123,7 @@ public class ReimbursementService {
    * 创建报销单（支持 MCP 无 Session 场景，直接传入用户信息）
    */
   public ReimbursementDTO createReimbursement(String title, String category, BigDecimal amount,
-                                              String description, List<Long> attachmentIds,
+                                              String description, String matterDescription, List<Long> attachmentIds,
                                               Long applicantId, String applicantName,
                                               String invoiceNo, String invoiceCode,
                                               LocalDateTime invoiceDate, String buyerName,
@@ -140,6 +147,7 @@ public class ReimbursementService {
     r.setInvoiceType(invoiceType);
     r.setInvoiceStatus(invoiceStatus);
     r.setDescription(description);
+    r.setMatterDescription(matterDescription);
     r.setOcrRawJson(ocrRawJson);
     r.setStatus("draft");
     r.setApplicantId(applicantId);
@@ -166,12 +174,13 @@ public class ReimbursementService {
 
   public ReimbursementDTO updateReimbursement(Long id, String title, String category, BigDecimal amount,
                                               String description, List<Long> attachmentIds) {
-    return updateReimbursement(id, title, category, amount, description,
+    return updateReimbursement(id, title, category, amount, description, null,
       null, null, null, null, null, null, null, null, null, attachmentIds);
   }
 
   public ReimbursementDTO updateReimbursement(Long id, String title, String category, BigDecimal amount,
                                               String description,
+                                              String matterDescription,
                                               String invoiceNo, String invoiceCode, String invoiceDate,
                                               String buyerName, String sellerName,
                                               String buyerTaxId, String sellerTaxId,
@@ -186,6 +195,7 @@ public class ReimbursementService {
     r.setCategory(category);
     r.setAmount(amount);
     r.setDescription(description);
+    r.setMatterDescription(matterDescription);
     if (invoiceNo != null) r.setInvoiceNo(invoiceNo);
     if (invoiceCode != null) r.setInvoiceCode(invoiceCode);
     if (invoiceDate != null) r.setInvoiceDate(LocalDateTime.parse(invoiceDate));
