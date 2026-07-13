@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import tech.wetech.admin3.sys.model.Attachment;
 import tech.wetech.admin3.sys.model.Invoice;
 import tech.wetech.admin3.sys.model.Reimbursement;
+import tech.wetech.admin3.sys.model.ReimbursementExpenseItem;
 import tech.wetech.admin3.sys.repository.AttachmentRepository;
 import tech.wetech.admin3.sys.repository.InvoiceRepository;
 import tech.wetech.admin3.sys.repository.ReimbursementRepository;
+import tech.wetech.admin3.sys.repository.ReimbursementExpenseItemRepository;
 
 import java.math.BigDecimal;
 import java.nio.file.Files;
@@ -32,13 +34,16 @@ public class OcrService {
   private final AttachmentRepository attachmentRepository;
   private final ReimbursementRepository reimbursementRepository;
   private final InvoiceRepository invoiceRepository;
+  private final ReimbursementExpenseItemRepository expenseItemRepository;
   private final ObjectMapper objectMapper;
 
   public OcrService(AttachmentRepository attachmentRepository, ReimbursementRepository reimbursementRepository,
-                    InvoiceRepository invoiceRepository, ObjectMapper objectMapper) {
+                    InvoiceRepository invoiceRepository, ReimbursementExpenseItemRepository expenseItemRepository,
+                    ObjectMapper objectMapper) {
     this.attachmentRepository = attachmentRepository;
     this.reimbursementRepository = reimbursementRepository;
     this.invoiceRepository = invoiceRepository;
+    this.expenseItemRepository = expenseItemRepository;
     this.objectMapper = objectMapper;
   }
 
@@ -151,6 +156,26 @@ public class OcrService {
         return;
       }
       if (invoice == null) {
+        Invoice duplicate = findDuplicateInvoice(reimbursementId, invoiceNo, invoiceCode, attachment.getId());
+        if (duplicate != null) {
+          duplicate.setAttachmentId(duplicate.getAttachmentId() == null ? attachment.getId() : duplicate.getAttachmentId());
+          duplicate.setUpdatedBy(attachment.getUploadedBy());
+          duplicate.setUpdatedAt(LocalDateTime.now());
+          Invoice savedDuplicate = invoiceRepository.save(duplicate);
+          ReimbursementExpenseItem expenseItem = upsertExpenseItemFromInvoice(r, savedDuplicate, attachment, ocrText);
+          if (expenseItem != null) {
+            savedDuplicate.setExpenseItemId(expenseItem.getId());
+            savedDuplicate.setUpdatedAt(LocalDateTime.now());
+            invoiceRepository.save(savedDuplicate);
+          }
+          if (!isEmpty(ocrText)) r.setDescription(ocrText);
+          r.setOcrRawJson(ocrResultJson);
+          updateInvoiceSummary(r);
+          r.setUpdatedAt(LocalDateTime.now());
+          reimbursementRepository.save(r);
+          log.info("OCR attachment {} matched duplicate invoice {}, skipped new invoice creation", attachment.getId(), savedDuplicate.getId());
+          return;
+        }
         invoice = new Invoice();
         invoice.setReimbursementId(reimbursementId);
         invoice.setAttachmentId(attachment.getId());
@@ -184,7 +209,13 @@ public class OcrService {
       invoice.setRemarks(remarks);
       invoice.setUpdatedBy(attachment.getUploadedBy());
       invoice.setUpdatedAt(LocalDateTime.now());
-      invoiceRepository.save(invoice);
+      Invoice savedInvoice = invoiceRepository.save(invoice);
+      ReimbursementExpenseItem expenseItem = upsertExpenseItemFromInvoice(r, savedInvoice, attachment, ocrText);
+      if (expenseItem != null) {
+        savedInvoice.setExpenseItemId(expenseItem.getId());
+        savedInvoice.setUpdatedAt(LocalDateTime.now());
+        invoiceRepository.save(savedInvoice);
+      }
 
       if (!isEmpty(invoiceNo) && isEmpty(r.getInvoiceNo())) r.setInvoiceNo(invoiceNo);
       if (!isEmpty(invoiceCode) && isEmpty(r.getInvoiceCode())) r.setInvoiceCode(invoiceCode);
@@ -274,6 +305,107 @@ public class OcrService {
       .reduce(BigDecimal.ZERO, BigDecimal::add);
     r.setInvoiceCount(invoices.size());
     r.setInvoiceTotalAmount(total);
+  }
+
+  private ReimbursementExpenseItem upsertExpenseItemFromInvoice(Reimbursement reimbursement, Invoice invoice,
+                                                                Attachment attachment, String ocrText) {
+    BigDecimal amount = invoice.getTotalAmount();
+    if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) return null;
+    LocalDateTime now = LocalDateTime.now();
+    String expenseType = classifyExpenseType(invoice, ocrText);
+    ReimbursementExpenseItem item = expenseItemRepository.findByInvoiceId(invoice.getId()).orElse(null);
+    if (item == null) {
+      item = expenseItemRepository.findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(reimbursement.getId()).stream()
+        .filter(existing -> expenseType.equals(existing.getExpenseType())
+          && "ocr".equals(existing.getSource())
+          && sameExpenseDate(existing.getExpenseDate(), invoice.getInvoiceDate()))
+        .findFirst()
+        .orElse(null);
+      if (item == null) {
+        item = new ReimbursementExpenseItem();
+        item.setReimbursementId(reimbursement.getId());
+        item.setCreatedBy(attachment.getUploadedBy());
+        item.setCreatedAt(now);
+        int nextOrder = expenseItemRepository
+          .findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(reimbursement.getId()).size() + 1;
+        item.setSortOrder(nextOrder);
+      }
+    }
+    item.setExpenseDate(invoice.getInvoiceDate());
+    item.setExpenseType(expenseType);
+    item.setOaExpenseName(oaExpenseName(expenseType));
+    item.setRemark(invoice.getSellerName());
+    item.setDescription(firstNonBlank(invoice.getRemarks(), invoice.getSellerName(), ocrText));
+    item.setSource("ocr");
+    item.setUpdatedBy(attachment.getUploadedBy());
+    item.setUpdatedAt(now);
+    ReimbursementExpenseItem saved = expenseItemRepository.save(item);
+    invoice.setExpenseItemId(saved.getId());
+    BigDecimal total = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(reimbursement.getId()).stream()
+      .filter(existing -> saved.getId().equals(existing.getExpenseItemId()) || existing.getId().equals(invoice.getId()))
+      .map(Invoice::getTotalAmount)
+      .filter(value -> value != null)
+      .reduce(BigDecimal.ZERO, BigDecimal::add);
+    saved.setAmount(total);
+    return expenseItemRepository.save(saved);
+  }
+
+  private Invoice findDuplicateInvoice(Long reimbursementId, String invoiceNo, String invoiceCode, Long attachmentId) {
+    if (isEmpty(invoiceNo) || isEmpty(invoiceCode)) return null;
+    return invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(reimbursementId).stream()
+      .filter(invoice -> invoiceNo.equals(invoice.getInvoiceNo()) && invoiceCode.equals(invoice.getInvoiceCode()))
+      .filter(invoice -> attachmentId == null || !attachmentId.equals(invoice.getAttachmentId()))
+      .findFirst()
+      .orElse(null);
+  }
+
+  private String classifyExpenseType(Invoice invoice, String ocrText) {
+    String text = (firstNonBlank(invoice.getRemarks(), invoice.getSellerName(), invoice.getInvoiceContentShortName(), ocrText)).toLowerCase();
+    if (containsAny(text, "加油", "汽油", "柴油", "石化", "石油", "油品")) return "fuel";
+    if (containsAny(text, "高速", "通行费", "过路", "etc")) return "toll";
+    if (containsAny(text, "高铁", "动车", "火车", "铁路")) return "rail";
+    if (containsAny(text, "地铁", "轨道交通")) return "metro";
+    if (containsAny(text, "网约车", "滴滴", "出行", "客运服务")) return "ride_hailing";
+    if (containsAny(text, "顺风车")) return "carpool";
+    if (containsAny(text, "货拉拉", "货运", "物流", "运输")) return "freight";
+    if (containsAny(text, "停车")) return "parking";
+    if (containsAny(text, "餐", "饭店", "餐饮", "酒楼", "美食")) return "meal";
+    return "other";
+  }
+
+  private boolean sameExpenseDate(LocalDateTime left, LocalDateTime right) {
+    if (left == null || right == null) return left == null && right == null;
+    return left.toLocalDate().equals(right.toLocalDate());
+  }
+
+  private boolean containsAny(String text, String... keywords) {
+    if (text == null) return false;
+    for (String keyword : keywords) {
+      if (text.contains(keyword.toLowerCase())) return true;
+    }
+    return false;
+  }
+
+  private String oaExpenseName(String expenseType) {
+    return switch (expenseType == null ? "" : expenseType) {
+      case "fuel" -> "加油费";
+      case "toll" -> "高速过路费";
+      case "rail" -> "高铁/动车/火车费";
+      case "metro" -> "地铁费";
+      case "ride_hailing" -> "网约车费";
+      case "carpool" -> "顺风车费";
+      case "freight" -> "货拉拉货运费";
+      case "parking" -> "停车费";
+      case "meal" -> "餐费";
+      default -> "其他";
+    };
+  }
+
+  private String firstNonBlank(String... values) {
+    for (String value : values) {
+      if (value != null && !value.isBlank()) return value;
+    }
+    return "";
   }
 
   private boolean hasInvoiceData(String... values) {

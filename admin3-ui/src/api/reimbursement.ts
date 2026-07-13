@@ -125,6 +125,39 @@ export function deleteInvoice(reimbursementId: number, invoiceId: number) {
     });
 };
 
+export function saveExpenseItems(reimbursementId: number, items: any[]) {
+    return request({
+        url: `${BASE_URI}/reimbursements/${reimbursementId}/expense-items`,
+        method: 'put',
+        data: {items}
+    });
+};
+
+export function exportElectronicInvoiceRegister(reimbursementId: number) {
+    return request({
+        url: `${BASE_URI}/reimbursements/${reimbursementId}/exports/electronic-invoice-register`,
+        method: 'get',
+        responseType: 'blob'
+    });
+};
+
+export function exportExpenseDetails(reimbursementId: number) {
+    return request({
+        url: `${BASE_URI}/reimbursements/${reimbursementId}/exports/expense-details`,
+        method: 'get',
+        responseType: 'blob'
+    });
+};
+
+export function exportOaPackage(ids: number[]) {
+    return request({
+        url: `${BASE_URI}/reimbursements/exports/oa-package`,
+        method: 'post',
+        responseType: 'blob',
+        data: {ids}
+    });
+};
+
 export function submitReimbursement(id: number) {
     return request({
         url: `${BASE_URI}/reimbursements/${id}:submit`,

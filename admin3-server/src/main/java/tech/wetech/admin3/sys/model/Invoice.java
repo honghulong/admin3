@@ -16,6 +16,8 @@ public class Invoice extends BaseEntity {
 
   private Long attachmentId;
 
+  private Long expenseItemId;
+
   @Column(length = 500)
   private String imagePath;
 
@@ -36,6 +38,14 @@ public class Invoice extends BaseEntity {
   @Column(length = 200)
   private String sellerName;
 
+  @Column(length = 100)
+  private String sellerShortName;
+
+  @Column(length = 100)
+  private String invoiceContentShortName;
+
+  private LocalDateTime submitDate;
+
   @Column(length = 50)
   private String buyerTaxId;
 
@@ -50,6 +60,15 @@ public class Invoice extends BaseEntity {
 
   @Column(length = 50)
   private String invoiceStatus;
+
+  @Column(length = 20)
+  private String duplicateCheckStatus;
+
+  @Column(length = 20)
+  private String verifyStatus;
+
+  @Column(precision = 5, scale = 2)
+  private BigDecimal ocrConfidence;
 
   @Column(precision = 10, scale = 2)
   private BigDecimal amountBeforeTax;
@@ -130,6 +149,14 @@ public class Invoice extends BaseEntity {
     return imagePath;
   }
 
+  public Long getExpenseItemId() {
+    return expenseItemId;
+  }
+
+  public void setExpenseItemId(Long expenseItemId) {
+    this.expenseItemId = expenseItemId;
+  }
+
   public void setImagePath(String imagePath) {
     this.imagePath = imagePath;
   }
@@ -178,6 +205,30 @@ public class Invoice extends BaseEntity {
     return sellerName;
   }
 
+  public String getSellerShortName() {
+    return sellerShortName;
+  }
+
+  public void setSellerShortName(String sellerShortName) {
+    this.sellerShortName = sellerShortName;
+  }
+
+  public String getInvoiceContentShortName() {
+    return invoiceContentShortName;
+  }
+
+  public void setInvoiceContentShortName(String invoiceContentShortName) {
+    this.invoiceContentShortName = invoiceContentShortName;
+  }
+
+  public LocalDateTime getSubmitDate() {
+    return submitDate;
+  }
+
+  public void setSubmitDate(LocalDateTime submitDate) {
+    this.submitDate = submitDate;
+  }
+
   public void setSellerName(String sellerName) {
     this.sellerName = sellerName;
   }
@@ -216,6 +267,30 @@ public class Invoice extends BaseEntity {
 
   public String getInvoiceStatus() {
     return invoiceStatus;
+  }
+
+  public String getDuplicateCheckStatus() {
+    return duplicateCheckStatus;
+  }
+
+  public void setDuplicateCheckStatus(String duplicateCheckStatus) {
+    this.duplicateCheckStatus = duplicateCheckStatus;
+  }
+
+  public String getVerifyStatus() {
+    return verifyStatus;
+  }
+
+  public void setVerifyStatus(String verifyStatus) {
+    this.verifyStatus = verifyStatus;
+  }
+
+  public BigDecimal getOcrConfidence() {
+    return ocrConfidence;
+  }
+
+  public void setOcrConfidence(BigDecimal ocrConfidence) {
+    this.ocrConfidence = ocrConfidence;
   }
 
   public void setInvoiceStatus(String invoiceStatus) {

@@ -5,6 +5,7 @@ import tech.wetech.admin3.sys.model.ApprovalLog;
 import tech.wetech.admin3.sys.model.Invoice;
 import tech.wetech.admin3.sys.model.InvoiceTemp;
 import tech.wetech.admin3.sys.model.Reimbursement;
+import tech.wetech.admin3.sys.model.ReimbursementExpenseItem;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,11 +44,13 @@ public record ReimbursementDTO(
   List<AttachmentDTO> attachments,
   List<ApprovalLogDTO> approvalLogs,
   List<InvoiceDTO> invoices,
+  List<ExpenseItemDTO> expenseItems,
   List<InvoiceTempDTO> invoiceTemps
 ) {
 
   public static ReimbursementDTO of(Reimbursement r, List<Attachment> attachments, List<ApprovalLog> approvalLogs,
-                                    List<Invoice> invoices, List<InvoiceTemp> invoiceTemps) {
+                                    List<Invoice> invoices, List<ReimbursementExpenseItem> expenseItems,
+                                    List<InvoiceTemp> invoiceTemps) {
     return new ReimbursementDTO(
       r.getId(), r.getTitle(), r.getCategory(), r.getAmount(), r.getInvoiceCount(), r.getInvoiceTotalAmount(),
       r.getInvoiceNo(), r.getInvoiceCode(), r.getInvoiceDate(), r.getBuyerName(),
@@ -59,6 +62,7 @@ public record ReimbursementDTO(
       attachments.stream().map(AttachmentDTO::new).toList(),
       approvalLogs.stream().map(ApprovalLogDTO::new).toList(),
       invoices.stream().map(InvoiceDTO::new).toList(),
+      expenseItems.stream().map(item -> new ExpenseItemDTO(item, invoices)).toList(),
       invoiceTemps.stream().map(InvoiceTempDTO::new).toList()
     );
   }
@@ -72,7 +76,7 @@ public record ReimbursementDTO(
       r.getDescription(), r.getMatterDescription(), r.getOcrRawJson(), r.getStatus(), r.getApplicantId(), r.getApplicantName(),
       r.getApproverId(), r.getApproverName(), r.getApproveComment(), r.getApproveTime(),
       r.getCreatedBy(), r.getCreatedAt(), r.getUpdatedBy(), r.getUpdatedAt(),
-      null, null, null, null
+      null, null, null, null, null
     );
   }
 
@@ -115,6 +119,7 @@ public record ReimbursementDTO(
     Long reimbursementId,
     Long invoiceTempId,
     Long attachmentId,
+    Long expenseItemId,
     String imagePath,
     String ocrRawJson,
     String invoiceNo,
@@ -122,11 +127,17 @@ public record ReimbursementDTO(
     LocalDateTime invoiceDate,
     String buyerName,
     String sellerName,
+    String sellerShortName,
+    String invoiceContentShortName,
+    LocalDateTime submitDate,
     String buyerTaxId,
     String sellerTaxId,
     BigDecimal totalAmount,
     String invoiceType,
     String invoiceStatus,
+    String duplicateCheckStatus,
+    String verifyStatus,
+    BigDecimal ocrConfidence,
     BigDecimal amountBeforeTax,
     String taxRate,
     BigDecimal taxAmount,
@@ -145,14 +156,70 @@ public record ReimbursementDTO(
     LocalDateTime updatedAt
   ) {
     public InvoiceDTO(Invoice i) {
-      this(i.getId(), i.getReimbursementId(), i.getInvoiceTempId(), i.getAttachmentId(),
+      this(i.getId(), i.getReimbursementId(), i.getInvoiceTempId(), i.getAttachmentId(), i.getExpenseItemId(),
         i.getImagePath(), i.getOcrRawJson(), i.getInvoiceNo(), i.getInvoiceCode(),
-        i.getInvoiceDate(), i.getBuyerName(), i.getSellerName(), i.getBuyerTaxId(),
+        i.getInvoiceDate(), i.getBuyerName(), i.getSellerName(), i.getSellerShortName(),
+        i.getInvoiceContentShortName(), i.getSubmitDate(), i.getBuyerTaxId(),
         i.getSellerTaxId(), i.getTotalAmount(), i.getInvoiceType(), i.getInvoiceStatus(),
+        i.getDuplicateCheckStatus(), i.getVerifyStatus(), i.getOcrConfidence(),
         i.getAmountBeforeTax(), i.getTaxRate(), i.getTaxAmount(), i.getPayee(),
         i.getReviewer(), i.getIssuer(), i.getBuyerAddressPhone(), i.getBuyerBankInfo(),
         i.getSellerAddressPhone(), i.getSellerBankInfo(), i.getRemarks(), i.getStatus(),
         i.getCreatedBy(), i.getCreatedAt(), i.getUpdatedBy(), i.getUpdatedAt());
+    }
+  }
+
+  public record ExpenseItemDTO(
+    Long id,
+    Long reimbursementId,
+    Long invoiceId,
+    LocalDateTime expenseDate,
+    String startPlace,
+    String endPlace,
+    BigDecimal kilometers,
+    String expenseType,
+    String oaExpenseName,
+    BigDecimal amount,
+    String projectCostCategory,
+    String customerName,
+    String remark,
+    String description,
+    String source,
+    List<Long> invoiceIds,
+    Integer invoiceCount,
+    BigDecimal invoiceTotalAmount,
+    Integer sortOrder,
+    Long createdBy,
+    LocalDateTime createdAt,
+    Long updatedBy,
+    LocalDateTime updatedAt
+  ) {
+    public ExpenseItemDTO(ReimbursementExpenseItem item, List<Invoice> invoices) {
+      this(item.getId(), item.getReimbursementId(), item.getInvoiceId(), item.getExpenseDate(),
+        item.getStartPlace(), item.getEndPlace(), item.getKilometers(), item.getExpenseType(),
+        item.getOaExpenseName(), item.getAmount(), item.getProjectCostCategory(), item.getCustomerName(),
+        item.getRemark(), item.getDescription(), item.getSource(), invoiceIds(item, invoices),
+        invoiceCount(item, invoices), invoiceTotalAmount(item, invoices), item.getSortOrder(),
+        item.getCreatedBy(), item.getCreatedAt(), item.getUpdatedBy(), item.getUpdatedAt());
+    }
+
+    private static List<Long> invoiceIds(ReimbursementExpenseItem item, List<Invoice> invoices) {
+      return invoices.stream()
+        .filter(invoice -> item.getId() != null && item.getId().equals(invoice.getExpenseItemId()))
+        .map(Invoice::getId)
+        .toList();
+    }
+
+    private static Integer invoiceCount(ReimbursementExpenseItem item, List<Invoice> invoices) {
+      return invoiceIds(item, invoices).size();
+    }
+
+    private static BigDecimal invoiceTotalAmount(ReimbursementExpenseItem item, List<Invoice> invoices) {
+      return invoices.stream()
+        .filter(invoice -> item.getId() != null && item.getId().equals(invoice.getExpenseItemId()))
+        .map(Invoice::getTotalAmount)
+        .filter(amount -> amount != null)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
   }
 

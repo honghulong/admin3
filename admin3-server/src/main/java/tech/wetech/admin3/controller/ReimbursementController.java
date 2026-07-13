@@ -8,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.wetech.admin3.common.authz.RequiresPermissions;
@@ -17,6 +19,8 @@ import tech.wetech.admin3.sys.service.dto.PageDTO;
 import tech.wetech.admin3.sys.service.dto.ReimbursementDTO;
 
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -85,6 +89,41 @@ public class ReimbursementController {
         request.buyerTaxId(), request.sellerTaxId(), request.invoiceType(), request.invoiceStatus(), request.attachmentIds()));
   }
 
+  @RequiresPermissions("reimbursement:update")
+  @PutMapping("/{id}/expense-items")
+  public ResponseEntity<ReimbursementDTO> saveExpenseItems(@PathVariable Long id, @RequestBody ExpenseItemsRequest request) {
+    return ResponseEntity.ok(reimbursementService.saveExpenseItems(id, request.items()));
+  }
+
+  @RequiresPermissions("reimbursement:update")
+  @DeleteMapping("/{id}/invoices/{invoiceId}")
+  public ResponseEntity<ReimbursementDTO> deleteInvoice(@PathVariable Long id, @PathVariable Long invoiceId) {
+    return ResponseEntity.ok(reimbursementService.deleteInvoice(id, invoiceId));
+  }
+
+  @RequiresPermissions("reimbursement:view")
+  @GetMapping("/{id}/exports/electronic-invoice-register")
+  public ResponseEntity<byte[]> exportElectronicInvoiceRegister(@PathVariable Long id) {
+    return excelResponse("电子发票登记表.xlsx", reimbursementService.exportElectronicInvoiceRegister(id));
+  }
+
+  @RequiresPermissions("reimbursement:view")
+  @GetMapping("/{id}/exports/expense-details")
+  public ResponseEntity<byte[]> exportExpenseDetails(@PathVariable Long id) {
+    return excelResponse("报销费用明细表.xlsx", reimbursementService.exportExpenseDetails(id));
+  }
+
+  @RequiresPermissions("reimbursement:view")
+  @PostMapping("/exports/oa-package")
+  public ResponseEntity<byte[]> exportOaPackage(@RequestBody ExportPackageRequest request) {
+    String filename = "OA报销表导出包.zip";
+    String encoded = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
+    return ResponseEntity.ok()
+      .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
+      .contentType(MediaType.parseMediaType("application/zip"))
+      .body(reimbursementService.exportBatchOaExcels(request.ids()));
+  }
+
   @RequiresPermissions("reimbursement:delete")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteReimbursement(@PathVariable Long id) {
@@ -134,6 +173,18 @@ public class ReimbursementController {
     List<Long> attachmentIds
   ) {}
 
+  record ExpenseItemsRequest(List<ReimbursementService.ExpenseItemRequest> items) {}
+
+  record ExportPackageRequest(List<Long> ids) {}
+
   record ApproveRequest(String comment) {}
+
+  private ResponseEntity<byte[]> excelResponse(String filename, byte[] content) {
+    String encoded = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
+    return ResponseEntity.ok()
+      .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
+      .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+      .body(content);
+  }
 
 }
