@@ -661,12 +661,19 @@ public class ReimbursementService {
   }
 
   private void updateExpenseSummary(Reimbursement r) {
+    List<Invoice> invoices = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(r.getId());
+    BigDecimal invoiceTotal = invoices.stream()
+      .map(Invoice::getTotalAmount)
+      .filter(Objects::nonNull)
+      .reduce(BigDecimal.ZERO, BigDecimal::add);
+    r.setInvoiceCount(invoices.size());
+    r.setInvoiceTotalAmount(invoiceTotal);
     List<ReimbursementExpenseItem> items = expenseItemRepository.findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(r.getId());
     BigDecimal total = items.stream()
       .map(ReimbursementExpenseItem::getAmount)
       .filter(Objects::nonNull)
       .reduce(BigDecimal.ZERO, BigDecimal::add);
-    if (total.compareTo(BigDecimal.ZERO) > 0) r.setAmount(total);
+    r.setAmount(total.compareTo(BigDecimal.ZERO) > 0 ? total : invoiceTotal);
   }
 
   private BigDecimal sumInvoices(List<Invoice> invoices, List<Long> invoiceIds) {

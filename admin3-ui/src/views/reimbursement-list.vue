@@ -883,6 +883,7 @@ async function handleEdit(row: TableItem) {
   }
   invoiceList.value = data.invoices || [];
   expenseItemList.value = (data.expenseItems || []).map(normalizeExpenseItemForEdit);
+  syncReimbursementSummary();
   dialogVisible.value = true;
 }
 
@@ -943,6 +944,7 @@ function startOcrPolling() {
       }
       invoiceList.value = data.invoices || invoiceList.value;
       expenseItemList.value = data.expenseItems ? data.expenseItems.map(normalizeExpenseItemForEdit) : expenseItemList.value;
+      syncReimbursementSummary();
       // 更新 fileList 中的 OCR 状态
       for (const att of attachments) {
         const item = fileList.value.find(f => f.id === att.id);
@@ -1191,6 +1193,7 @@ async function pollOcrResults() {
     }
     invoiceList.value = data.invoices || invoiceList.value;
     expenseItemList.value = data.expenseItems ? data.expenseItems.map(normalizeExpenseItemForEdit) : expenseItemList.value;
+    syncReimbursementSummary();
     // 更新 fileList 中的 OCR 状态
     for (const att of attachments) {
       const item = fileList.value.find(f => f.id === att.id);
@@ -1313,7 +1316,17 @@ function addExpenseItem() {
 }
 
 function removeExpenseItem(index: number) {
+  const removed = expenseItemList.value[index];
+  if (removed) {
+    const removedIds = new Set(removed.invoiceIds || []);
+    invoiceList.value.forEach(invoice => {
+      if ((removed.id && invoice.expenseItemId === removed.id) || removedIds.has(invoice.id)) {
+        invoice.expenseItemId = null;
+      }
+    });
+  }
   expenseItemList.value.splice(index, 1);
+  syncReimbursementSummary();
 }
 
 function openExpenseInvoiceDialog(index: number) {
@@ -1352,6 +1365,7 @@ function linkSelectedInvoices() {
   item.invoiceIds = Array.from(ids);
   applyInvoiceSuggestionToExpenseItem(item, selectedAvailableInvoices.value);
   updateExpenseItemAmount(item);
+  syncReimbursementSummary();
   selectedAvailableInvoices.value = [];
 }
 
@@ -1364,17 +1378,27 @@ function unlinkSelectedInvoices() {
     if (item.id && invoice.expenseItemId === item.id) invoice.expenseItemId = null;
   });
   updateExpenseItemAmount(item);
+  syncReimbursementSummary();
   selectedLinkedInvoices.value = [];
 }
 
 function saveExpenseInvoiceDialog() {
   const item = currentExpenseItem.value;
   if (item) updateExpenseItemAmount(item);
+  syncReimbursementSummary();
   expenseInvoiceDialogVisible.value = false;
 }
 
 function updateExpenseItemAmount(item: any) {
   item.amount = Number(expenseInvoiceTotal(item));
+}
+
+function syncReimbursementSummary() {
+  const invoiceTotal = invoiceList.value.reduce((sum, invoice) => sum + Number(invoice.totalAmount || 0), 0);
+  form.invoiceCount = invoiceList.value.length;
+  expenseItemList.value.forEach(item => updateExpenseItemAmount(item));
+  const expenseTotal = expenseItemList.value.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  form.amount = Number(formatMoney(expenseTotal > 0 ? expenseTotal : invoiceTotal));
 }
 
 function applyInvoiceSuggestionToExpenseItem(item: any, invoices: any[]) {
@@ -1476,6 +1500,7 @@ function saveInvoiceEdit() {
   } else {
     invoiceList.value.push(invoice);
   }
+  syncReimbursementSummary();
   invoiceEditVisible.value = false;
 }
 
@@ -1488,12 +1513,14 @@ async function removeInvoice(row: any, index: number) {
       expenseItemList.value = (res.data.expenseItems || []).map(normalizeExpenseItemForEdit);
       form.invoiceCount = res.data.invoiceCount || 0;
       form.amount = res.data.amount || form.amount;
+      syncReimbursementSummary();
     } else {
       invoiceList.value.splice(index, 1);
       expenseItemList.value.forEach(item => {
         item.invoiceIds = (item.invoiceIds || []).filter((id: number) => id !== row.id);
         updateExpenseItemAmount(item);
       });
+      syncReimbursementSummary();
     }
     ElMessage.success('删除成功');
   } catch (e) {
