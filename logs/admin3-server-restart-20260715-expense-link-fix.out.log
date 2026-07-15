@@ -1,0 +1,120 @@
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-07-15T15:13:12.951+08:00  INFO 30696 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 30696 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-07-15T15:13:12.953+08:00  INFO 30696 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-07-15T15:13:14.138+08:00  INFO 30696 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-15T15:13:14.337+08:00  INFO 30696 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 191 ms. Found 19 JPA repository interfaces.
+2026-07-15T15:13:15.167+08:00  INFO 30696 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-07-15T15:13:15.189+08:00  INFO 30696 --- [admin3] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-15T15:13:15.189+08:00  INFO 30696 --- [admin3] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-07-15T15:13:15.246+08:00  INFO 30696 --- [admin3] [           main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-07-15T15:13:15.247+08:00  INFO 30696 --- [admin3] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2203 ms
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+2026-07-15T15:13:15.543+08:00  INFO 30696 --- [admin3] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-15T15:13:15.637+08:00  INFO 30696 --- [admin3] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-07-15T15:13:15.669+08:00  INFO 30696 --- [admin3] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-07-15T15:13:15.886+08:00  INFO 30696 --- [admin3] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-15T15:13:15.914+08:00  INFO 30696 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-15T15:13:16.258+08:00  INFO 30696 --- [admin3] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6ffc6ea7
+2026-07-15T15:13:16.265+08:00  INFO 30696 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-15T15:13:16.310+08:00  WARN 30696 --- [admin3] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-07-15T15:13:17.798+08:00  INFO 30696 --- [admin3] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-15T15:13:17.949+08:00  INFO 30696 --- [admin3] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-15T15:13:18.548+08:00  INFO 30696 --- [admin3] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-15T15:13:19.920+08:00  WARN 30696 --- [admin3] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-15T15:13:20.301+08:00  INFO 30696 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-07-15T15:13:20.320+08:00  INFO 30696 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 7.874 seconds (process running for 8.569)
+2026-07-15T15:13:20.868+08:00  INFO 30696 --- [admin3] [nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-15T15:13:20.868+08:00  INFO 30696 --- [admin3] [nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-15T15:13:20.870+08:00  INFO 30696 --- [admin3] [nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-07-15T15:13:35.416+08:00  INFO 30696 --- [admin3] [nio-9099-exec-5] t.w.a.controller.AttachmentController    : Attachment uploaded: id=31, file=2026-06-28_vat_26442000007273956556.pdf, size=56964, reimbursementId=25, stored=71065cb2-71b3-448a-9b07-d6afed1daddb.pdf
+2026-07-15T15:13:35.421+08:00  INFO 30696 --- [admin3] [nio-9099-exec-5] t.w.a.controller.AttachmentController    : OCR triggered for attachment 31
+2026-07-15T15:13:35.433+08:00  INFO 30696 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 31, file: uploads\attachments\71065cb2-71b3-448a-9b07-d6afed1daddb.pdf
+2026-07-15T15:13:35.453+08:00  INFO 30696 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR temp file saved: C:\Users\Administrator\AppData\Local\Temp\reimbursement-ocr\5c1dbcd2-b33d-4610-b6fd-d314fc2258d0_2026-06-28_vat_26442000007273956556.pdf
+2026-07-15T15:13:40.440+08:00  INFO 30696 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 31, result length: 6033
+2026-07-15T15:13:40.586+08:00  INFO 30696 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Reimbursement 25 updated from OCR attachment 31, invoiceNo=26442000, amount=148.00
+2026-07-15T15:13:41.633+08:00  INFO 30696 --- [admin3] [io-9099-exec-10] t.w.a.controller.AttachmentController    : Attachment uploaded: id=32, file=2026-07-09_vat_26442000007779083686.pdf, size=56699, reimbursementId=25, stored=e27d7ddb-be0f-4f21-b4dc-62b4b0210773.pdf
+2026-07-15T15:13:41.634+08:00  INFO 30696 --- [admin3] [io-9099-exec-10] t.w.a.controller.AttachmentController    : OCR triggered for attachment 32
+2026-07-15T15:13:41.643+08:00  INFO 30696 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 32, file: uploads\attachments\e27d7ddb-be0f-4f21-b4dc-62b4b0210773.pdf
+2026-07-15T15:13:41.660+08:00  INFO 30696 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR temp file saved: C:\Users\Administrator\AppData\Local\Temp\reimbursement-ocr\ae35da2f-6487-46a7-82e7-d0244e9b0352_2026-07-09_vat_26442000007779083686.pdf
+2026-07-15T15:13:47.013+08:00  INFO 30696 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 32, result length: 7036
+2026-07-15T15:13:47.154+08:00  INFO 30696 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Reimbursement 25 updated from OCR attachment 32, invoiceNo=26442000, amount=188.90
+2026-07-15T15:13:48.264+08:00  INFO 30696 --- [admin3] [nio-9099-exec-1] t.w.a.controller.AttachmentController    : Attachment uploaded: id=33, file=2026-06-04_didi-invoice_26117000000804123309.pdf, size=74742, reimbursementId=25, stored=b84498db-89c5-46e4-93b6-19cd6852d089.pdf
+2026-07-15T15:13:48.265+08:00  INFO 30696 --- [admin3] [nio-9099-exec-1] t.w.a.controller.AttachmentController    : OCR triggered for attachment 33
+2026-07-15T15:13:48.273+08:00  INFO 30696 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 33, file: uploads\attachments\b84498db-89c5-46e4-93b6-19cd6852d089.pdf
+2026-07-15T15:13:48.290+08:00  INFO 30696 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR temp file saved: C:\Users\Administrator\AppData\Local\Temp\reimbursement-ocr\ebf86343-7972-4830-a1ab-4c57aaf89034_2026-06-04_didi-invoice_26117000000804123309.pdf
+2026-07-15T15:13:53.926+08:00  INFO 30696 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 33, result length: 7667
+2026-07-15T15:13:54.035+08:00  WARN 30696 --- [admin3] [               ] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Error: 1366, SQLState: HY000
+2026-07-15T15:13:54.036+08:00 ERROR 30696 --- [admin3] [               ] o.h.engine.jdbc.spi.SqlExceptionHelper   : Incorrect string value: '\xF0\x9F\x92\xAF\x0A\xE5...' for column 'description' at row 1
+2026-07-15T15:13:54.044+08:00 ERROR 30696 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Failed to auto-update reimbursement 25 from OCR result: could not execute statement [Incorrect string value: '\xF0\x9F\x92\xAF\x0A\xE5...' for column 'description' at row 1] [update reimbursement set amount=?,applicant_id=?,applicant_name=?,approve_comment=?,approve_time=?,approver_id=?,approver_name=?,buyer_name=?,buyer_tax_id=?,category=?,created_at=?,created_by=?,description=?,invoice_code=?,invoice_count=?,invoice_date=?,invoice_no=?,invoice_status=?,invoice_total_amount=?,invoice_type=?,matter_description=?,ocr_raw_json=?,seller_name=?,seller_tax_id=?,status=?,title=?,updated_at=?,updated_by=? where id=?]
+
+org.springframework.orm.jpa.JpaSystemException: could not execute statement [Incorrect string value: '\xF0\x9F\x92\xAF\x0A\xE5...' for column 'description' at row 1] [update reimbursement set amount=?,applicant_id=?,applicant_name=?,approve_comment=?,approve_time=?,approver_id=?,approver_name=?,buyer_name=?,buyer_tax_id=?,category=?,created_at=?,created_by=?,description=?,invoice_code=?,invoice_count=?,invoice_date=?,invoice_no=?,invoice_status=?,invoice_total_amount=?,invoice_type=?,matter_description=?,ocr_raw_json=?,seller_name=?,seller_tax_id=?,status=?,title=?,updated_at=?,updated_by=? where id=?]
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.convertHibernateAccessException(HibernateJpaDialect.java:341) ~[spring-orm-6.1.4.jar!/:6.1.4]
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.translateExceptionIfPossible(HibernateJpaDialect.java:241) ~[spring-orm-6.1.4.jar!/:6.1.4]
+	at org.springframework.orm.jpa.JpaTransactionManager.doCommit(JpaTransactionManager.java:565) ~[spring-orm-6.1.4.jar!/:6.1.4]
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.processCommit(AbstractPlatformTransactionManager.java:794) ~[spring-tx-6.1.4.jar!/:6.1.4]
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.commit(AbstractPlatformTransactionManager.java:757) ~[spring-tx-6.1.4.jar!/:6.1.4]
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.commitTransactionAfterReturning(TransactionAspectSupport.java:669) ~[spring-tx-6.1.4.jar!/:6.1.4]
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:419) ~[spring-tx-6.1.4.jar!/:6.1.4]
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119) ~[spring-tx-6.1.4.jar!/:6.1.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:137) ~[spring-tx-6.1.4.jar!/:6.1.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at org.springframework.data.jpa.repository.support.CrudMethodMetadataPostProcessor$CrudMethodMetadataPopulatingMethodInterceptor.invoke(CrudMethodMetadataPostProcessor.java:164) ~[spring-data-jpa-3.2.3.jar!/:3.2.3]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:220) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at jdk.proxy2/jdk.proxy2.$Proxy152.save(Unknown Source) ~[na:na]
+	at tech.wetech.admin3.sys.service.OcrService.updateReimbursementFromOcr(OcrService.java:234) ~[!/:0.0.1-SNAPSHOT]
+	at tech.wetech.admin3.sys.service.OcrService.recognizeAttachment(OcrService.java:81) ~[!/:0.0.1-SNAPSHOT]
+	at tech.wetech.admin3.sys.service.OcrService.lambda$recognizeAttachmentAsync$0(OcrService.java:53) ~[!/:0.0.1-SNAPSHOT]
+	at java.base/java.lang.VirtualThread.run(VirtualThread.java:329) ~[na:na]
+Caused by: org.hibernate.exception.GenericJDBCException: could not execute statement [Incorrect string value: '\xF0\x9F\x92\xAF\x0A\xE5...' for column 'description' at row 1] [update reimbursement set amount=?,applicant_id=?,applicant_name=?,approve_comment=?,approve_time=?,approver_id=?,approver_name=?,buyer_name=?,buyer_tax_id=?,category=?,created_at=?,created_by=?,description=?,invoice_code=?,invoice_count=?,invoice_date=?,invoice_no=?,invoice_status=?,invoice_total_amount=?,invoice_type=?,matter_description=?,ocr_raw_json=?,seller_name=?,seller_tax_id=?,status=?,title=?,updated_at=?,updated_by=? where id=?]
+	at org.hibernate.exception.internal.StandardSQLExceptionConverter.convert(StandardSQLExceptionConverter.java:63) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:108) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.engine.jdbc.internal.ResultSetReturnImpl.executeUpdate(ResultSetReturnImpl.java:197) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.engine.jdbc.mutation.internal.AbstractMutationExecutor.performNonBatchedMutation(AbstractMutationExecutor.java:108) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.engine.jdbc.mutation.internal.MutationExecutorSingleNonBatched.performNonBatchedOperations(MutationExecutorSingleNonBatched.java:40) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.engine.jdbc.mutation.internal.AbstractMutationExecutor.execute(AbstractMutationExecutor.java:52) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.persister.entity.mutation.UpdateCoordinatorStandard.doStaticUpdate(UpdateCoordinatorStandard.java:778) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.persister.entity.mutation.UpdateCoordinatorStandard.performUpdate(UpdateCoordinatorStandard.java:324) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.persister.entity.mutation.UpdateCoordinatorStandard.coordinateUpdate(UpdateCoordinatorStandard.java:242) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.persister.entity.AbstractEntityPersister.update(AbstractEntityPersister.java:2810) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.action.internal.EntityUpdateAction.execute(EntityUpdateAction.java:168) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.engine.spi.ActionQueue.executeActions(ActionQueue.java:632) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.engine.spi.ActionQueue.executeActions(ActionQueue.java:499) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.event.internal.AbstractFlushingEventListener.performExecutions(AbstractFlushingEventListener.java:363) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.event.internal.DefaultFlushEventListener.onFlush(DefaultFlushEventListener.java:41) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.event.service.internal.EventListenerGroupImpl.fireEventOnEachListener(EventListenerGroupImpl.java:127) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.internal.SessionImpl.doFlush(SessionImpl.java:1403) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.internal.SessionImpl.managedFlush(SessionImpl.java:484) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.internal.SessionImpl.flushBeforeTransactionCompletion(SessionImpl.java:2319) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.internal.SessionImpl.beforeTransactionCompletion(SessionImpl.java:1976) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.engine.jdbc.internal.JdbcCoordinatorImpl.beforeTransactionCompletion(JdbcCoordinatorImpl.java:439) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl.beforeCompletionCallback(JdbcResourceLocalTransactionCoordinatorImpl.java:169) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl$TransactionDriverControlImpl.commit(JdbcResourceLocalTransactionCoordinatorImpl.java:267) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.hibernate.engine.transaction.internal.TransactionImpl.commit(TransactionImpl.java:101) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at org.springframework.orm.jpa.JpaTransactionManager.doCommit(JpaTransactionManager.java:561) ~[spring-orm-6.1.4.jar!/:6.1.4]
+	... 18 common frames omitted
+Caused by: java.sql.SQLException: Incorrect string value: '\xF0\x9F\x92\xAF\x0A\xE5...' for column 'description' at row 1
+	at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:130) ~[mysql-connector-j-8.3.0.jar!/:8.3.0]
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122) ~[mysql-connector-j-8.3.0.jar!/:8.3.0]
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:912) ~[mysql-connector-j-8.3.0.jar!/:8.3.0]
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1054) ~[mysql-connector-j-8.3.0.jar!/:8.3.0]
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdateInternal(ClientPreparedStatement.java:1003) ~[mysql-connector-j-8.3.0.jar!/:8.3.0]
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeLargeUpdate(ClientPreparedStatement.java:1312) ~[mysql-connector-j-8.3.0.jar!/:8.3.0]
+	at com.mysql.cj.jdbc.ClientPreparedStatement.executeUpdate(ClientPreparedStatement.java:988) ~[mysql-connector-j-8.3.0.jar!/:8.3.0]
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61) ~[HikariCP-5.0.1.jar!/:na]
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java) ~[HikariCP-5.0.1.jar!/:na]
+	at org.hibernate.engine.jdbc.internal.ResultSetReturnImpl.executeUpdate(ResultSetReturnImpl.java:194) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	... 40 common frames omitted
+

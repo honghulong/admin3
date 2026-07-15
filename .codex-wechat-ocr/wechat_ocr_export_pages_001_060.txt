@@ -1,0 +1,1939 @@
+﻿===== wechat-001 =====
+
+花皮与晓敏的聊天记录
+…·
+花皮
+2026年7月14日10:01
+2026-07-1310:29:57-各层TO主题层映射-为了转换解除补丁
+开始[各层TO主题层映射]
+2026-07-1310:29:58-表输.0-ERROR):Unexpected error
+2026-07-1310:29:58-表输.0-ERROR):
+org.pentaho.di.core.exception.KettleDatabaseException:
+2026-07-1310:29:58-表输.0-An erroroccurred
+executing SQL:
+2026-07-1310:29:58-表输.0-SELECT
+FNC_GET_NODE_STATUS('9052',TRG_NODE_ID) AS
+NODE_STATUS,
+2026-07-1310:29:58-表输.0-TRG_NODE_ID
+2026-07-1310:29:58-表输.0-MIN(TRG_TAB_ID)AS
+TRG_TAB_ID,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK EXEC_SQL(TRG_NODE_ID) AS DM_SQL,
+2026-07-1310:29:58-表输.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052, TRG_NODE_ID,'1')AS
+STA_DAT_DT,
+2026-07-1310:29:58-表输入.0
+FNC_GET_BLOCK_EXEC_DAT_DT(9052, TRG_NODE_ID, '2')AS
+END_DAT_DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'3)AS
+DAT_DT,
+2026-07-1310:29:58-表输.0-MIN(SRC_TAB_ID)AS
+SRC_TAB_ID
+2026-07-1310:29:58-表输.0-FROM(select
+
+
+===== wechat-002 =====
+
+花皮与晓敏的聊天记录
+升始 【各层IU主题层映射]
+2026-07-1310:29:58-表输.0-ERROR):Unexpected error
+2026-07-1310:29:58-表输入.0-ERROR):
+org.pentaho.di.core.exception.KettleDatabaseException:
+2026-07-1310:29:58-表输入.0-An erroroccurred
+executing SQL:
+2026-07-1310:29:58-表输入.0-SELECT
+FNC_GET_NODE_STATUS('9052',TRG_NODE_ID)AS
+NODE_STATUS,
+2026-07-1310:29:58-表输入.0-TRG_NODE_ID
+2026-07-1310:29:58-表输.0-MIN(TRG_TAB_ID)AS
+TRG_TAB_ID,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_SQL(TRG_NODE_ID)AS DM_SQL,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'1')AS
+STA_DAT_DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'2')AS
+END_DAT_DT,
+2026-07-1310:29:58-表输入.0
+FNC_GET_BLOCK_EXEC_DAT_DT(9052, TRG_NODE_ID,'3)AS
+DAT_DT,
+2026-07-1310:29:58-表输入.0-MIN(SRC_TAB_ID)AS
+SRC_TAB_ID
+2026-07-1310:29:58-表输入.0-FROM(select
+t.TAB_MAPPING_ID as MAPPING_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_NODE_ID,
+02C
+07.13.10:20:59
+
+
+===== wechat-003 =====
+
+花皮与晓敏的聊天记录
+∠0C0-01-110.∠.0-期八.0-L11
+org.pentaho.di.core.exception.KettleDatabaseException:
+2026-07-1310:29:58-表输入.0-An erroroccurred
+executing SQL:
+2026-07-1310:29:58-表输.0-SELECT
+FNC_GET_NODE_STATUS('9052',TRG_NODE_ID)AS
+NODE_STATUS,
+2026-07-1310:29:58-表输入.0-TRG_NODE_ID,
+2026-07-1310:29:58-表输入.0-MIN(TRG_TAB_ID)AS
+TRG_TAB_ID,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_SQL(TRG_NODE_ID)ASDM_SQL
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'1')AS
+STA_DAT_DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'2')AS
+END_DAT_DT,
+2026-07-1310:29:58-表输.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'3')AS
+DAT_DT,
+2026-07-1310:29:58-表输入.0-MIN(SRC_TAB_ID)AS
+SRC_TAB_ID
+2026-07-1310:29:58-表输入.0-FROM(select
+t.TAB_MAPPING_ID as MAPPING_ID,
+2026-07-1310:29:58-表输入.0-t.TRGNODE_ID
+2026-07-1310:29:58-表输入.0-t.TRG_TAB_ID,
+2026-07-1310:29:58-表输入.0-t.SRC_TAB_ID,
+2026-07-1310:29:58-表输入.0-t.SRCABBR,
+
+
+===== wechat-004 =====
+
+花皮与晓敏的聊天记录
+中
+executing SQL:
+2026-07-1310:29:58-表输入.0-SELECT
+FNC_GET_NODE_STATUS(9052',TRG_NODE_ID)AS
+NODE_STATUS,
+2026-07-1310:29:58-表输入.0-TRG_NODE_ID,
+2026-07-1310:29:58-表输入.0-MIN(TRG_TAB_ID)AS
+TRG TAB_ID
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_SQL(TRG_NODE_ID)AS DM_SQL,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'1')AS
+STA_DAT_DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'2')AS
+END_DAT_DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'3')AS
+DAT_DT,
+2026-07-1310:29:58-表输入.0-MIN(SRC_TAB_ID)AS
+SRC_TAB_ID
+2026-07-1310:29:58-表输入.0-FROM(select
+t.TAB_MAPPING_IDas MAPPING_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_NODE_ID,
+2026-07-1310:29:58-表输入.0-t.TRGTAB_ID
+2026-07-1310:29:58-表输.0-t.SRC_TAB_ID,
+2026-07-1310:29:58-表输入.0-t.SRC_ABBR,
+2026-07-1310:29:58-表输入.0-T.TRG_TAB_LAYER
+2026-07-1310:29:58-表输.0-fromVWTABMAPPINGt
+
+
+===== wechat-005 =====
+
+花皮与晓敏的聊天记录
+FNC_GET_NODE_STATUS('9052',TRG_NODE_ID)AS
+NODE_STATUS,
+2026-07-1310:29:58-表输.0-TRG_NODE_ID
+2026-07-1310:29:58-表输.0-MIN(TRG_TAB_ID)AS
+TRG_TAB_ID,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_SQL(TRG_NODE_ID)AS DM_SQL,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'1')AS
+STA_DAT_DT,
+2026-07-1310:29:58-表输入.0-
+T0 I 
+06201292
+10 I
+SRC_TAB_ID
+2026-07-1310:29:58-表输入.0-FROM(select
+t.TAB_MAPPING_ID as MAPPING_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_NODE_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_TAB_ID，
+2026-07-1310:29:58-表输入.0-t.SRC_TAB_ID,
+2026-07-1310:29:58-表输入.0-t.SRC_ABBR,
+2026-07-1310:29:58-表输入.0-T.TRG_TAB_LAYER
+2026-07-1310:29:58-表输入.0-fromVW_TAB_MAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm',
+
+
+===== wechat-006 =====
+
+花皮与晓敏的聊天记录
+∠026-U/-151U:∠9:58-输.U-1KG_NUDE_ID,
+2026-07-1310:29:58-表输.0-MIN(TRG_TAB_ID)AS
+TRG_TAB_ID,
+2026-07-1310:29:58-表输.0-
+FNC_GET_BLOCK_EXEC_SQL(TRG_NODE_ID)AS DM_SQL,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'1')AS
+STA_DAT_DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'2)AS
+END_DAT_DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'3)AS
+DAT_DT,
+2026-07-1310:29:58-表输.0-MIN(SRC_TAB_ID)AS
+SRC_TAB_ID
+2026-07-1310:29:58-表输.0-FROM(select
+t.TAB_MAPPING ID as MAPPING_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_NODE_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_TAB_ID,
+2026-07-1310:29:58-
+表输入.0-t.SRC_TAB_ID,
+2026-07-1310:29:58-
+表输入.0-t.SRC_ABBR,
+2026-07-1310:29:58
+-
+表输入.0-T.TRG_TAB_LAYER
+2026-07-1310:29:58-表输入.0-fromVW_TAB_MAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm',
+'m_infrastruct_project_capital_allocate_info_new') as tids) s
+2026-07-1310:29:58-表输入.0-WHERE
+find in set(t trg tab id s tids) → 0
+
+
+===== wechat-007 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_SQL(TRG_NODE_ID)AS DM_SQL,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'1)AS
+STA DAT DT,
+2026-07-1310:29:58-表输入.0-
+FNCGETBLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'2)AS
+END DAT_DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'3')AS
+DAT_DT,
+2026-07-1310:29:58-表输入.0-MIN(SRC_TAB_ID)AS
+SRC TAB ID
+2026-07-1310:29:58-表输入.0-FROM(select
+t.TAB MAPPING ID asMAPPINGID,
+2026-07-1310:29:58-表输入.0-t.TRG_NODE_ID,
+2026-07-1310:29:58-表输入.0-t.TRGTABID，
+2026-07-1310:29:58-表输入.0-t.SRC_TAB_ID,
+2026-07-1310:29:58-
+表输入.0-t.SRCABBR,
+2026-07-1310:29:58-表输入.0-T.TRGTABLAYER
+2026-07-1310:29:58-表输入.0-fromVWTABMAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm',
+'m_infrastruct_project_capital_allocate_info_new')as tids)s
+2026-07-1310:29:58-表输入.0-WHERE
+find in set(t.trg_tab_id, s.tids) >0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输入.0-WHFRFTRG
+TAD
+
+
+===== wechat-008 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'1')AS
+STA DAT_DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'2)AS
+END_DAT_DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'3')AS
+DAT_DT,
+2026-07-1310:29:58-表输入.0-MIN(SRC_TAB_ID)AS
+SRC_TAB_ID
+2026-07-1310:29:58-表输入.0-FROM(select
+t.TAB_MAPPING_ID as MAPPING_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_NODE_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_TAB_ID,
+2026-07-1310:29:58-表输入.0-t.SRC_TAB_ID
+2026-07-1310:29:58-表输入.0-t.SRC_ABBR,
+2026-07-1310:29:58-表输入.0-T.TRG_TAB_LAYER
+2026-07-1310:29:58-表输入.0-fromVW_TAB_MAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm',
+'m_infrastruct_project_capital_allocate_info_new') as tids) s
+2026-07-1310:29:58-表输入.0-WHERE
+find_in_set(t.trg_tab_id,s.tids)>0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输入.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输入.0-GROUPBYTRGNODEID
+
+
+===== wechat-009 =====
+
+花皮与晓敏的聊天记录
+STA DAT DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'2)AS
+END DAT_DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'3)AS
+DAT_DT,
+2026-07-1310:29:58-表输入.0-MIN(SRC_TAB_ID)AS
+SRC TAB_ID
+2026-07-1310:29:58-表输入.0-FROM(select
+t.TAB_MAPPING_ ID as MAPPING_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_NODEID
+2026-07-1310:29:58-表输入.0-t.TRG_TAB_ID,
+2026-07-1310:29:58-表输入.0-t.SRC_TAB_ID,
+2026-07-1310:29:58-表输入.0-t.SRC_ABBR,
+2026-07-1310:29:58-表输入.0-T.TRGTABLAYER
+2026-07-1310:29:58-表输入.0-fromVW_TAB_MAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm',
+'m_infrastruct_project_capital_allocate_info_new') as tids) s
+2026-07-1310:29:58-表输入.0-WHERE
+find_in_set(t.trg_tab_id,s.tids)>0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输入.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输入.0-GROUPBYTRG_NODE_ID
+2026-07-1310:29:58-表输.0-ERROR:ERRCODE-20005:
+输入的BLOCK_NODE_ID:117017，在
+
+
+===== wechat-010 =====
+
+花皮与晓敏的聊天记录
+TINC_UEI_DLUCN_CACC_UHI_UI(VUO∠,IKU_IVUUC_IU,∠)AS
+END_DAT_DT,
+2026-07-1310:29:58-表输入.0-
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'3)AS
+DAT_DT,
+2026-07-1310:29:58-表输.0-MIN(SRC_TAB_ID)AS
+SRC_TAB_ID
+2026-07-1310:29:58-表输入.0-FROM(select
+t.TAB MAPPING_IDas MAPPING_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_NODE_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_TAB_ID，
+2026-07-1310:29:58-表输入.0-t.SRC_TAB_ID
+2026-07-1310:29:58-表输入.0-t.SRC_ABBR,
+2026-07-1310:29:58-表输入.0-T.TRGTAB_LAYER
+2026-07-1310:29:58-表输入.0-fromVW_TAB_MAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm',
+'m_infrastruct_project_capital_allocate_info_new') as tids) s
+2026-07-1310:29:58-表输入.0-WHERE
+find_in_set(t.trg_tab_id, s.tids) >0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输入.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输入.0-GROUPBYTRGNODE_ID
+2026-07-1310:29:58-表输入.0-ERROR:ERRCODE-20005:
+输入的BLOCK_NODE_ID:117017，在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29：58-丰输入0
+
+
+===== wechat-011 =====
+
+花皮与晓敏的聊天记录
+FNC_GET_BLOCK_EXEC_DAT_DT(9052,TRG_NODE_ID,'3')AS
+DAT_DT,
+2026-07-1310:29:58-表输入.0-MIN(SRC_TAB_ID)AS
+SRC_TAB_ID
+2026-07-1310:29:58-表输入.0-FROM(select
+t.TAB_MAPPING_ID as MAPPING_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_NODE_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_TAB_ID，
+2026-07-1310:29:58-表输入.0-t.SRC_TAB_ID,
+2026-07-1310:29:58-
+表输入.0-t.SRCABBR,
+2026-07-1310:29:58-表输入.0-T.TRG_TAB_LAYER
+2026-07-1310:29:58-表输入.0-fromVW_TAB_MAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm'
+'m_infrastruct_project_capital_allocate_info_new') as tids) s
+2026-07-1310:29:58-表输.0-WHERE
+find_in_set(t.trg_tab_id,s.tids)>0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输入.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输入.0-GROUPBYTRG_NODE_ID
+2026-07-1310:29:58-表输入.0-ERROR:ERRCODE-20005:
+输入的BLOCK_NODE_ID:117017，在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+
+
+===== wechat-012 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-MIN(SRC_TAB_ID)AS
+SRC_TAB_ID
+2026-07-1310:29:58-表输入.0-FROM(select
+t.TAB MAPPING ID as MAPPING_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_NODEID,
+2026-07-1310:29:58-表输入.0-t.TRG_TAB_ID,
+2026-07-1310:29:58-表输入.0-t.SRCTABID，
+2026-07-1310:29:58-表输入.0-t.SRC_ABBR,
+2026-07-1310:29:58-表输入.0-T.TRGTABLAYER
+2026-07-1310:29:58-表输入.0-fromVW_TAB_MAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm',
+'m_infrastruct_project_capital_allocate_info_new') as tids) s
+2026-07-1310:29:58-表输入.0-WHERE
+find_in_set(t.trg_tab_id, s.tids)>0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输入.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输入.0-GROUPBYTRG_NODE_ID
+2026-07-1310:29:58-表输入.0-ERROR:ERRCODE-20005:
+输入的BLOCKNODEID:117017,在
+DIMMAPPINGSTEPPROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+
+
+===== wechat-013 =====
+
+花皮与晓敏的聊天记录
++
+2026-0/-1310:29:58-表输入.0-FROM(select
+t.TAB MAPPING IDasMAPPING_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_NODE_ID
+2026-07-1310:29:58-表输入.0-t.TRGTAB_ID，
+2026-07-1310:29:58-表输入.0-t.SRCTABID
+2026-07-1310:29:58-表输入.0-t.SRC_ABBR,
+2026-07-1310:29:58-表输入.0-T.TRG_TAB_LAYER
+2026-07-1310:29:58-表输.0-fromVW_TAB_MAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm'
+'m_infrastruct_project_capital_allocate_info_new') as tids) s
+2026-07-1310:29:58-表输入.0-WHERE
+find_in_set(t.trg_tab_id,s.tids)>0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输.0-GROUPBYTRG_NODE_ID
+2026-07-1310:29:58-表输入.0-ERROR:ERRCODE-20005:
+输入的BLOCK_NODE_ID:117017，在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输.0-'输的BLOCK_NODE_ID:'|l
+P_BLOCK_NODE_IDI'在DIM_MAPPINGSTEPPROCESS表
+
+
+===== wechat-014 =====
+
+花皮与晓敏的聊天记录
+CV∠0-01-1010.∠0.00-期八.0-11U_1VVL_1，
+2026-07-1310:29:58-表输入.0-t.TRG_TAB_ID,
+2026-07-1310:29:58-表输入.0-t.SRC_TAB_ID,
+2026-07-1310:29:58-表输入.0-t.SRC_ABBR,
+2026-07-1310:29:58-表输入.0-T.TRG_TAB_LAYER
+2026-07-1310:29:58-表输入.0-fromVW_TAB_MAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm'
+'m_infrastruct_project_capital_allocate_info_new') as tids)s
+2026-07-1310:29:58-表输入.0-WHERE
+find_in_set(t.trg_tab_id,s.tids)>0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输入.0-GROUPBYTRG_NODE_ID
+2026-07-1310:29:58-表输入.0-ERROR:ERRCODE-20005:
+输入的BLOCK_NODE_ID:117017，在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatementCALL
+RAISE_APPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输入.0-输入的BLOCK_NODE_ID:Ⅱ
+P_BLOCK_NODE_IDII'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)
+2026-07-1310:29:58-表输入.0-PL/SOLfunction
+
+
+===== wechat-015 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-t.SRC_ABBR,
+2026-07-1310:29:58-表输入.0-T.TRG_TAB_LAYER
+2026-07-1310:29:58-表输入.0-fromVW_TAB_MAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm',
+'m_infrastruct_project_capital_allocate_info_new')as tids) s
+2026-07-1310:29:58-表输入.0-WHERE
+find_in_set(t.trg_tab_id,s.tids)>0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输入.0-GROUPBYTRG_NODE_ID
+2026-07-1310:29:58-表输入.0-ERROR:ERRCODE-20005:
+输入的BLOCK_NODE_ID：117017，在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输入.0-'输入的BLOCK_NODE_ID:|
+P_BLOCK_NODE_IDI'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-
+
+
+===== wechat-016 =====
+
+花皮与晓敏的聊天记录
+·
+2026-07-1310:29:58-表输入.0-fromVW_TAB_MAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm',
+'m_infrastruct_project_capital_allocate_info_new') as tids) s
+2026-07-1310:29:58-表输入.0-WHERE
+find_in_set(t.trg_tab_id, s.tids)>0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输入.0-GROUPBYTRG_NODE_ID
+2026-07-1310:29:58-表输入.0-ERROR:ERRCODE-20005:
+输入的BLOCK_NODE_ID:117017,在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输.0-输的BLOCK_NODE_ID:|l
+P_BLOCK_NODE_ID在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1764)
+
+
+===== wechat-017 =====
+
+花皮与晓敏的聊天记录
+.
+Tnc_get_tap_mapping(aaqam,
+m_infrastruct_project_capital_allocate_info_new') as tids) s
+2026-07-1310:29:58-表输入.0-WHERE
+find in set(t.trg tab_id, s.tids)>0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输入.0-GROUPBYTRG_NODE_ID
+2026-07-1310:29:58-表输入.0-ERROR:ERRCODE-20005:
+输入的BLOCKNODE_ID:117017，在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输入.0-'输入的BLOCK_NODE_ID:|
+P_BLOCK_NODE_IDI'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database,java:1764)
+2026-07-1310:29:58-表输.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput,java:236)
+2026-07-1310:29:58-表输入0-atorgnentabo.di
+
+
+===== wechat-018 =====
+
+花皮与晓敏的聊天记录
+L.
+/
+find_in_set(t.trg_tab_id, s.tids)>0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输入.0-GROUPBYTRG_NODE_ID
+2026-07-1310:29:58-表输入.0-ERROR:ERRCODE-20005:
+输入的BLOCK_NODE_ID:117017，在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISEAPPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输入.0-'输入的BLOCK_NODE_ID:Ⅱ
+P_BLOCK_NODE_IDI',在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE）"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36at CALL
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1764)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput,java:236)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput,java:140)
+2026-07-1310:29:58-表输入.0-atora.pentaho.di.trans.ste
+
+
+===== wechat-019 =====
+
+花皮与晓敏的聊天记录
++
+2026-07-1310:29:58-表输入.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输.0-GROUPBYTRG_NODE_ID
+2026-07-1310:29:58-表输入.0-ERROR:ERRCODE-20005:
+输入的BLOCKNODE_ID:117017,在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输入.0-输入的BLOCK_NODE_ID:|
+P_BLOCK_NODE_IDI'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database,java:1764)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput.,java:236)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput.java:140)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+p.RunThread.run(RunThread,java:62)
+2026-07-1310:29:58-表输入.0-at
+
+
+===== wechat-020 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输.0-GROUPBYTRG_NODE_ID
+2026-07-1310:29:58-表输.0-ERROR:ERRCODE-20005:
+输入的BLOCKNODEID:117017，在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输.0-'输入的BLOCK_NODE_ID:|
+PBLOCKNODE_IDI'在DIMMAPPING_STEPPROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1764)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput,java:236)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput.java:140)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+p.RunThread.run(RunThread,java:62)
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Thread,java:750)
+2026-07-1310:29:58-表输入.0-Causedby:
+
+
+===== wechat-021 =====
+
+花皮与晓敏的聊天记录
+.·
+八DLULNINUUC_IU.II/UI/,仕
+DIM_MAPPINGSTEPPROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISEAPPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输.0-'输的BLOCK_NODE_ID:Ⅱl
+PBLOCKNODE_IDI'在DIMMAPPINGSTEPPROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database,java:1764)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput,java:236)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput,java:140)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+p.RunThread.run(RunThread,java:62)
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Threadjava:750)
+2026-07-1310:29:58-表输入.0-Causedby:
+com.kingbase86.util.KSQLException:ERROR:
+ERRCODE-20005:输入的BLOCK_NODE_ID:117017,在
+DIMMAPPINGSTEPPROCESS丰中
+
+
+===== wechat-022 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISEAPPLICATIONERROR(-20005,
+2026-07-1310:29:58-表输.0-'输的BLOCK_NODE_ID:|
+PBLOCKNODE_ID'在DIM_MAPPINGSTEPPROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。，
+2026-07-1310:29:58-表输入.0-TRUE)
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1764)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput,java:236)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput.,java:140)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+p.RunThread.run(RunThread,java:62)
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Thread.java:750)
+2026-07-1310:29:58-表输入.0-Caused by:
+com.kingbase86.util.KSQLException: ERROR:
+ERRCODE-20005:输入的BLOCKNODEID:117017,在
+DIMMAPPINGSTEPPROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+
+
+===== wechat-023 =====
+
+花皮与晓敏的聊天记录
+RAISE
+2026-07-1310:29:58-表输入.0-SQL statement"CALL
+RAISEAPPLICATIONERROR(-20005,
+2026-07-1310:29:58-表输入.0-输入的BLOCK_NODE_ID:|
+PBLOCKNODE_IDI'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1764)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput.java:236)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput.java:140)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+p.RunThread.run(RunThread,java:62)
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Thread,java:750)
+2026-07-1310:29:58-表输入.0-Causedby:
+com.kingbase86.util.KSQLException: ERROR:
+ERRCODE-20005:输的BLOCK_NODE_ID:117017,在
+DIM_MAPPINGSTEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+
+
+===== wechat-024 =====
+
+花皮与晓敏的聊天记录
+RAISE APPLICAIION_ERROR(-20005,
+2026-07-1310:29:58-表输.0-输的BLOCK_NODE_ID:Ⅱ
+PBLOCKNODEIDIL'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc get block exec sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1764)
+2026-07-1310:29:58-表输入.0-at org.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput,java:236)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput.,java:140)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+p.RunThread.run(RunThread,java:62)
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Thread,java:750)
+2026-07-1310:29:58-表输入.0-Caused by:
+com.kingbase86.util.KSQLException:ERROR:
+ERRCODE-20005:输入的BLOCKNODEID:117017,在
+DIMMAPPINGSTEPPROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+
+
+===== wechat-025 =====
+
+花皮与晓敏的聊天记录
+.·
+_U_W
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1764)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput.java:236)
+2026-07-13 10:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput,java:140)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+p.RunThread.run(RunThread,java:62)
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Thread.java:750)
+2026-07-1310:29:58-表输入.0-Causedby:
+com.kingbase86.util.KSQLException:ERROR:
+ERRCODE-20005:输入的BLOCKNODE_ID:117017,在
+DIM_MAPPINGSTEPPROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISEAPPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输.0-'输的BLOCK_NODE_ID:|
+P_BLOCK_NODE_IDI'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行
+
+
+===== wechat-026 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1764)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput.java:236)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput.java:140)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+p.RunThread.run(RunThread,java:62)
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Thread,java:750)
+2026-07-1310:29:58-表输入.0-Causedby:
+com.kingbase86.util.KSQLException: ERROR:
+ERRCODE-20005:输入的BLOCKNODEID:117017，在
+DIM_MAPPINGSTEPPROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输入.0-输入的BLOCK_NODE_ID:|
+P_BLOCK_NODE_IDI'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+
+
+===== wechat-027 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1764)
+2026-07-13 10:29:58-表输入.0-at org.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput,java:236)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput,java:140)
+2026-07-13 10:29:58-表输入.0-at org.pentaho.di.trans.ste
+p.RunThread.run(RunThread,java:62)
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Thread,java:750)
+2026-07-1310:29:58-表输入.0-Causedby:
+com.kingbase86.util.KSQLException:ERROR:
+ERRCODE-20005:输入的BLOCKNODEID:117017，在
+DIM_MAPPINGSTEPPROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISEAPPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输入.0-输入的BLOCKNODE_ID:Ⅱ
+P_BLOCK_NODE_IDI'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+
+
+===== wechat-028 =====
+
+花皮与晓敏的聊天记录
+apase.Datapase.openuuery(Uatapase,java:I/b4)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput,java:236)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput,java:140)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+p.RunThread.run(RunThreadjava:62)
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Thread,java:750)
+2026-07-1310:29:58-表输.0-Caused by:
+com.kingbase86.util.KSQLException:ERROR:
+ERRCODE-20005:输入的BLOCKNODEID:117017在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输入.0-输入的BLOCK_NODE_ID:|
+P_BLOCK_NODE_IDI'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl.java:2676)
+2026-07-13.10:29:58.
+丰）
+
+
+===== wechat-029 =====
+
+花皮与晓敏的聊天记录
+p…p…u…puy…pu
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput.java:140)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+p.RunThread.run(RunThread,java:62)
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Thread.java:750)
+2026-07-1310:29:58-表输入.0-Caused by:
+com.kingbase86.util.KSQLException:ERROR:
+ERRCODE-20005:输入的BLOCKNODEID:117017,在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION ERROR(-20005,
+2026-07-1310:29:58-表输入.0-输入的BLOCK_NODE_ID:|
+P_BLOCK_NODE_IDI'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl.java:2676)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl,java
+:2368)
+
+
+===== wechat-030 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+p.RunThread.run(RunThread.java:62)
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Thread,java:750)
+2026-07-1310:29:58-表输.0-Caused by:
+com.kingbase86.util.KSQLException: ERROR:
+ERRCODE-20005:输入的BLOCKNODEID:117017，在
+DIMMAPPINGSTEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISEAPPLICATIONERROR(-20005,
+2026-07-1310:29:58-表输.0-'输入的BLOCK_NODE_ID:Ⅱ
+P_BLOCKNODEIDI'在DIMMAPPINGSTEPPROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl.java:2676)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl.java
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpl,java:319)
+
+
+===== wechat-031 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Thread,java:750)
+2026-07-1310:29:58-表输入.0-Causedby:
+com.kingbase86.util.KSQLException: ERROR:
+ERRCODE-20005:输入的BLOCKNODEID:117017,在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输入.0-输入的BLOCK_NODE_ID:|
+P_BLOCKNODE_ID'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl.java:2676)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl.java
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpl.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executelnternal(KbStatement.,java:472)
+
+
+===== wechat-032 =====
+
+花皮与晓敏的聊天记录
+∠u∠0-v/-1310.∠y.00-衣八.0-LdusuUy.
+com.kingbase86.util.KSQLException:ERROR:
+ERRCODE-20005:输入的BLOCK_NODE_ID:117017,在
+DIMMAPPINGSTEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISEAPPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输入.0-'输入的BLOCK_NODE_ID:Ⅱ
+P_BLOCK_NODE_IDI在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl.java:2676)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl.java
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpl,java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executelnternal(KbStatement.java:472)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86jdbc.Kb
+Statement.execute(KbStatement.java:392)
+2026-07-1310:29:58-表输入.0-atcom.king
+
+
+===== wechat-033 =====
+
+花皮与晓敏的聊天记录
+DIMMAPPINGSTEPPROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISEAPPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输入.0-输入的BLOCK_NODE_ID:II
+PBLOCKNODEID在DIMMAPPINGSTEPPROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl.java:2676)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl,java
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpl.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executelnternal(Kbstatement,java:472)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.execute(KbStatement,java:392)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+
+
+===== wechat-034 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISEAPPLICATIONERROR(-20005,
+2026-07-1310:29:58-表输.0-'输的BLOCK_NODE_ID:Ⅱ
+P_BLOCK_NODE_IDII'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_ block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl.java:2676)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl.java
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpl.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executelnternal(KbStatement,java:472)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.execute(KbStatement.java:392)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeCachedSql(KbStatement.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+
+
+===== wechat-035 =====
+
+花皮与晓敏的聊天记录
+RAISE
+2026-07-1310:29:58-表输.0-SQLstatement"CALL
+RAISEAPPLICATIONERROR(-20005,
+2026-07-1310:29:58-表输.0-'输的BLOCK_NODE_ID:Ⅱ
+PBLOCKNODE_IDI在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl.java:2676)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl.java
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpl.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executelnternal(KbStatement.,java:472)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.execute(KbStatement,java:392)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeCachedSql(KbStatement.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+
+
+===== wechat-036 =====
+
+花皮与晓敏的聊天记录
++
+_-,
+2026-07-1310:29:58-表输入.0-输的BLOCK_NODE_ID:|
+P_BLOCKNODE_IDI'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。，
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl.java:2676)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl.java
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpl.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executelnternal(KbStatement,java:472)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86jdbc.Kb
+Statement.execute(Kbstatement,java:392)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeCachedSql(KbStatement,java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeQuery(KbStatement,java:246)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1753)
+
+
+===== wechat-037 =====
+
+花皮与晓敏的聊天记录
+中未找到对应步骤！请保存步骤后再重新执行。
+1
+2026-07-1310:29:58-表输入.0-TRUE)"
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get_ block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl.java:2676)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl.java
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpl.,java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executelnternal(Kbstatement.java:472)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86jdbc.Kb
+Statement.execute(Kbstatement.java:392)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement.java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeCachedSql(KbStatement.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement.java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86jdbc.Kb
+Statement.executeQuery(KbStatement.java:246)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1753)
+2026-07-1310:29:58-表输入.0-..4more
+2026-07-1310:29:58-表输入.0-Finishedreadingquery,
+
+
+===== wechat-038 =====
+
+花皮与晓敏的聊天记录
+.
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl.java:2676)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl.java
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpl,java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executelnternal(KbStatement,java:472)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.execute(KbStatement.java:392)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeCachedSql(KbStatement.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement.java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeQuery(KbStatement.java:246)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1753)
+2026-07-1310:29:58-表输入.0-..4more
+2026-07-1310:29:58-表输入.0-Finishedreadingquery,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+
+
+===== wechat-039 =====
+
+花皮与晓敏的聊天记录
+2u2b-u/-131u:zy:5δ-表输入.u-atcom.kingDaseob.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl,java:2676)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl.java
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpljava:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executelnternal(KbStatement,java:472)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.execute(KbStatement.java:392)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86jdbc.Kb
+Statement.executeWithFlags(KbStatement.java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeCachedSql(KbStatement,java:319)
+2026-07-1310:29:58-表输入.0-at com.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86jdbc.Kb
+Statement.executeQuery(KbStatement,java:246)
+2026-07-1310:29:58-表输入.0-at org.pentaho.di.core.dat
+abase.Database.openQuery(Database,java:1753)
+2026-07-1310:29:58-表输入.0-.4more
+2026-07-1310:29:58-表输入.0-Finishedreadingquery,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理(1=0,O=0,R=0,
+
+
+===== wechat-040 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl.java
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpl,java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86jdbc.Kb
+Statement.executelnternal(Kbstatement,java:472)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.execute(KbStatement,java:392)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeCachedSql(KbStatement.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement.java:296)
+2026-07-1310:29:58-表输入.0-at com.kingbase86.jdbc.Kb
+Statement.executeQuery(KbStatement.java:246)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database,java:1753)
+2026-07-1310:29:58-表输入.0-.4more
+2026-07-1310:29:58-表输入.0-Finishedreadingquery
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR)：错误被
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理（1=0,O=0,R=0，
+W=0,U=0,E=1)
+2026-07-1310:29:58-各层T0主题层映射-转换被检测
+2026-07-1310:29:58-各层T0主题层映射，转换正
+
+
+===== wechat-041 =====
+
+花皮与晓敏的聊天记录
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpl.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executelnternal(KbStatement.java:472)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.execute(KbStatement.java:392)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeCachedSql(KbStatement.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeQuery(KbStatement.java:246)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Databasejava:1753)
+2026-07-1310:29:58-表输入.0-.4more
+2026-07-1310:29:58-表输入.0-Finishedreadingquery,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理(1=0,O=0,R=0,
+W=0, U=0, E=1)
+2026-07-1310:29:58-各层T0主题层映射-转换被检测
+2026-07-1310:29:58-各层T0主题层映射-转换正在杀死其他
+步骤！
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+
+
+===== wechat-042 =====
+
+花皮与晓敏的聊天记录
+.QueryExecutorlmpl.execute(QueryExecutorlmpl.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executelnternal(KbStatement,java:472)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.execute(KbStatement.java:392)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeCachedSql(Kbstatement.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeQuery(KbStatement.,java:246)
+2026-07-1310:29:58-表输入.0-at org.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1753)
+2026-07-1310:29:58-表输入.0-..4more
+2026-07-1310:29:58-表输入.0-Finishedreadingquery,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理(1=0,O=0,R=0,
+W=0,U=0, E=1)
+2026-07-1310:29:58-各层TO主题层映射-转换被检测
+2026-07-1310:29:58-各层TO主题层映射-转换正在杀死其他
+步骤！
+2026-07-1310:29:58-各层TO主题层映射-ERROR)：错误被
+检测到！
+
+
+===== wechat-043 =====
+
+花皮与晓敏的聊天记录
+...
+tateen.executeenia(nuotdteeava.4/)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.execute(KbStatement.java:392)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeCachedSql(KbStatement,java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeQuery(KbStatement.java:246)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database,java:1753)
+2026-07-1310:29:58-表输入.0-..4more
+2026-07-1310:29:58-表输入.0- Finished readingquery,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理(1=0,O=0,R=0,
+W=0,U=0, E=1)
+2026-07-1310:29:58-各层TO主题层映射-转换被检测
+2026-07-1310:29:58-各层T0主题层映射-转换正在杀死其他
+步骤!
+2026-07-1310:29:58-各层TO主题层映射-ERROR)：错误被
+检测到！
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+
+
+===== wechat-044 =====
+
+花皮与晓敏的聊天记录
+.
+2026-07-1310:29:58-表输入.0-atcom.kingbase86jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeCachedSql(Kbstatement.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeQuery(KbStatement,java:246)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1753)
+2026-07-1310:29:58-表输入.0-4more
+2026-07-1310:29:58 -表输入.0-Finished reading query,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理（1=0,O=0,R=0,
+W=0, U=0, E=1)
+2026-07-1310:29:58-各层TO主题层映射-转换被检测
+2026-07-1310:29:58-各层TO主题层映射-转换正在杀死其他
+步骤！
+2026-07-1310:29:58-各层TO主题层映射-ERROR)：错误被
+检测到！
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+花皮
+2026年7月14日10:05
+
+
+===== wechat-045 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeCachedSql(Kbstatement.,java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeQuery(KbStatement,java:246)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Databasejava:1753)
+2026-07-1310:29:58-表输入.0-4more
+2026-07-1310:29:58-表输入.0-Finished readingquery,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR)：错误被
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理（1=0,O=0,R=0,
+W=0,U=0, E=1)
+2026-07-1310:29:58-各层T0主题层映射-转换被检测
+2026-07-1310:29:58-各层TO主题层映射-转换正在杀死其他
+步骤！
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+花皮
+2026年7月14日10:05
+大概是在哪个步骤去看看情况
+
+
+===== wechat-046 =====
+
+花皮与晓敏的聊天记录
+...
+2026-0/-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement.,java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86jdbc.Kb
+Statement.executeQuery(KbStatement.,java:246)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1753)
+2026-07-1310:29:58-表输入.0-4more
+2026-07-1310:29:58-表输入.0-Finishedreadingquery,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR)：错误被
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理（1=0,O=0,R=0，
+W=0,U=0, E=1)
+2026-07-1310:29:58-各层TO主题层映射-转换被检测
+2026-07-1310:29:58-各层TO主题层映射-转换正在杀死其他
+步骤！
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+花皮
+2026年7月14日10:05
+大概是在哪个步骤去看看情况
+晓敏
+2026年7月14日10:06
+主题层工作流重新配置
+
+
+===== wechat-047 =====
+
+花皮与晓敏的聊天记录
+..
+cvcu-v1-1√10.c.0-八.0-acnyvascouJuu.1
+Statement.executeQuery(KbStatement,java:246)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database,java:1753)
+2026-07-1310:29:58-表输入.0-.4more
+2026-07-1310:29:58-表输入.0-Finished reading query,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理(1=0,O=0,R=0,
+W=0,U=0, E=1)
+2026-07-1310:29:58-各层T0主题层映射-转换被检测
+2026-07-1310:29:58-各层TO主题层映射-转换正在杀死其他
+步骤！
+2026-07-1310:29:58-各层TO主题层映射-ERROR)：错误被
+检测到！
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+花皮
+2026年7月14日10:05
+大概是在哪个步骤去看看情况
+晓敏
+2026年7月14日10:06
+主题层工作流重新配置
+花皮
+2026年7月14日10:07
+
+
+===== wechat-048 =====
+
+花皮与晓敏的聊天记录
+abase.Database.openQuery(Database,java:1753)
+2026-07-1310:29:58-表输入.0-..4more
+2026-07-1310:29:58-表输入.0- Finished reading query,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理(1=0,O=0,R=0,
+W=0,U=0,E=1)
+2026-07-1310:29:58-各层T0主题层映射-转换被检测
+2026-07-1310:29:58-各层T0主题层映射-转换正在杀死其他
+步骤！
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+花皮
+2026年7月14日10:05
+大概是在哪个步骤去看看情况
+晓敏
+2026年7月14日10:06
+主题层工作流重新配置
+花皮
+2026年7月14日10:07
+它现在执行是从贴源到主题层出错，需要去主题层那儿看对吗
+
+
+===== wechat-049 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-Finishedreading query,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理（1=0,O=0,R=0,
+W=0,U=0, E=1)
+2026-07-1310:29:58-各层TO主题层映射-转换被检测
+2026-07-1310:29:58-各层T0主题层映射-转换正在杀死其他
+步骤！
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+花皮
+2026年7月14日10:05
+大概是在哪个步骤去看看情况
+晓敏
+2026年7月14日10:06
+主题层工作流重新配置
+花皮
+2026年7月14日10:07
+它现在执行是从贴源到主题层出错，需要去主题层那儿看对吗
+晓敏
+2026年7月14日10:07
+是的贴源层到主题层也有映射的工作流配置
+
+
+===== wechat-050 =====
+
+花皮与晓敏的聊天记录
+·
+202b-U/-131U:2Y:58-各层1U题层映射-上KKUK)：错误
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理(1=0,O=0,R=0,
+W=0,U=0, E=1)
+2026-07-1310:29:58-各层T0主题层映射-转换被检测
+2026-07-1310:29:58-各层T0主题层映射-转换正在杀死其他
+步骤！
+2026-07-1310:29:58-各层TO主题层映射-ERROR)：错误被
+检测到！
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+花皮
+2026年7月14日10:05
+大概是在哪个步骤去看看情况
+晓敏
+2026年7月14日10:06
+主题层工作流重新配置
+花皮
+2026年7月14日10:07
+它现在执行是从贴源到主题层出错，需要去主题层那儿看对吗
+晓敏
+2026年7月14日10:07
+是的贴源层到主题层也有映射的工作流配置
+花皮
+2026年7月14日10:08
+
+
+===== wechat-051 =====
+
+花皮与晓敏的聊天记录
+.
+…，，…
+W=0,U=0, E=1)
+2026-07-1310:29:58-各层T0主题层映射-转换被检测
+2026-07-1310:29:58-各层TO主题层映射-转换正在杀死其他
+步骤！
+2026-07-1310:29:58-各层TO主题层映射-ERROR)：错误被
+检测到！
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+花皮
+2026年7月14日10:05
+大概是在哪个步骤去看看情况
+晓敏
+2026年7月14日10:06
+主题层工作流重新配置
+花皮
+2026年7月14日10:07
+它现在执行是从贴源到主题层出错，需要去主题层那儿看对吗
+晓敏
+2026年7月14日10:07
+是的贴源层到主题层也有映射的工作流配置
+花皮
+2026年7月14日10:08
+请问是这里吗
+
+
+===== wechat-052 =====
+
+花皮与晓敏的聊天记录
+··.
+2026-07-1310:29:58-各层TO主题层映射-转换正在杀死其他
+步骤！
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+花皮
+2026年7月14日10:05
+大概是在哪个步骤去看看情况
+晓敏
+2026年7月14日10:06
+主题层工作流重新配置
+花皮
+2026年7月14日10:07
+它现在执行是从贴源到主题层出错，需要去主题层那儿看对吗
+晓敏
+2026年7月1410:07
+是的贴源层到主题层也有映射的工作流配置
+花皮
+2026年7月14日10:08
+请问是这里吗
+花皮
+2026年7月14日10:08
+
+
+===== wechat-053 =====
+
+花皮与晓敏的聊天记录
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+花皮
+2026年7月14日10:05
+大概是在哪个步骤去看看情况
+晓敏
+2026年7月14日10:06
+主题层工作流重新配置
+花皮
+2026年7月14日10:07
+它现在执行是从贴源到主题层出错，需要去主题层那儿看对吗
+晓敏
+2026年7月14日10:07
+是的贴源层到主题层也有映射的工作流配置
+花皮
+2026年7月14日10:08
+请问是这里吗
+花皮
+2026年7月14日10:08
+
+
+===== wechat-054 =====
+
+花皮与晓敏的聊天记录
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+花皮
+2026年7月14日10:05
+大概是在哪个步骤去看看情况
+晓敏
+2026年7月14日10:06
+主题层工作流重新配置
+花皮
+2026年7月14日10:07
+它现在执行是从贴源到主题层出错，需要去主题层那儿看对吗
+晓敏
+2026年7月14日10:07
+是的贴源层到主题层也有映射的工作流配置
+花皮
+2026年7月14日10:08
+请问是这里吗
+花皮
+2026年7月14日10:08
+
+
+===== wechat-055 =====
+
+花皮与晓敏的聊天记录
+2
+节点映射缺天木保仔
+花皮
+2026年7月14日10:05
+大概是在哪个步骤去看看情况
+晓敏
+2026年7月14日10:06
+主题层工作流重新配置
+花皮
+2026年7月14日10:07
+它现在执行是从贴源到主题层出错，需要去主题层那儿看对吗
+晓敏
+2026年7月14日10:07
+是的贴源层到主题层也有映射的工作流配置
+花皮
+2026年7月14日10:08
+请问是这里吗
+花皮
+2026年7月14日10:08
+2026年7月14日10:09
+
+
+===== wechat-056 =====
+
+花皮与晓敏的聊天记录
+化皮
+2026年/月14日10:05
+大概是在哪个步骤去看看情况
+晓敏
+2026年7月14日10:06
+主题层工作流重新配置
+花皮
+2026年7月14日10:07
+它现在执行是从贴源到主题层出错，需要去主题层那儿看对吗
+晓敏
+2026年7月14日10:07
+是的贴源层到主题层也有映射的工作流配置
+花皮
+2026年7月14日10:08
+请问是这里吗
+花皮
+2026年7月14日10:08
+晓敏
+2026年7月14日10:09
+是的
+
+
+===== wechat-057 =====
+
+花皮与晓敏的聊天记录
+..
+晓敏
+2026年7月14日10:06
+主题层工作流重新配置
+花皮
+2026年7月14日10:07
+它现在执行是从贴源到主题层出错，需要去主题层那儿看对吗
+晓敏
+2026年7月14日10:07
+是的贴源层到主题层也有映射的工作流配置
+花皮
+2026年7月14日10:08
+请问是这里吗
+花皮
+2026年7月14日10:08
+晓敏
+2026年7月14日10:09
+是的
+晓敏
+2026年7月14日10:10
+这里配置完还有下边的工作流配置
+
+
+===== wechat-058 =====
+
+花皮与晓敏的聊天记录
+.
+王题层工作流重新配置
+花皮
+2026年7月14日10:07
+它现在执行是从贴源到主题层出错，需要去主题层那儿看对吗
+晓敏
+2026年7月14日10:07
+是的贴源层到主题层也有映射的工作流配置
+花皮
+2026年7月14日10:08
+请问是这里吗
+花皮
+2026年7月14日10:08
+晓敏
+2026年7月14日10:09
+是的
+晓敏
+2026年7月14日10:10
+这里配置完还有下边的工作流配置
+花皮
+2026年7月14日10:13
+
+
+===== wechat-059 =====
+
+花皮与晓敏的聊天记录
+.
+化皮
+2026年/月14日10:01
+它现在执行是从贴源到主题层出错，需要去主题层那儿看对吗
+晓敏
+2026年7月14日10:07
+是的贴源层到主题层也有映射的工作流配置
+花皮
+2026年7月14日10:08
+请问是这里吗
+花皮
+2026年7月14日10:08
+晓敏
+2026年7月14日10:09
+是的
+晓敏
+2026年7月14日10:10
+这里配置完还有下边的工作流配置
+花皮
+2026年7月14日10:13
+像这些字段需要关联映射嘛
+
+
+===== wechat-060 =====
+
+花皮与晓敏的聊天记录
+·.
+晓敏
+2026年7月14日10:07
+是的贴源层到主题层也有映射的工作流配置
+花皮
+2026年7月14日10:08
+请问是这里吗
+花皮
+2026年7月14日10:08
+晓敏
+2026年7月14日10:09
+是的
+晓敏
+2026年7月14日10:10
+这里配置完还有下边的工作流配置
+花皮
+2026年7月14日10:13
+像这些字段需要关联映射嘛
+花皮
+2026年7月14日10:13
+

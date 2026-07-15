@@ -13,4 +13,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
   List<Invoice> findByReimbursementIdOrderByCreatedAtAsc(Long reimbursementId);
 
   Optional<Invoice> findByAttachmentIdAndDeletedFalse(Long attachmentId);
+
+  Optional<Invoice> findBySupportAttachmentIdAndDeletedFalse(Long supportAttachmentId);
 }

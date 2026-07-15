@@ -61,7 +61,7 @@ public record ReimbursementDTO(
       r.getCreatedBy(), r.getCreatedAt(), r.getUpdatedBy(), r.getUpdatedAt(),
       attachments.stream().map(AttachmentDTO::new).toList(),
       approvalLogs.stream().map(ApprovalLogDTO::new).toList(),
-      invoices.stream().map(InvoiceDTO::new).toList(),
+      invoices.stream().map(invoice -> new InvoiceDTO(invoice, attachments)).toList(),
       expenseItems.stream().map(item -> new ExpenseItemDTO(item, invoices)).toList(),
       invoiceTemps.stream().map(InvoiceTempDTO::new).toList()
     );
@@ -120,6 +120,8 @@ public record ReimbursementDTO(
     Long invoiceTempId,
     Long attachmentId,
     Long expenseItemId,
+    Long supportAttachmentId,
+    AttachmentDTO supportAttachment,
     String imagePath,
     String ocrRawJson,
     String invoiceNo,
@@ -156,7 +158,12 @@ public record ReimbursementDTO(
     LocalDateTime updatedAt
   ) {
     public InvoiceDTO(Invoice i) {
+      this(i, List.of());
+    }
+
+    public InvoiceDTO(Invoice i, List<Attachment> attachments) {
       this(i.getId(), i.getReimbursementId(), i.getInvoiceTempId(), i.getAttachmentId(), i.getExpenseItemId(),
+        i.getSupportAttachmentId(), supportAttachment(i, attachments),
         i.getImagePath(), i.getOcrRawJson(), i.getInvoiceNo(), i.getInvoiceCode(),
         i.getInvoiceDate(), i.getBuyerName(), i.getSellerName(), i.getSellerShortName(),
         i.getInvoiceContentShortName(), i.getSubmitDate(), i.getBuyerTaxId(),
@@ -166,6 +173,15 @@ public record ReimbursementDTO(
         i.getReviewer(), i.getIssuer(), i.getBuyerAddressPhone(), i.getBuyerBankInfo(),
         i.getSellerAddressPhone(), i.getSellerBankInfo(), i.getRemarks(), i.getStatus(),
         i.getCreatedBy(), i.getCreatedAt(), i.getUpdatedBy(), i.getUpdatedAt());
+    }
+
+    private static AttachmentDTO supportAttachment(Invoice invoice, List<Attachment> attachments) {
+      if (invoice.getSupportAttachmentId() == null) return null;
+      return attachments.stream()
+        .filter(attachment -> invoice.getSupportAttachmentId().equals(attachment.getId()))
+        .findFirst()
+        .map(AttachmentDTO::new)
+        .orElse(null);
     }
   }
 

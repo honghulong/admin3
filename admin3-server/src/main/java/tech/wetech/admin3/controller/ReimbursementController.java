@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import tech.wetech.admin3.common.authz.RequiresPermissions;
 import tech.wetech.admin3.sys.service.ReimbursementService;
 import tech.wetech.admin3.sys.service.dto.PageDTO;
@@ -99,6 +100,21 @@ public class ReimbursementController {
   @DeleteMapping("/{id}/invoices/{invoiceId}")
   public ResponseEntity<ReimbursementDTO> deleteInvoice(@PathVariable Long id, @PathVariable Long invoiceId) {
     return ResponseEntity.ok(reimbursementService.deleteInvoice(id, invoiceId));
+  }
+
+  @RequiresPermissions("reimbursement:update")
+  @PostMapping("/{id}/invoices/{invoiceId}/support-attachment")
+  public ResponseEntity<ReimbursementDTO> uploadInvoiceSupportAttachment(
+    @PathVariable Long id,
+    @PathVariable Long invoiceId,
+    @RequestParam("file") MultipartFile file) {
+    return ResponseEntity.ok(reimbursementService.uploadInvoiceSupportAttachment(id, invoiceId, file));
+  }
+
+  @RequiresPermissions("reimbursement:update")
+  @DeleteMapping("/{id}/invoices/{invoiceId}/support-attachment")
+  public ResponseEntity<ReimbursementDTO> deleteInvoiceSupportAttachment(@PathVariable Long id, @PathVariable Long invoiceId) {
+    return ResponseEntity.ok(reimbursementService.deleteInvoiceSupportAttachment(id, invoiceId));
   }
 
   @RequiresPermissions("reimbursement:view")

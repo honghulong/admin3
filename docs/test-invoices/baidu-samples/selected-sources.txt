@@ -1,0 +1,8 @@
+invoice-sample-01.png <- D:\hongmengProjects\admin3\docs\test-invoices\baidu-samples\caidao-images\caidao-01.png
+invoice-sample-02.png <- D:\hongmengProjects\admin3\docs\test-invoices\baidu-samples\caidao-images\caidao-02.png
+invoice-sample-03.png <- D:\hongmengProjects\admin3\docs\test-invoices\baidu-samples\caidao-images\caidao-03.png
+invoice-sample-04.png <- D:\hongmengProjects\admin3\docs\test-invoices\baidu-samples\caidao-images\caidao-04.png
+invoice-sample-05.png <- D:\hongmengProjects\admin3\docs\test-invoices\baidu-samples\caidao-images\caidao-05.png
+invoice-sample-06.png <- D:\hongmengProjects\admin3\docs\test-invoices\baidu-samples\web-images\web-07.png
+invoice-sample-07.png <- D:\hongmengProjects\admin3\docs\test-invoices\baidu-samples\rendered\shenzhen-vat-e-normal-real-1.png
+invoice-sample-08.png <- D:\hongmengProjects\admin3\docs\test-invoices\baidu-samples\rendered\adeo-vat-e-special-real-1.png

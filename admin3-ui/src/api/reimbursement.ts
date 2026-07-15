@@ -125,6 +125,24 @@ export function deleteInvoice(reimbursementId: number, invoiceId: number) {
     });
 };
 
+export function uploadInvoiceSupportAttachment(reimbursementId: number, invoiceId: number, file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return request({
+        url: `${BASE_URI}/reimbursements/${reimbursementId}/invoices/${invoiceId}/support-attachment`,
+        method: 'post',
+        headers: {'Content-Type': 'multipart/form-data'},
+        data: formData
+    });
+};
+
+export function deleteInvoiceSupportAttachment(reimbursementId: number, invoiceId: number) {
+    return request({
+        url: `${BASE_URI}/reimbursements/${reimbursementId}/invoices/${invoiceId}/support-attachment`,
+        method: 'delete'
+    });
+};
+
 export function saveExpenseItems(reimbursementId: number, items: any[]) {
     return request({
         url: `${BASE_URI}/reimbursements/${reimbursementId}/expense-items`,

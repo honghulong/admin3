@@ -18,6 +18,8 @@ public class Invoice extends BaseEntity {
 
   private Long expenseItemId;
 
+  private Long supportAttachmentId;
+
   @Column(length = 500)
   private String imagePath;
 
@@ -155,6 +157,14 @@ public class Invoice extends BaseEntity {
 
   public void setExpenseItemId(Long expenseItemId) {
     this.expenseItemId = expenseItemId;
+  }
+
+  public Long getSupportAttachmentId() {
+    return supportAttachmentId;
+  }
+
+  public void setSupportAttachmentId(Long supportAttachmentId) {
+    this.supportAttachmentId = supportAttachmentId;
   }
 
   public void setImagePath(String imagePath) {

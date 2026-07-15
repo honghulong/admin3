@@ -1,0 +1,60 @@
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2026-07-15T17:37:55.944+08:00  INFO 18892 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 18892 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-07-15T17:37:55.945+08:00  INFO 18892 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-07-15T17:37:56.981+08:00  INFO 18892 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-15T17:37:57.190+08:00  INFO 18892 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 193 ms. Found 19 JPA repository interfaces.
+2026-07-15T17:37:58.083+08:00  INFO 18892 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-07-15T17:37:58.112+08:00  INFO 18892 --- [admin3] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-15T17:37:58.114+08:00  INFO 18892 --- [admin3] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-07-15T17:37:58.184+08:00  INFO 18892 --- [admin3] [           main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-07-15T17:37:58.188+08:00  INFO 18892 --- [admin3] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2156 ms
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+2026-07-15T17:37:58.522+08:00  INFO 18892 --- [admin3] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-15T17:37:58.630+08:00  INFO 18892 --- [admin3] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-07-15T17:37:58.690+08:00  INFO 18892 --- [admin3] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-07-15T17:37:58.945+08:00  INFO 18892 --- [admin3] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-15T17:37:58.984+08:00  INFO 18892 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-15T17:37:59.356+08:00  INFO 18892 --- [admin3] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@42238078
+2026-07-15T17:37:59.359+08:00  INFO 18892 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-15T17:37:59.407+08:00  WARN 18892 --- [admin3] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-07-15T17:38:01.233+08:00  INFO 18892 --- [admin3] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-15T17:38:01.387+08:00  INFO 18892 --- [admin3] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-15T17:38:01.993+08:00  INFO 18892 --- [admin3] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-15T17:38:03.817+08:00  WARN 18892 --- [admin3] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-15T17:38:04.455+08:00  INFO 18892 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-07-15T17:38:04.487+08:00  INFO 18892 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 9.156 seconds (process running for 9.817)
+2026-07-15T17:38:04.802+08:00  INFO 18892 --- [admin3] [nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-15T17:38:04.804+08:00  INFO 18892 --- [admin3] [nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-15T17:38:04.804+08:00  INFO 18892 --- [admin3] [nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-07-15T17:44:00.150+08:00  INFO 18892 --- [admin3] [io-9099-exec-10] t.w.a.controller.AttachmentController    : Attachment uploaded: id=82, file=2026-02-26_didi-invoice_26117000000328150997.pdf, size=74747, reimbursementId=42, stored=668ea02f-ae86-42a7-aa60-9c3d5622ff55.pdf
+2026-07-15T17:44:00.155+08:00  INFO 18892 --- [admin3] [io-9099-exec-10] t.w.a.controller.AttachmentController    : OCR triggered for attachment 82
+2026-07-15T17:44:00.173+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 82, file: uploads\attachments\668ea02f-ae86-42a7-aa60-9c3d5622ff55.pdf
+2026-07-15T17:44:00.199+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR temp file saved: C:\Users\Administrator\AppData\Local\Temp\reimbursement-ocr\071bbd71-c018-49d8-8e42-47618451cdef_2026-02-26_didi-invoice_26117000000328150997.pdf
+2026-07-15T17:44:06.324+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 82, result length: 8003
+2026-07-15T17:44:06.491+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Reimbursement 42 updated from OCR attachment 82, invoiceNo=26117000000328150997, amount=2.60
+2026-07-15T17:44:35.360+08:00  INFO 18892 --- [admin3] [nio-9099-exec-6] t.w.a.controller.AttachmentController    : Attachment uploaded: id=83, file=2026-04-10_didi-invoice_26447000000797905930.pdf, size=75709, reimbursementId=42, stored=6955cd28-c308-4dd7-bdfc-09588bff1fbb.pdf
+2026-07-15T17:44:35.360+08:00  INFO 18892 --- [admin3] [nio-9099-exec-6] t.w.a.controller.AttachmentController    : OCR triggered for attachment 83
+2026-07-15T17:44:35.371+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 83, file: uploads\attachments\6955cd28-c308-4dd7-bdfc-09588bff1fbb.pdf
+2026-07-15T17:44:35.390+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR temp file saved: C:\Users\Administrator\AppData\Local\Temp\reimbursement-ocr\8b7e476d-7fdf-4750-8b75-a1262030aded_2026-04-10_didi-invoice_26447000000797905930.pdf
+2026-07-15T17:44:41.285+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 83, result length: 7336
+2026-07-15T17:44:41.453+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Reimbursement 42 updated from OCR attachment 83, invoiceNo=26447000000797905930, amount=60.90
+2026-07-15T17:46:13.085+08:00  INFO 18892 --- [admin3] [nio-9099-exec-3] t.w.a.controller.AttachmentController    : Attachment uploaded: id=84, file=2026-07-07_vat_26117000000999324130.pdf, size=99350, reimbursementId=42, stored=185bd8d0-467b-4baa-a989-6c60cb0ef948.pdf
+2026-07-15T17:46:13.087+08:00  INFO 18892 --- [admin3] [nio-9099-exec-3] t.w.a.controller.AttachmentController    : OCR triggered for attachment 84
+2026-07-15T17:46:13.095+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 84, file: uploads\attachments\185bd8d0-467b-4baa-a989-6c60cb0ef948.pdf
+2026-07-15T17:46:13.115+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR temp file saved: C:\Users\Administrator\AppData\Local\Temp\reimbursement-ocr\6fccd0fa-3ea1-4ab3-952d-553710f0ab66_2026-07-07_vat_26117000000999324130.pdf
+2026-07-15T17:46:18.239+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 84, result length: 6676
+2026-07-15T17:46:18.383+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Reimbursement 42 updated from OCR attachment 84, invoiceNo=26117000000999324130, amount=172.90
+2026-07-15T17:46:58.059+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting support attachment OCR for attachment 85, file: uploads\attachments\5070ed44-59c6-44e9-a48a-4a9625905656.pdf
+2026-07-15T17:46:58.082+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR temp file saved: C:\Users\Administrator\AppData\Local\Temp\reimbursement-ocr\9568dcf1-5b6c-466a-80ab-a76b46a30f2a_2026-05-07_didi-trip_no-invoice-031.pdf
+2026-07-15T17:47:18.225+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting support attachment OCR for attachment 86, file: uploads\attachments\6458cd4a-fbbf-4df1-944e-706aed62595d.pdf
+2026-07-15T17:47:18.243+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR temp file saved: C:\Users\Administrator\AppData\Local\Temp\reimbursement-ocr\dfcf154b-f095-4eaf-9c14-e262eba1d403_2026-05-07_didi-trip_no-invoice-032.pdf
+2026-07-15T17:47:22.973+08:00  INFO 18892 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Support attachment 86 updated trip places for expense item 112: 汇峰中心C区 -> 珠岛宾馆-南门

@@ -57,6 +57,16 @@ public class OcrService {
     });
   }
 
+  public void recognizeInvoiceSupportAttachmentAsync(Long attachmentId, Path imagePath) {
+    Thread.startVirtualThread(() -> {
+      try {
+        recognizeInvoiceSupportAttachment(attachmentId, imagePath);
+      } catch (Exception e) {
+        log.error("Support attachment OCR async recognition failed for attachment {}: {}", attachmentId, e.getMessage(), e);
+      }
+    });
+  }
+
   public void recognizeAttachment(Long attachmentId, Path imagePath) {
     Attachment attachment = attachmentRepository.findById(attachmentId).orElse(null);
     if (attachment == null) {
@@ -81,6 +91,34 @@ public class OcrService {
       updateReimbursementFromOcr(attachment, ocrResultJson);
     } catch (Exception e) {
       log.error("OCR failed for attachment {}: {}", attachmentId, e.getMessage(), e);
+      attachment.setOcrStatus("failed");
+      String errMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+      attachment.setOcrResult("{\"error\":\"" + errMsg.replace("\"", "'") + "\"}");
+      attachmentRepository.save(attachment);
+    }
+  }
+
+  public void recognizeInvoiceSupportAttachment(Long attachmentId, Path imagePath) {
+    Attachment attachment = attachmentRepository.findById(attachmentId).orElse(null);
+    if (attachment == null) {
+      log.warn("Support attachment {} not found, skip OCR", attachmentId);
+      return;
+    }
+
+    log.info("Starting support attachment OCR for attachment {}, file: {}", attachmentId, imagePath);
+    attachment.setOcrStatus("processing");
+    attachmentRepository.save(attachment);
+
+    try {
+      byte[] imageBytes = Files.readAllBytes(imagePath);
+      String base64 = Base64.getEncoder().encodeToString(imageBytes);
+      String ocrResultJson = callOcrService(base64, attachment.getFileName());
+      attachment.setOcrStatus("completed");
+      attachment.setOcrResult(ocrResultJson);
+      attachmentRepository.save(attachment);
+      updateExpenseItemTripFromSupportOcr(attachment, ocrResultJson);
+    } catch (Exception e) {
+      log.error("Support attachment OCR failed for attachment {}: {}", attachmentId, e.getMessage(), e);
       attachment.setOcrStatus("failed");
       String errMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
       attachment.setOcrResult("{\"error\":\"" + errMsg.replace("\"", "'") + "\"}");
@@ -127,12 +165,35 @@ public class OcrService {
       String remarks = getJsonField(data, "remarks");
 
       if (!isEmpty(ocrText)) {
-        if (isEmpty(invoiceNo)) invoiceNo = regexExtract(ocrText, "发票号码[：:\\s]*(\\d{8,20})");
+        String invoiceNoFromText = regexExtract(ocrText, "发票号码[：:\\s]*(\\d{8,20})");
+        if (isBetterInvoiceNo(invoiceNoFromText, invoiceNo)) invoiceNo = invoiceNoFromText;
         if (isEmpty(invoiceCode)) invoiceCode = regexExtract(ocrText, "发票代码[：:\\s]*(\\d{10,20})");
         if (isEmpty(date)) date = regexExtract(ocrText, "开票日期[：:\\s]*(\\d{4}年\\d{1,2}月\\d{1,2}日)");
         if (isEmpty(totalAmount)) {
           totalAmount = regexExtract(ocrText, "(?:价税合计|小写|合计)[\\s\\S]{0,20}[¥￥]?\\s*(\\d+(?:\\.\\d{1,2})?)");
         }
+        if (isEmpty(buyerName)) buyerName = regexExtract(ocrText, "购买方信息[\\s\\S]{0,80}名称[：:]\\s*([^\\r\\n]+)");
+        if (isEmpty(sellerName)) sellerName = regexExtract(ocrText, "销售方信息[\\s\\S]{0,80}名称[：:]\\s*([^\\r\\n]+)");
+        if (isEmpty(sellerName)) sellerName = regexExtract(ocrText, "名称[：:]\\s*([^\\r\\n]*滴滴[^\\r\\n]*)");
+        List<String> taxIds = regexExtractAll(ocrText, "统一社会信用代码/纳税人识别号[：:]\\s*([0-9A-Z]{12,30})");
+        if (isEmpty(buyerTaxId) && !taxIds.isEmpty()) buyerTaxId = taxIds.get(0);
+        if (isEmpty(sellerTaxId) && taxIds.size() > 1) sellerTaxId = taxIds.get(1);
+        List<String> subtotalAmounts = extractMoneyBefore(ocrText, "出行人");
+        if (isEmpty(amountBeforeTax) && subtotalAmounts.size() >= 2) amountBeforeTax = subtotalAmounts.get(subtotalAmounts.size() - 2);
+        if (isEmpty(taxAmount) && subtotalAmounts.size() >= 1) taxAmount = subtotalAmounts.get(subtotalAmounts.size() - 1);
+        List<String> summaryAmounts = extractSummaryAmountPair(ocrText);
+        if (shouldUseSummaryAmountPair(totalAmount, summaryAmounts, amountBeforeTax, taxAmount)) {
+          amountBeforeTax = summaryAmounts.get(0);
+          taxAmount = summaryAmounts.get(1);
+        }
+        InvoiceParties parties = extractInvoiceParties(ocrText);
+        if (!isEmpty(parties.buyerName())) buyerName = parties.buyerName();
+        if (!isEmpty(parties.sellerName())) sellerName = parties.sellerName();
+        if (!isEmpty(parties.buyerTaxId())) buyerTaxId = parties.buyerTaxId();
+        if (!isEmpty(parties.sellerTaxId())) sellerTaxId = parties.sellerTaxId();
+        if (isEmpty(taxRate)) taxRate = regexExtract(ocrText, "(\\d+(?:\\.\\d+)?%)");
+        if (isEmpty(issuer)) issuer = regexExtract(ocrText, "开票人[：:]\\s*([^\\r\\n]+)");
+        if (isEmpty(invoiceType) && ocrText.contains("普通发票")) invoiceType = "普通发票";
       }
 
       LocalDateTime invoiceDate = parseInvoiceDate(date);
@@ -239,6 +300,49 @@ public class OcrService {
     }
   }
 
+  private void updateExpenseItemTripFromSupportOcr(Attachment attachment, String ocrResultJson) {
+    try {
+      Invoice invoice = invoiceRepository.findBySupportAttachmentIdAndDeletedFalse(attachment.getId()).orElse(null);
+      if (invoice == null) {
+        log.debug("Support attachment {} not linked to active invoice, skip trip update", attachment.getId());
+        return;
+      }
+      ReimbursementExpenseItem item = null;
+      if (invoice.getExpenseItemId() != null) {
+        item = expenseItemRepository.findById(invoice.getExpenseItemId()).orElse(null);
+      }
+      if (item == null) {
+        item = expenseItemRepository.findByInvoiceId(invoice.getId()).orElse(null);
+      }
+      if (item == null) {
+        log.debug("Invoice {} has no expense item, skip support trip update", invoice.getId());
+        return;
+      }
+
+      JsonNode data = unwrapOcrData(objectMapper.readTree(ocrResultJson));
+      String ocrText = data.has("ocr_text") ? data.get("ocr_text").asText() : "";
+      TripPlaces places = extractTripPlaces(ocrText);
+      boolean changed = false;
+      if (isEmpty(item.getStartPlace()) && !isEmpty(places.startPlace())) {
+        item.setStartPlace(stripSupplementaryChars(places.startPlace()));
+        changed = true;
+      }
+      if (isEmpty(item.getEndPlace()) && !isEmpty(places.endPlace())) {
+        item.setEndPlace(stripSupplementaryChars(places.endPlace()));
+        changed = true;
+      }
+      if (changed) {
+        item.setUpdatedBy(attachment.getUploadedBy());
+        item.setUpdatedAt(LocalDateTime.now());
+        expenseItemRepository.save(item);
+        log.info("Support attachment {} updated trip places for expense item {}: {} -> {}",
+          attachment.getId(), item.getId(), item.getStartPlace(), item.getEndPlace());
+      }
+    } catch (Exception e) {
+      log.warn("Failed to update trip places from support OCR attachment {}: {}", attachment.getId(), e.getMessage(), e);
+    }
+  }
+
   private JsonNode unwrapOcrData(JsonNode root) {
     JsonNode content = null;
     if (root.has("result") && root.get("result").has("content")) {
@@ -312,13 +416,12 @@ public class OcrService {
     BigDecimal amount = invoice.getTotalAmount();
     if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) return null;
     LocalDateTime now = LocalDateTime.now();
-    String expenseType = classifyExpenseType(invoice, ocrText);
+    String expenseType = classifyExpenseType(invoice, ocrText + " " + attachment.getFileName());
     ReimbursementExpenseItem item = expenseItemRepository.findByInvoiceId(invoice.getId()).orElse(null);
     if (item == null) {
       item = expenseItemRepository.findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(reimbursement.getId()).stream()
         .filter(existing -> expenseType.equals(existing.getExpenseType())
-          && "ocr".equals(existing.getSource())
-          && sameExpenseDate(existing.getExpenseDate(), invoice.getInvoiceDate()))
+          && canAutoLinkToExpenseItem(existing.getExpenseDate(), invoice.getInvoiceDate()))
         .findFirst()
         .orElse(null);
       if (item == null) {
@@ -335,7 +438,7 @@ public class OcrService {
     item.setExpenseType(expenseType);
     item.setOaExpenseName(oaExpenseName(expenseType));
     item.setRemark(invoice.getSellerName());
-    item.setDescription(firstNonBlank(invoice.getRemarks(), invoice.getSellerName(), ocrText));
+    item.setDescription(stripSupplementaryChars(firstNonBlank(invoice.getRemarks(), invoice.getSellerName(), ocrText)));
     item.setSource("ocr");
     item.setUpdatedBy(attachment.getUploadedBy());
     item.setUpdatedAt(now);
@@ -359,13 +462,120 @@ public class OcrService {
       .orElse(null);
   }
 
+  private InvoiceParties extractInvoiceParties(String ocrText) {
+    if (isEmpty(ocrText)
+      || !ocrText.contains("\u8d2d\u4e70\u65b9\u4fe1\u606f")
+      || !ocrText.contains("\u9500\u552e\u65b9\u4fe1\u606f")) {
+      return new InvoiceParties("", "", "", "");
+    }
+    List<String> names = regexExtractAll(ocrText, "\u540d\u79f0[\uff1a:]\\s*([^\\r\\n]+)");
+    List<String> taxIds = regexExtractAll(ocrText, "\u7edf\u4e00\u793e\u4f1a\u4fe1\u7528\u4ee3\u7801/\u7eb3\u7a0e\u4eba\u8bc6\u522b\u53f7[\uff1a:]\\s*([0-9A-Z]{12,30})");
+    if (names.size() < 2) return new InvoiceParties("", "", "", "");
+    return new InvoiceParties(
+      cleanPartyValue(names.get(0)),
+      cleanPartyValue(names.get(1)),
+      taxIds.isEmpty() ? "" : taxIds.get(0),
+      taxIds.size() < 2 ? "" : taxIds.get(1)
+    );
+  }
+
+  private String cleanPartyValue(String value) {
+    if (isEmpty(value)) return "";
+    return value.trim().replaceAll("\\s+", "");
+  }
+
+  private record InvoiceParties(String buyerName, String sellerName, String buyerTaxId, String sellerTaxId) {}
+
+  private TripPlaces extractTripPlaces(String ocrText) {
+    if (isEmpty(ocrText)) return new TripPlaces("", "");
+    TripPlaces didiTrip = extractDidiTripTablePlaces(ocrText);
+    if (!isEmpty(didiTrip.startPlace()) || !isEmpty(didiTrip.endPlace())) return didiTrip;
+    String start = firstNonBlank(
+      regexExtract(ocrText, "(?:出发地|始发地|始发)[：:\\s]*([^\\r\\n]{2,40})"),
+      regexExtract(ocrText, "出发地\\s+到达地[\\s\\S]{0,80}\\n\\s*([^\\r\\n\\s]{2,40})\\s+([^\\r\\n\\s]{2,40})")
+    );
+    String end = firstNonBlank(
+      regexExtract(ocrText, "(?:到达地|目的地)[：:\\s]*([^\\r\\n]{2,40})"),
+      regexExtractGroup(ocrText, "出发地\\s+到达地[\\s\\S]{0,80}\\n\\s*([^\\r\\n\\s]{2,40})\\s+([^\\r\\n\\s]{2,40})", 2)
+    );
+    return new TripPlaces(cleanTripPlace(start), cleanTripPlace(end));
+  }
+
+  private TripPlaces extractDidiTripTablePlaces(String ocrText) {
+    String normalized = ocrText.replace("\r", "\n").replace('|', '\n');
+    String[] lines = normalized.split("\\n+");
+    TripPlaces verticalPlaces = extractDidiVerticalTripTablePlaces(lines);
+    if (!isEmpty(verticalPlaces.startPlace()) || !isEmpty(verticalPlaces.endPlace())) return verticalPlaces;
+    for (String line : lines) {
+      String compact = line.trim().replaceAll("\\s+", " ");
+      if (!compact.matches("^\\d+\\s+.*\\d+(?:\\.\\d+)?\\s+\\d+(?:\\.\\d+)?(?:\\s+.*)?$")) continue;
+      var m = Pattern.compile("^\\d+\\s+\\S+\\s+\\S+\\s+\\d{2}-\\d{2}\\s+\\d{1,2}:\\d{2}\\s+\\S+\\s+\\d{2}-\\d{2}\\s+\\d{1,2}:\\d{2}\\s+\\S+\\s+(.+?)\\s+(.+?)\\s+\\d+(?:\\.\\d+)?\\s+\\d+(?:\\.\\d+)?(?:\\s+.*)?$").matcher(compact);
+      if (m.find()) {
+        return new TripPlaces(cleanTripPlace(m.group(1)), cleanTripPlace(m.group(2)));
+      }
+    }
+    return new TripPlaces("", "");
+  }
+
+  private TripPlaces extractDidiVerticalTripTablePlaces(String[] lines) {
+    for (int i = 0; i < lines.length; i++) {
+      String line = lines[i].trim();
+      if (!line.matches("\\d+")) continue;
+      if (i + 8 >= lines.length) continue;
+      String carType = lines[i + 1].trim();
+      String city = lines[i + 2].trim();
+      String departTime = lines[i + 3].trim();
+      String arriveTime = lines[i + 4].trim();
+      String start = lines[i + 5].trim();
+      String end = lines[i + 6].trim();
+      String mileage = lines[i + 7].trim();
+      String amount = lines[i + 8].trim();
+      if (!isTripDataRow(carType, city, departTime, arriveTime, start, end, mileage, amount)) continue;
+      return new TripPlaces(cleanTripPlace(start), cleanTripPlace(end));
+    }
+    return new TripPlaces("", "");
+  }
+
+  private boolean isTripDataRow(String carType, String city, String departTime, String arriveTime,
+                                String start, String end, String mileage, String amount) {
+    return !isEmpty(carType)
+      && !isEmpty(city)
+      && departTime.matches(".*\\d{2}-?\\d{2}.*\\d{1,2}:\\d{2}.*")
+      && arriveTime.matches(".*\\d{2}-?\\d{2}.*\\d{1,2}:\\d{2}.*")
+      && !isEmpty(cleanTripPlace(start))
+      && !isEmpty(cleanTripPlace(end))
+      && mileage.matches("\\d+(?:\\.\\d+)?")
+      && amount.matches("\\d+(?:\\.\\d+)?");
+  }
+
+  private String cleanTripPlace(String value) {
+    if (isEmpty(value)) return "";
+    return value
+      .replaceAll("^(起点|终点|出发地|到达地)$", "")
+      .replaceAll("(出发地|到达地|始发地|目的地|起点|终点|里程\\[公里\\]|里程|金额\\[元\\]|备注|等级|交通工具类型|金额|税率|税额).*$", "")
+      .replaceAll("[：:]+$", "")
+      .trim();
+  }
+
+  private String regexExtractGroup(String text, String pattern, int group) {
+    var m = Pattern.compile(pattern).matcher(text);
+    return m.find() ? m.group(group) : "";
+  }
+
+  private record TripPlaces(String startPlace, String endPlace) {}
+
   private String classifyExpenseType(Invoice invoice, String ocrText) {
-    String text = (firstNonBlank(invoice.getRemarks(), invoice.getSellerName(), invoice.getInvoiceContentShortName(), ocrText)).toLowerCase();
+    String text = String.join(" ",
+      firstNonBlank(invoice.getRemarks()),
+      firstNonBlank(invoice.getSellerName()),
+      firstNonBlank(invoice.getInvoiceContentShortName()),
+      firstNonBlank(ocrText)
+    ).toLowerCase();
     if (containsAny(text, "加油", "汽油", "柴油", "石化", "石油", "油品")) return "fuel";
     if (containsAny(text, "高速", "通行费", "过路", "etc")) return "toll";
     if (containsAny(text, "高铁", "动车", "火车", "铁路")) return "rail";
     if (containsAny(text, "地铁", "轨道交通")) return "metro";
-    if (containsAny(text, "网约车", "滴滴", "出行", "客运服务")) return "ride_hailing";
+    if (containsAny(text, "网约车", "滴滴", "didi", "出行", "客运服务")) return "ride_hailing";
     if (containsAny(text, "顺风车")) return "carpool";
     if (containsAny(text, "货拉拉", "货运", "物流", "运输")) return "freight";
     if (containsAny(text, "停车")) return "parking";
@@ -376,6 +586,18 @@ public class OcrService {
   private boolean sameExpenseDate(LocalDateTime left, LocalDateTime right) {
     if (left == null || right == null) return left == null && right == null;
     return left.toLocalDate().equals(right.toLocalDate());
+  }
+
+  private boolean canAutoLinkToExpenseItem(LocalDateTime expenseDate, LocalDateTime invoiceDate) {
+    return expenseDate == null || invoiceDate == null || sameExpenseDate(expenseDate, invoiceDate);
+  }
+
+  private String stripSupplementaryChars(String value) {
+    if (value == null) return null;
+    return value.codePoints()
+      .filter(codePoint -> codePoint <= Character.MAX_VALUE)
+      .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+      .toString();
   }
 
   private boolean containsAny(String text, String... keywords) {
@@ -420,6 +642,59 @@ public class OcrService {
   private String regexExtract(String text, String pattern) {
     var m = Pattern.compile(pattern).matcher(text);
     return m.find() ? m.group(1) : "";
+  }
+
+  private List<String> regexExtractAll(String text, String pattern) {
+    var m = Pattern.compile(pattern).matcher(text);
+    java.util.ArrayList<String> values = new java.util.ArrayList<>();
+    while (m.find()) {
+      values.add(m.group(1));
+    }
+    return values;
+  }
+
+  private List<String> extractMoneyBefore(String text, String endMarker) {
+    int end = text.indexOf(endMarker);
+    String scope = end >= 0 ? text.substring(0, end) : text;
+    var m = Pattern.compile("[¥￥]\\s*(\\d+(?:\\.\\d{1,2})?)").matcher(scope);
+    java.util.ArrayList<String> values = new java.util.ArrayList<>();
+    while (m.find()) {
+      values.add(m.group(1));
+    }
+    return values;
+  }
+
+  private List<String> extractSummaryAmountPair(String text) {
+    java.util.ArrayList<String> values = new java.util.ArrayList<>();
+    var m = Pattern.compile("合\\s*计[\\s\\S]{0,20}[￥¥]\\s*(\\d+(?:\\.\\d{1,2})?)[\\s\\S]{0,20}[￥¥]\\s*(\\d+(?:\\.\\d{1,2})?)").matcher(text);
+    if (m.find()) {
+      values.add(m.group(1));
+      values.add(m.group(2));
+    }
+    return values;
+  }
+
+  private boolean shouldUseSummaryAmountPair(String totalAmount, List<String> summaryAmounts,
+                                             String amountBeforeTax, String taxAmount) {
+    if (summaryAmounts.size() < 2) return false;
+    BigDecimal total = toBigDecimal(totalAmount);
+    BigDecimal summaryAmount = toBigDecimal(summaryAmounts.get(0));
+    BigDecimal summaryTax = toBigDecimal(summaryAmounts.get(1));
+    if (total == null || summaryAmount == null || summaryTax == null) return false;
+    BigDecimal summaryTotal = summaryAmount.add(summaryTax);
+    boolean summaryMatchesTotal = summaryTotal.subtract(total).abs().compareTo(new BigDecimal("0.02")) <= 0;
+    if (!summaryMatchesTotal) return false;
+    BigDecimal currentAmount = toBigDecimal(amountBeforeTax);
+    BigDecimal currentTax = toBigDecimal(taxAmount);
+    if (currentAmount == null || currentTax == null) return true;
+    BigDecimal currentTotal = currentAmount.add(currentTax);
+    return currentTotal.subtract(total).abs().compareTo(new BigDecimal("0.02")) > 0;
+  }
+
+  private boolean isBetterInvoiceNo(String candidate, String current) {
+    if (isEmpty(candidate)) return false;
+    if (isEmpty(current)) return true;
+    return candidate.length() > current.length() && candidate.startsWith(current);
   }
 
   private boolean isEmpty(String s) {

@@ -1,0 +1,30 @@
+﻿花皮与晓敏的聊天记录
+.
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.receiveErrorResponse(QueryExecutorl
+mpl.java:2676)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.processResults(QueryExecutorlmpl.java
+:2368)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.core.v3
+.QueryExecutorlmpl.execute(QueryExecutorlmpl,java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executelnternal(KbStatement,java:472)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.execute(KbStatement.java:392)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:333)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeCachedSql(KbStatement.java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement.java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86,jdbc.Kb
+Statement.executeQuery(KbStatement.java:246)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1753)
+2026-07-1310:29:58-表输入.0-..4more
+2026-07-1310:29:58-表输入.0-Finishedreadingquery,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被

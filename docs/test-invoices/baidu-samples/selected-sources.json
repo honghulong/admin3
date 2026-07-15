@@ -1,0 +1,50 @@
+﻿[
+    {
+        "note":  "增值税专用发票-记账联",
+        "source":  "https://www.caidao8.com/pub/knowledge/011001002.htm",
+        "file":  "invoice-sample-01.png",
+        "image":  "https://resource.caidao8.com/attachment/4b2c420192e443ea8834e4c1504e5b7a.png"
+    },
+    {
+        "note":  "增值税专用发票-抵扣联",
+        "source":  "https://www.caidao8.com/pub/knowledge/011001002.htm",
+        "file":  "invoice-sample-02.png",
+        "image":  "https://resource.caidao8.com/attachment/617f569f0b5748969bc9f6932101dc1b.png"
+    },
+    {
+        "note":  "增值税专用发票-发票联",
+        "source":  "https://www.caidao8.com/pub/knowledge/011001002.htm",
+        "file":  "invoice-sample-03.png",
+        "image":  "https://resource.caidao8.com/attachment/16fffbf103434e2fad51587f2bd2c772.png"
+    },
+    {
+        "note":  "增值税普通发票-记账联",
+        "source":  "https://www.caidao8.com/pub/knowledge/011001002.htm",
+        "file":  "invoice-sample-04.png",
+        "image":  "https://resource.caidao8.com/attachment/e47c66478a2d400f907e37c5da4d4081.png"
+    },
+    {
+        "note":  "增值税普通发票-发票联",
+        "source":  "https://www.caidao8.com/pub/knowledge/011001002.htm",
+        "file":  "invoice-sample-05.png",
+        "image":  "https://resource.caidao8.com/attachment/72cc4d01b0f440eebb3ad0d58076bcc6.png"
+    },
+    {
+        "note":  "增值税电子普通发票样本",
+        "source":  "https://ai.cs.ac.cn/fapiao.html",
+        "file":  "invoice-sample-06.png",
+        "image":  "https://ai.cs.ac.cn/fapiao.png"
+    },
+    {
+        "note":  "电子普通发票 PDF 渲染",
+        "source":  "PDF: https://taoic.oss-cn-hangzhou.aliyuncs.com/5375/product/13928452225_1591340299000.pdf",
+        "file":  "invoice-sample-07.png",
+        "image":  "rendered/shenzhen-vat-e-normal-real-1.png"
+    },
+    {
+        "note":  "电子普通发票 PDF 渲染",
+        "source":  "PDF: https://media.adeo.com/media/5336473/media.pdf",
+        "file":  "invoice-sample-08.png",
+        "image":  "rendered/adeo-vat-e-special-real-1.png"
+    }
+]

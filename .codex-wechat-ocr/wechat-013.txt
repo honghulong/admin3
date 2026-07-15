@@ -1,0 +1,30 @@
+﻿花皮与晓敏的聊天记录
++
+2026-0/-1310:29:58-表输入.0-FROM(select
+t.TAB MAPPING IDasMAPPING_ID,
+2026-07-1310:29:58-表输入.0-t.TRG_NODE_ID
+2026-07-1310:29:58-表输入.0-t.TRGTAB_ID，
+2026-07-1310:29:58-表输入.0-t.SRCTABID
+2026-07-1310:29:58-表输入.0-t.SRC_ABBR,
+2026-07-1310:29:58-表输入.0-T.TRG_TAB_LAYER
+2026-07-1310:29:58-表输.0-fromVW_TAB_MAPPINGt
+2026-07-1310:29:58-表输入.0-,(select
+fnc_get_tab_mapping('adqdm'
+'m_infrastruct_project_capital_allocate_info_new') as tids) s
+2026-07-1310:29:58-表输入.0-WHERE
+find_in_set(t.trg_tab_id,s.tids)>0
+2026-07-1310:29:58-表输入.0-）src
+2026-07-1310:29:58-表输.0-WHERETRG_TAB_LAYER=
+'5'
+2026-07-1310:29:58-表输.0-GROUPBYTRG_NODE_ID
+2026-07-1310:29:58-表输入.0-ERROR:ERRCODE-20005:
+输入的BLOCK_NODE_ID:117017，在
+DIM_MAPPING_STEP_PROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输.0-'输的BLOCK_NODE_ID:'|l
+P_BLOCK_NODE_IDI'在DIM_MAPPINGSTEPPROCESS表

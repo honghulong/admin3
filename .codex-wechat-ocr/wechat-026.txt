@@ -1,0 +1,29 @@
+﻿花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-PL/SQLfunction
+fnc_get block_exec_sql(integer) line 36 at CALL
+2026-07-1310:29:58-表输入.0-
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Database.java:1764)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.doQuery(Tablelnput.java:236)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+ps.tableinput.Tablelnput.processRow(Tablelnput.java:140)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.trans.ste
+p.RunThread.run(RunThread,java:62)
+2026-07-1310:29:58-表输入.0-at
+java.lang.Thread.run(Thread,java:750)
+2026-07-1310:29:58-表输入.0-Causedby:
+com.kingbase86.util.KSQLException: ERROR:
+ERRCODE-20005:输入的BLOCKNODEID:117017，在
+DIM_MAPPINGSTEPPROCESS表中未找到对应步骤！请保存
+步骤后再重新执行。
+2026-07-1310:29:58-表输入.0-Where:PL/SQLfunction
+raise_application_error(integer,text,boolean) line 19 at
+RAISE
+2026-07-1310:29:58-表输入.0-SQLstatement"CALL
+RAISE_APPLICATION_ERROR(-20005,
+2026-07-1310:29:58-表输入.0-输入的BLOCK_NODE_ID:|
+P_BLOCK_NODE_IDI'在DIM_MAPPING_STEP_PROCESS表
+中未找到对应步骤！请保存步骤后再重新执行。'，
+2026-07-1310:29:58-表输入.0-TRUE)
+2026-07-1310:29:58-表输入.0-PL/SQLfunction

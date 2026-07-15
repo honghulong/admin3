@@ -1,0 +1,27 @@
+﻿花皮与晓敏的聊天记录
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeCachedSql(Kbstatement.,java:319)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeWithFlags(KbStatement,java:296)
+2026-07-1310:29:58-表输入.0-atcom.kingbase86.jdbc.Kb
+Statement.executeQuery(KbStatement,java:246)
+2026-07-1310:29:58-表输入.0-atorg.pentaho.di.core.dat
+abase.Database.openQuery(Databasejava:1753)
+2026-07-1310:29:58-表输入.0-4more
+2026-07-1310:29:58-表输入.0-Finished readingquery,
+closing connection.
+2026-07-1310:29:58-各层TO主题层映射-ERROR)：错误被
+检测到！
+2026-07-1310:29:58-表输入.0-完成处理（1=0,O=0,R=0,
+W=0,U=0, E=1)
+2026-07-1310:29:58-各层T0主题层映射-转换被检测
+2026-07-1310:29:58-各层TO主题层映射-转换正在杀死其他
+步骤！
+2026-07-1310:29:58-各层TO主题层映射-ERROR):错误被
+检测到！
+晓敏
+2026年7月14日10:05
+节点映射缺失未保存
+花皮
+2026年7月14日10:05
+大概是在哪个步骤去看看情况
