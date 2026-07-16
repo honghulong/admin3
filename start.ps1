@@ -7,8 +7,24 @@ $JarFile = Join-Path $ProjectRoot "admin3-server\target\admin3-server-0.0.1-SNAP
 $LogDir = Join-Path $ProjectRoot "logs"
 $LogFile = Join-Path $LogDir "admin3-server.log"
 $PidFile = Join-Path $LogDir "admin3-server.pid"
-$JavaHome = "C:\JAVA\jdk21.0.11-win_x64"
-$JavaExe = Join-Path $JavaHome "bin\java.exe"
+$JavaCandidates = @()
+if ($env:JAVA_HOME) {
+    $JavaCandidates += (Join-Path $env:JAVA_HOME "bin\java.exe")
+}
+$PathJava = Get-Command java -ErrorAction SilentlyContinue
+if ($PathJava) {
+    $JavaCandidates += $PathJava.Source
+}
+$JavaCandidates += @(
+    "D:\java\jdk21.0.11-win_x64\bin\java.exe",
+    "C:\JAVA\jdk21.0.11-win_x64\bin\java.exe"
+)
+$JavaExe = $JavaCandidates | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+
+if (-not $JavaExe) {
+    Write-Host "[ERROR] Cannot find java.exe. Please set JAVA_HOME or add Java to PATH."
+    exit 1
+}
 
 if (-not (Test-Path $JarFile)) {
     Write-Host "[ERROR] Cannot find JAR file: $JarFile"
@@ -37,7 +53,16 @@ Write-Host "[INFO] Log file: $LogFile"
 Write-Host "[INFO] Press Ctrl+C to stop"
 Write-Host ""
 
-& $JavaExe -Dspring.datasource.url="jdbc:mysql://127.0.0.1:3306/admin3?characterEncoding=utf8" -Dspring.datasource.username=root -Dspring.datasource.password=123456 -jar $JarFile --server.port=$Port 2>&1 | ForEach-Object { $_; $_ | Out-File -FilePath $LogFile -Encoding utf8 -Append }
+$JavaArgs = @(
+    "-Dspring.datasource.url=jdbc:mysql://127.0.0.1:3306/admin3?characterEncoding=utf8",
+    "-Dspring.datasource.username=root",
+    "-Dspring.datasource.password=123456",
+    "-jar",
+    $JarFile,
+    "--server.port=$Port"
+)
+
+& $JavaExe @JavaArgs 2>&1 | ForEach-Object { $_; $_ | Out-File -FilePath $LogFile -Encoding utf8 -Append }
 
 Write-Host ""
 Write-Host "[INFO] Service stopped"

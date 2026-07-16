@@ -49,8 +49,10 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -131,7 +133,7 @@ public class ReimbursementService {
     reimbursementRepository.save(r);
     List<Invoice> allInvoices = invoiceRepository.findByReimbursementIdOrderByCreatedAtAsc(id);
     List<Attachment> attachments = filterActiveAttachments(
-      attachmentRepository.findByReimbursementIdOrderByCreatedAtAsc(id),
+      attachmentRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(id),
       allInvoices);
     List<ApprovalLog> logs = approvalLogRepository.findByReimbursementIdOrderByCreatedAtAsc(id);
     List<Invoice> invoices = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(id);
@@ -272,7 +274,7 @@ public class ReimbursementService {
         .filter(Objects::nonNull)
         .collect(Collectors.toSet());
       // 解除旧关联
-      List<Attachment> oldAttachments = attachmentRepository.findByReimbursementIdOrderByCreatedAtAsc(id);
+      List<Attachment> oldAttachments = attachmentRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(id);
       for (Attachment a : oldAttachments) {
         if (supportAttachmentIds.contains(a.getId())) continue;
         a.setReimbursementId(null);
@@ -316,9 +318,12 @@ public class ReimbursementService {
     Long affectedExpenseItemId = invoice.getExpenseItemId();
     UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
     LocalDateTime now = LocalDateTime.now();
+    deleteInvoiceAttachments(invoice, now);
     invoice.setDeleted(true);
     invoice.setDeletedAt(now);
     invoice.setExpenseItemId(null);
+    invoice.setAttachmentId(null);
+    invoice.setSupportAttachmentId(null);
     invoice.setUpdatedBy(userInfo.userId());
     invoice.setUpdatedAt(now);
     invoiceRepository.save(invoice);
@@ -327,6 +332,19 @@ public class ReimbursementService {
     r.setUpdatedAt(now);
     reimbursementRepository.save(r);
     return findReimbursementById(reimbursementId);
+  }
+
+  private void deleteInvoiceAttachments(Invoice invoice, LocalDateTime now) {
+    Set<Long> attachmentIds = java.util.stream.Stream.of(invoice.getAttachmentId(), invoice.getSupportAttachmentId())
+      .filter(Objects::nonNull)
+      .collect(Collectors.toSet());
+    for (Long attachmentId : attachmentIds) {
+      attachmentRepository.findById(attachmentId).ifPresent(attachment -> {
+        attachment.setDeleted(true);
+        attachment.setDeletedAt(now);
+        attachmentRepository.save(attachment);
+      });
+    }
   }
 
   @Transactional
@@ -375,10 +393,13 @@ public class ReimbursementService {
     if (invoice.getSupportAttachmentId() != null) {
       deleteAttachmentRecord(invoice.getSupportAttachmentId());
       invoice.setSupportAttachmentId(null);
+      invoice.setStartPlace(null);
+      invoice.setEndPlace(null);
       UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
       invoice.setUpdatedBy(userInfo.userId());
       invoice.setUpdatedAt(LocalDateTime.now());
       invoiceRepository.save(invoice);
+      ocrService.regroupExpenseItemsByInvoiceTrips(reimbursementId, userInfo.userId());
     }
     return findReimbursementById(reimbursementId);
   }
@@ -417,6 +438,7 @@ public class ReimbursementService {
       attachment.setFileUrl("/attachments/" + storedName + "/download");
       attachment.setUploadedBy(userInfo.userId());
       attachment.setCreatedAt(LocalDateTime.now());
+      attachment.setDeleted(false);
       attachment.setOcrStatus("pending");
       return attachmentRepository.save(attachment);
     } catch (IOException e) {
@@ -426,11 +448,9 @@ public class ReimbursementService {
 
   private void deleteAttachmentRecord(Long attachmentId) {
     attachmentRepository.findById(attachmentId).ifPresent(attachment -> {
-      try {
-        Files.deleteIfExists(uploadDir.resolve(storedFileName(attachment)));
-      } catch (Exception ignored) {
-      }
-      attachmentRepository.delete(attachment);
+      attachment.setDeleted(true);
+      attachment.setDeletedAt(LocalDateTime.now());
+      attachmentRepository.save(attachment);
     });
   }
 
@@ -745,7 +765,7 @@ public class ReimbursementService {
         setCell(row, 9, firstNonBlank(invoice.getSellerShortName(), invoice.getSellerName()));
         setCell(row, 10, firstNonBlank(invoice.getInvoiceContentShortName(), invoice.getRemarks(), oaExpenseNameByInvoice(invoice)));
       }
-      autosize(sheet, headers.length);
+      applyReadableLayout(sheet, headers.length, 2);
       workbook.write(out);
       return out.toByteArray();
     } catch (Exception e) {
@@ -763,7 +783,7 @@ public class ReimbursementService {
       Row applicant = sheet.createRow(2);
       setCell(applicant, 0, "报销人：");
       setCell(applicant, 1, r.getApplicantName());
-      String[] headers = {"时间", "始发", "终点", "公用数", "加油金额", "高速费", "高（城际/动车）铁费", "地铁费", "网约车费", "顺风车费", "货拉拉费", "停车费", "餐费", "合计", "备注", "说明"};
+      String[] headers = {"时间", "始发", "终点", "公里数", "加油金额", "高速费", "高（城际/动车）铁费", "地铁费", "网约车费", "顺风车费", "货拉拉费", "停车费", "餐费", "合计", "备注", "说明"};
       writeHeader(sheet, workbook, 4, headers);
       int rowIndex = 5;
       BigDecimal total = BigDecimal.ZERO;
@@ -783,7 +803,7 @@ public class ReimbursementService {
       Row totalRow = sheet.createRow(rowIndex);
       setCell(totalRow, 0, "合计：");
       setCell(totalRow, 13, total);
-      autosize(sheet, headers.length);
+      applyReadableLayout(sheet, headers.length, 4);
       workbook.write(out);
       return out.toByteArray();
     } catch (Exception e) {
@@ -941,6 +961,7 @@ public class ReimbursementService {
 
   private void createTitle(Sheet sheet, Workbook workbook, String title, int firstCol, int lastCol) {
     Row row = sheet.createRow(0);
+    row.setHeightInPoints(26);
     setCell(row, firstCol, title);
     CellStyle style = workbook.createCellStyle();
     Font font = workbook.createFont();
@@ -953,10 +974,14 @@ public class ReimbursementService {
 
   private void writeHeader(Sheet sheet, Workbook workbook, int rowIndex, String[] headers) {
     Row row = sheet.createRow(rowIndex);
+    row.setHeightInPoints(24);
     CellStyle style = workbook.createCellStyle();
     Font font = workbook.createFont();
     font.setBold(true);
     style.setFont(font);
+    style.setAlignment(HorizontalAlignment.CENTER);
+    style.setVerticalAlignment(VerticalAlignment.CENTER);
+    style.setWrapText(true);
     for (int i = 0; i < headers.length; i++) {
       setCell(row, i, headers[i]);
       row.getCell(i).setCellStyle(style);
@@ -964,16 +989,43 @@ public class ReimbursementService {
   }
 
   private void setCell(Row row, int index, Object value) {
-    if (value == null) row.createCell(index).setBlank();
-    else if (value instanceof BigDecimal amount) row.createCell(index).setCellValue(amount.doubleValue());
-    else if (value instanceof Number number) row.createCell(index).setCellValue(number.doubleValue());
-    else row.createCell(index).setCellValue(String.valueOf(value));
+    var cell = row.createCell(index);
+    if (value == null) cell.setBlank();
+    else if (value instanceof BigDecimal amount) cell.setCellValue(amount.doubleValue());
+    else if (value instanceof Number number) cell.setCellValue(number.doubleValue());
+    else cell.setCellValue(String.valueOf(value));
   }
 
   private void autosize(Sheet sheet, int cols) {
     for (int i = 0; i < cols; i++) {
       sheet.autoSizeColumn(i);
-      if (sheet.getColumnWidth(i) > 8000) sheet.setColumnWidth(i, 8000);
+      int minWidth = switch (i) {
+        case 0 -> 3600;
+        case 1, 2 -> 5200;
+        case 6 -> 6200;
+        case 14 -> 5200;
+        case 15 -> 7600;
+        default -> 3600;
+      };
+      int width = Math.max(sheet.getColumnWidth(i) + 512, minWidth);
+      sheet.setColumnWidth(i, Math.min(width, 10000));
+    }
+  }
+
+  private void applyReadableLayout(Sheet sheet, int cols, int headerRowIndex) {
+    autosize(sheet, cols);
+    sheet.createFreezePane(0, headerRowIndex + 1);
+    for (Row row : sheet) {
+      if (row.getRowNum() > headerRowIndex) {
+        row.setHeightInPoints(28);
+      }
+      row.forEach(cell -> {
+        CellStyle style = sheet.getWorkbook().createCellStyle();
+        style.cloneStyleFrom(cell.getCellStyle());
+        style.setWrapText(true);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+        cell.setCellStyle(style);
+      });
     }
   }
 

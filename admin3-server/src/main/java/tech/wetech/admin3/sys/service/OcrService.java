@@ -22,7 +22,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
 import java.util.regex.Pattern;
 
 @Service
@@ -30,6 +33,8 @@ public class OcrService {
 
   private static final Logger log = LoggerFactory.getLogger(OcrService.class);
   private static final String OCR_SERVER_URL = "http://localhost:8765";
+  private static final java.time.Duration OCR_REQUEST_TIMEOUT = java.time.Duration.ofSeconds(120);
+  private static final Semaphore OCR_REQUESTS = new Semaphore(1, true);
 
   private final AttachmentRepository attachmentRepository;
   private final ReimbursementRepository reimbursementRepository;
@@ -170,7 +175,7 @@ public class OcrService {
         if (isEmpty(invoiceCode)) invoiceCode = regexExtract(ocrText, "发票代码[：:\\s]*(\\d{10,20})");
         if (isEmpty(date)) date = regexExtract(ocrText, "开票日期[：:\\s]*(\\d{4}年\\d{1,2}月\\d{1,2}日)");
         if (isEmpty(totalAmount)) {
-          totalAmount = regexExtract(ocrText, "(?:价税合计|小写|合计)[\\s\\S]{0,20}[¥￥]?\\s*(\\d+(?:\\.\\d{1,2})?)");
+          totalAmount = extractTotalAmountFromText(ocrText);
         }
         if (isEmpty(buyerName)) buyerName = regexExtract(ocrText, "购买方信息[\\s\\S]{0,80}名称[：:]\\s*([^\\r\\n]+)");
         if (isEmpty(sellerName)) sellerName = regexExtract(ocrText, "销售方信息[\\s\\S]{0,80}名称[：:]\\s*([^\\r\\n]+)");
@@ -186,6 +191,7 @@ public class OcrService {
           amountBeforeTax = summaryAmounts.get(0);
           taxAmount = summaryAmounts.get(1);
         }
+        totalAmount = reconcileTotalAmountFromSummary(totalAmount, summaryAmounts);
         InvoiceParties parties = extractInvoiceParties(ocrText);
         if (!isEmpty(parties.buyerName())) buyerName = parties.buyerName();
         if (!isEmpty(parties.sellerName())) sellerName = parties.sellerName();
@@ -277,6 +283,7 @@ public class OcrService {
         savedInvoice.setUpdatedAt(LocalDateTime.now());
         invoiceRepository.save(savedInvoice);
       }
+      regroupExpenseItemsByInvoiceTrips(reimbursementId, attachment.getUploadedBy());
 
       if (!isEmpty(invoiceNo) && isEmpty(r.getInvoiceNo())) r.setInvoiceNo(invoiceNo);
       if (!isEmpty(invoiceCode) && isEmpty(r.getInvoiceCode())) r.setInvoiceCode(invoiceCode);
@@ -307,36 +314,26 @@ public class OcrService {
         log.debug("Support attachment {} not linked to active invoice, skip trip update", attachment.getId());
         return;
       }
-      ReimbursementExpenseItem item = null;
-      if (invoice.getExpenseItemId() != null) {
-        item = expenseItemRepository.findById(invoice.getExpenseItemId()).orElse(null);
-      }
-      if (item == null) {
-        item = expenseItemRepository.findByInvoiceId(invoice.getId()).orElse(null);
-      }
-      if (item == null) {
-        log.debug("Invoice {} has no expense item, skip support trip update", invoice.getId());
-        return;
-      }
-
       JsonNode data = unwrapOcrData(objectMapper.readTree(ocrResultJson));
       String ocrText = data.has("ocr_text") ? data.get("ocr_text").asText() : "";
       TripPlaces places = extractTripPlaces(ocrText);
       boolean changed = false;
-      if (isEmpty(item.getStartPlace()) && !isEmpty(places.startPlace())) {
-        item.setStartPlace(stripSupplementaryChars(places.startPlace()));
+      if (!isEmpty(places.startPlace())) {
+        invoice.setStartPlace(stripSupplementaryChars(places.startPlace()));
         changed = true;
       }
-      if (isEmpty(item.getEndPlace()) && !isEmpty(places.endPlace())) {
-        item.setEndPlace(stripSupplementaryChars(places.endPlace()));
+      if (!isEmpty(places.endPlace())) {
+        invoice.setEndPlace(stripSupplementaryChars(places.endPlace()));
         changed = true;
       }
       if (changed) {
-        item.setUpdatedBy(attachment.getUploadedBy());
-        item.setUpdatedAt(LocalDateTime.now());
-        expenseItemRepository.save(item);
-        log.info("Support attachment {} updated trip places for expense item {}: {} -> {}",
-          attachment.getId(), item.getId(), item.getStartPlace(), item.getEndPlace());
+        invoice.setUpdatedBy(attachment.getUploadedBy());
+        invoice.setUpdatedAt(LocalDateTime.now());
+        invoiceRepository.save(invoice);
+        updateInvoiceExpenseItemKilometers(invoice, places.kilometers(), attachment.getUploadedBy());
+        regroupExpenseItemsByInvoiceTrips(invoice.getReimbursementId(), attachment.getUploadedBy());
+        log.info("Support attachment {} updated trip places for invoice {}: {} -> {}",
+          attachment.getId(), invoice.getId(), invoice.getStartPlace(), invoice.getEndPlace());
       }
     } catch (Exception e) {
       log.warn("Failed to update trip places from support OCR attachment {}: {}", attachment.getId(), e.getMessage(), e);
@@ -417,23 +414,19 @@ public class OcrService {
     if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) return null;
     LocalDateTime now = LocalDateTime.now();
     String expenseType = classifyExpenseType(invoice, ocrText + " " + attachment.getFileName());
-    ReimbursementExpenseItem item = expenseItemRepository.findByInvoiceId(invoice.getId()).orElse(null);
+    ReimbursementExpenseItem item = invoice.getExpenseItemId() == null ? null : expenseItemRepository.findById(invoice.getExpenseItemId()).orElse(null);
+    if (item == null) item = expenseItemRepository.findByInvoiceId(invoice.getId()).orElse(null);
     if (item == null) {
-      item = expenseItemRepository.findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(reimbursement.getId()).stream()
-        .filter(existing -> expenseType.equals(existing.getExpenseType())
-          && canAutoLinkToExpenseItem(existing.getExpenseDate(), invoice.getInvoiceDate()))
-        .findFirst()
-        .orElse(null);
-      if (item == null) {
-        item = new ReimbursementExpenseItem();
-        item.setReimbursementId(reimbursement.getId());
-        item.setCreatedBy(attachment.getUploadedBy());
-        item.setCreatedAt(now);
-        int nextOrder = expenseItemRepository
-          .findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(reimbursement.getId()).size() + 1;
-        item.setSortOrder(nextOrder);
-      }
+      item = new ReimbursementExpenseItem();
+      item.setReimbursementId(reimbursement.getId());
+      item.setInvoiceId(invoice.getId());
+      item.setCreatedBy(attachment.getUploadedBy());
+      item.setCreatedAt(now);
+      int nextOrder = expenseItemRepository
+        .findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(reimbursement.getId()).size() + 1;
+      item.setSortOrder(nextOrder);
     }
+    item.setInvoiceId(invoice.getId());
     item.setExpenseDate(invoice.getInvoiceDate());
     item.setExpenseType(expenseType);
     item.setOaExpenseName(oaExpenseName(expenseType));
@@ -452,6 +445,160 @@ public class OcrService {
     saved.setAmount(total);
     return expenseItemRepository.save(saved);
   }
+
+  public void regroupExpenseItemsByInvoiceTrips(Long reimbursementId, Long userId) {
+    List<Invoice> invoices = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(reimbursementId);
+    Map<ExpenseGroupKey, List<Invoice>> groups = new LinkedHashMap<>();
+    for (Invoice invoice : invoices) {
+      ExpenseGroupKey key = groupKey(invoice);
+      if (key == null) continue;
+      groups.computeIfAbsent(key, ignored -> new java.util.ArrayList<>()).add(invoice);
+    }
+    LocalDateTime now = LocalDateTime.now();
+    java.util.Set<Long> groupedInvoiceIds = new java.util.HashSet<>();
+    for (List<Invoice> group : groups.values()) {
+      if (group.size() < 2) continue;
+      ReimbursementExpenseItem target = findOrCreateTripGroupItem(reimbursementId, group, userId, now);
+      BigDecimal total = BigDecimal.ZERO;
+      BigDecimal kilometers = sumKilometers(group);
+      for (Invoice invoice : group) {
+        groupedInvoiceIds.add(invoice.getId());
+        invoice.setExpenseItemId(target.getId());
+        invoice.setUpdatedBy(userId);
+        invoice.setUpdatedAt(now);
+        invoiceRepository.save(invoice);
+        if (invoice.getTotalAmount() != null) total = total.add(invoice.getTotalAmount());
+      }
+      Invoice first = group.get(0);
+      target.setInvoiceId(null);
+      target.setExpenseDate(first.getInvoiceDate());
+      target.setExpenseType(classifyExpenseType(first, firstNonBlank(first.getRemarks(), first.getSellerName())));
+      target.setOaExpenseName(oaExpenseName(target.getExpenseType()));
+      target.setAmount(total);
+      target.setKilometers(kilometers);
+      target.setRemark(first.getSellerName());
+      target.setDescription(stripSupplementaryChars(firstNonBlank(first.getRemarks(), first.getSellerName())));
+      target.setSource("ocr");
+      target.setUpdatedBy(userId);
+      target.setUpdatedAt(now);
+      expenseItemRepository.save(target);
+    }
+    for (Invoice invoice : invoices) {
+      if (groupedInvoiceIds.contains(invoice.getId())) continue;
+      ReimbursementExpenseItem item = findOrCreateSingleInvoiceItem(reimbursementId, invoice, userId, now);
+      invoice.setExpenseItemId(item.getId());
+      invoice.setUpdatedBy(userId);
+      invoice.setUpdatedAt(now);
+      invoiceRepository.save(invoice);
+    }
+    removeOrphanExpenseItems(reimbursementId);
+  }
+
+  private ExpenseGroupKey groupKey(Invoice invoice) {
+    if (invoice.getInvoiceDate() == null) return null;
+    String date = invoice.getInvoiceDate().toLocalDate().toString();
+    if (hasCompleteTripSupport(invoice)) {
+      return new ExpenseGroupKey("trip", date, cleanGroupPlace(invoice.getStartPlace()), cleanGroupPlace(invoice.getEndPlace()));
+    }
+    String expenseType = classifyExpenseType(invoice, firstNonBlank(invoice.getRemarks(), invoice.getSellerName()));
+    if (!canGroupByDateAndType(expenseType)) return null;
+    return new ExpenseGroupKey("type", date, expenseType, "");
+  }
+
+  private ReimbursementExpenseItem findOrCreateTripGroupItem(Long reimbursementId, List<Invoice> group, Long userId, LocalDateTime now) {
+    return group.stream()
+      .map(Invoice::getExpenseItemId)
+      .filter(id -> id != null)
+      .map(id -> expenseItemRepository.findById(id).orElse(null))
+      .filter(item -> item != null)
+      .findFirst()
+      .orElseGet(() -> {
+        ReimbursementExpenseItem item = new ReimbursementExpenseItem();
+        item.setReimbursementId(reimbursementId);
+        item.setCreatedBy(userId);
+        item.setCreatedAt(now);
+        item.setSortOrder(expenseItemRepository.findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(reimbursementId).size() + 1);
+        return expenseItemRepository.save(item);
+      });
+  }
+
+  private ReimbursementExpenseItem findOrCreateSingleInvoiceItem(Long reimbursementId, Invoice invoice, Long userId, LocalDateTime now) {
+    ReimbursementExpenseItem item = invoice.getExpenseItemId() == null ? null : expenseItemRepository.findById(invoice.getExpenseItemId()).orElse(null);
+    if (item == null) item = expenseItemRepository.findByInvoiceId(invoice.getId()).orElse(null);
+    if (item == null || !reimbursementId.equals(item.getReimbursementId())) {
+      item = new ReimbursementExpenseItem();
+      item.setReimbursementId(reimbursementId);
+      item.setInvoiceId(invoice.getId());
+      item.setCreatedBy(userId);
+      item.setCreatedAt(now);
+      item.setSortOrder(expenseItemRepository.findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(reimbursementId).size() + 1);
+    }
+    item.setInvoiceId(invoice.getId());
+    item.setExpenseDate(invoice.getInvoiceDate());
+    item.setExpenseType(classifyExpenseType(invoice, firstNonBlank(invoice.getRemarks(), invoice.getSellerName())));
+    item.setOaExpenseName(oaExpenseName(item.getExpenseType()));
+    item.setAmount(invoice.getTotalAmount() == null ? BigDecimal.ZERO : invoice.getTotalAmount());
+    item.setRemark(invoice.getSellerName());
+    item.setDescription(stripSupplementaryChars(firstNonBlank(invoice.getRemarks(), invoice.getSellerName())));
+    item.setSource("ocr");
+    item.setUpdatedBy(userId);
+    item.setUpdatedAt(now);
+    return expenseItemRepository.save(item);
+  }
+
+  private void removeOrphanExpenseItems(Long reimbursementId) {
+    List<Long> boundIds = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(reimbursementId).stream()
+      .map(Invoice::getExpenseItemId)
+      .filter(id -> id != null)
+      .toList();
+    expenseItemRepository.findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(reimbursementId).stream()
+      .filter(item -> "ocr".equals(item.getSource()))
+      .filter(item -> item.getId() != null && !boundIds.contains(item.getId()))
+      .forEach(expenseItemRepository::delete);
+  }
+
+  private boolean hasCompleteTripSupport(Invoice invoice) {
+    return invoice.getSupportAttachmentId() != null
+      && invoice.getInvoiceDate() != null
+      && !isEmpty(invoice.getStartPlace())
+      && !isEmpty(invoice.getEndPlace());
+  }
+
+  private String cleanGroupPlace(String value) {
+    return value == null ? "" : value.replaceAll("\\s+", "").trim();
+  }
+
+  private void updateInvoiceExpenseItemKilometers(Invoice invoice, BigDecimal kilometers, Long userId) {
+    if (kilometers == null || invoice.getExpenseItemId() == null) return;
+    ReimbursementExpenseItem item = expenseItemRepository.findById(invoice.getExpenseItemId()).orElse(null);
+    if (item == null) return;
+    item.setKilometers(kilometers);
+    item.setUpdatedBy(userId);
+    item.setUpdatedAt(LocalDateTime.now());
+    expenseItemRepository.save(item);
+  }
+
+  private BigDecimal sumKilometers(List<Invoice> invoices) {
+    BigDecimal total = BigDecimal.ZERO;
+    boolean hasValue = false;
+    for (Invoice invoice : invoices) {
+      if (invoice.getExpenseItemId() == null) continue;
+      ReimbursementExpenseItem item = expenseItemRepository.findById(invoice.getExpenseItemId()).orElse(null);
+      if (item == null || item.getKilometers() == null) continue;
+      total = total.add(item.getKilometers());
+      hasValue = true;
+    }
+    return hasValue ? total : null;
+  }
+
+  private boolean canGroupByDateAndType(String expenseType) {
+    return "fuel".equals(expenseType)
+      || "toll".equals(expenseType)
+      || "parking".equals(expenseType)
+      || "meal".equals(expenseType);
+  }
+
+  private record ExpenseGroupKey(String mode, String date, String first, String second) {}
 
   private Invoice findDuplicateInvoice(Long reimbursementId, String invoiceNo, String invoiceCode, Long attachmentId) {
     if (isEmpty(invoiceNo) || isEmpty(invoiceCode)) return null;
@@ -487,7 +634,7 @@ public class OcrService {
   private record InvoiceParties(String buyerName, String sellerName, String buyerTaxId, String sellerTaxId) {}
 
   private TripPlaces extractTripPlaces(String ocrText) {
-    if (isEmpty(ocrText)) return new TripPlaces("", "");
+    if (isEmpty(ocrText)) return new TripPlaces("", "", null);
     TripPlaces didiTrip = extractDidiTripTablePlaces(ocrText);
     if (!isEmpty(didiTrip.startPlace()) || !isEmpty(didiTrip.endPlace())) return didiTrip;
     String start = firstNonBlank(
@@ -498,7 +645,7 @@ public class OcrService {
       regexExtract(ocrText, "(?:到达地|目的地)[：:\\s]*([^\\r\\n]{2,40})"),
       regexExtractGroup(ocrText, "出发地\\s+到达地[\\s\\S]{0,80}\\n\\s*([^\\r\\n\\s]{2,40})\\s+([^\\r\\n\\s]{2,40})", 2)
     );
-    return new TripPlaces(cleanTripPlace(start), cleanTripPlace(end));
+    return new TripPlaces(cleanTripPlace(start), cleanTripPlace(end), extractKilometers(ocrText));
   }
 
   private TripPlaces extractDidiTripTablePlaces(String ocrText) {
@@ -511,10 +658,11 @@ public class OcrService {
       if (!compact.matches("^\\d+\\s+.*\\d+(?:\\.\\d+)?\\s+\\d+(?:\\.\\d+)?(?:\\s+.*)?$")) continue;
       var m = Pattern.compile("^\\d+\\s+\\S+\\s+\\S+\\s+\\d{2}-\\d{2}\\s+\\d{1,2}:\\d{2}\\s+\\S+\\s+\\d{2}-\\d{2}\\s+\\d{1,2}:\\d{2}\\s+\\S+\\s+(.+?)\\s+(.+?)\\s+\\d+(?:\\.\\d+)?\\s+\\d+(?:\\.\\d+)?(?:\\s+.*)?$").matcher(compact);
       if (m.find()) {
-        return new TripPlaces(cleanTripPlace(m.group(1)), cleanTripPlace(m.group(2)));
+        BigDecimal kilometers = firstNumberAfter(compact, cleanTripPlace(m.group(2)));
+        return new TripPlaces(cleanTripPlace(m.group(1)), cleanTripPlace(m.group(2)), kilometers);
       }
     }
-    return new TripPlaces("", "");
+    return new TripPlaces("", "", extractKilometers(ocrText));
   }
 
   private TripPlaces extractDidiVerticalTripTablePlaces(String[] lines) {
@@ -531,9 +679,9 @@ public class OcrService {
       String mileage = lines[i + 7].trim();
       String amount = lines[i + 8].trim();
       if (!isTripDataRow(carType, city, departTime, arriveTime, start, end, mileage, amount)) continue;
-      return new TripPlaces(cleanTripPlace(start), cleanTripPlace(end));
+      return new TripPlaces(cleanTripPlace(start), cleanTripPlace(end), toBigDecimal(mileage));
     }
-    return new TripPlaces("", "");
+    return new TripPlaces("", "", null);
   }
 
   private boolean isTripDataRow(String carType, String city, String departTime, String arriveTime,
@@ -562,7 +710,20 @@ public class OcrService {
     return m.find() ? m.group(group) : "";
   }
 
-  private record TripPlaces(String startPlace, String endPlace) {}
+  private BigDecimal extractKilometers(String ocrText) {
+    String kilometers = regexExtract(ocrText, "(?:\\u91cc\\u7a0b|里程)\\s*(?:\\[\\s*(?:\\u516c\\u91cc|公里)\\s*\\])?\\s*[：:]?\\s*(\\d+(?:\\.\\d+)?)");
+    return toBigDecimal(kilometers);
+  }
+
+  private BigDecimal firstNumberAfter(String text, String marker) {
+    if (isEmpty(text) || isEmpty(marker)) return null;
+    int index = text.indexOf(marker);
+    if (index < 0) return null;
+    var m = Pattern.compile("(\\d+(?:\\.\\d+)?)").matcher(text.substring(index + marker.length()));
+    return m.find() ? toBigDecimal(m.group(1)) : null;
+  }
+
+  private record TripPlaces(String startPlace, String endPlace, BigDecimal kilometers) {}
 
   private String classifyExpenseType(Invoice invoice, String ocrText) {
     String text = String.join(" ",
@@ -674,6 +835,14 @@ public class OcrService {
     return values;
   }
 
+  String extractTotalAmountFromText(String text) {
+    String amount = regexExtract(text, "[（(]\\s*小写\\s*[）)]\\s*[¥￥]?\\s*(\\d+(?:\\.\\d{1,2})?)");
+    if (!isEmpty(amount)) return amount;
+    amount = regexExtract(text, "小写\\s*[）)]?\\s*[¥￥]?\\s*(\\d+(?:\\.\\d{1,2})?)");
+    if (!isEmpty(amount)) return amount;
+    return regexExtract(text, "(?:价税合计|合计)[\\s\\S]{0,20}?[¥￥]\\s*(\\d+(?:\\.\\d{1,2})?)");
+  }
+
   private boolean shouldUseSummaryAmountPair(String totalAmount, List<String> summaryAmounts,
                                              String amountBeforeTax, String taxAmount) {
     if (summaryAmounts.size() < 2) return false;
@@ -691,6 +860,26 @@ public class OcrService {
     return currentTotal.subtract(total).abs().compareTo(new BigDecimal("0.02")) > 0;
   }
 
+  String reconcileTotalAmountFromSummary(String totalAmount, List<String> summaryAmounts) {
+    if (summaryAmounts.size() < 2) return totalAmount;
+    BigDecimal summaryAmount = toBigDecimal(summaryAmounts.get(0));
+    BigDecimal summaryTax = toBigDecimal(summaryAmounts.get(1));
+    if (summaryAmount == null || summaryTax == null) return totalAmount;
+    BigDecimal summaryTotal = summaryAmount.add(summaryTax).setScale(2, java.math.RoundingMode.HALF_UP);
+    if (isEmpty(totalAmount)) return summaryTotal.toPlainString();
+
+    BigDecimal total = toBigDecimal(totalAmount);
+    if (total == null) return totalAmount;
+    if (summaryTotal.subtract(total).abs().compareTo(new BigDecimal("0.02")) <= 0) return totalAmount;
+
+    String normalizedTotal = total.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString();
+    String normalizedSummaryTotal = summaryTotal.toPlainString();
+    if (summaryTotal.compareTo(total) > 0 && normalizedSummaryTotal.endsWith(normalizedTotal)) {
+      return normalizedSummaryTotal;
+    }
+    return totalAmount;
+  }
+
   private boolean isBetterInvoiceNo(String candidate, String current) {
     if (isEmpty(candidate)) return false;
     if (isEmpty(current)) return true;
@@ -702,6 +891,7 @@ public class OcrService {
   }
 
   private String callOcrService(String imageBase64, String filename) throws Exception {
+    long started = System.currentTimeMillis();
     byte[] imageBytes = Base64.getDecoder().decode(imageBase64);
     Path tempDir = java.nio.file.Paths.get(System.getProperty("java.io.tmpdir"), "reimbursement-ocr");
     Files.createDirectories(tempDir);
@@ -709,7 +899,10 @@ public class OcrService {
     Files.write(tempFile, imageBytes);
     log.info("OCR temp file saved: {}", tempFile);
 
+    boolean acquired = false;
     try {
+      OCR_REQUESTS.acquire();
+      acquired = true;
       String boundary = "----" + java.util.UUID.randomUUID();
       String lineSeparator = "\r\n";
       java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
@@ -724,16 +917,22 @@ public class OcrService {
       java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
       java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
         .uri(java.net.URI.create(OCR_SERVER_URL + "/ocr"))
+        .timeout(OCR_REQUEST_TIMEOUT)
         .header("Content-Type", "multipart/form-data; boundary=" + boundary)
         .POST(java.net.http.HttpRequest.BodyPublishers.ofByteArray(baos.toByteArray()))
         .build();
 
+      log.info("Sending OCR request for {} to {}, timeout={}s", filename, OCR_SERVER_URL + "/ocr", OCR_REQUEST_TIMEOUT.toSeconds());
       java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
       if (response.statusCode() != 200) {
         throw new RuntimeException("OCR service returned status " + response.statusCode() + ", body: " + response.body());
       }
+      log.info("OCR request for {} completed in {}ms", filename, System.currentTimeMillis() - started);
       return response.body();
     } finally {
+      if (acquired) {
+        OCR_REQUESTS.release();
+      }
       try {
         Files.deleteIfExists(tempFile);
       } catch (java.io.IOException e) {

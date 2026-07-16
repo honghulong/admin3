@@ -1,0 +1,4 @@
+ALTER TABLE invoice
+  ADD COLUMN start_place VARCHAR(100) NULL,
+  ADD COLUMN end_place VARCHAR(100) NULL;
+

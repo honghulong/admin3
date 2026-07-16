@@ -121,6 +121,8 @@ public record ReimbursementDTO(
     Long attachmentId,
     Long expenseItemId,
     Long supportAttachmentId,
+    String startPlace,
+    String endPlace,
     AttachmentDTO supportAttachment,
     String imagePath,
     String ocrRawJson,
@@ -163,7 +165,7 @@ public record ReimbursementDTO(
 
     public InvoiceDTO(Invoice i, List<Attachment> attachments) {
       this(i.getId(), i.getReimbursementId(), i.getInvoiceTempId(), i.getAttachmentId(), i.getExpenseItemId(),
-        i.getSupportAttachmentId(), supportAttachment(i, attachments),
+        i.getSupportAttachmentId(), i.getStartPlace(), i.getEndPlace(), supportAttachment(i, attachments),
         i.getImagePath(), i.getOcrRawJson(), i.getInvoiceNo(), i.getInvoiceCode(),
         i.getInvoiceDate(), i.getBuyerName(), i.getSellerName(), i.getSellerShortName(),
         i.getInvoiceContentShortName(), i.getSubmitDate(), i.getBuyerTaxId(),

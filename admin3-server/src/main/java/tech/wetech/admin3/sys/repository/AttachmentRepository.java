@@ -9,9 +9,13 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
 
   List<Attachment> findByReimbursementIdOrderByCreatedAtAsc(Long reimbursementId);
 
+  List<Attachment> findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(Long reimbursementId);
+
   void deleteByReimbursementId(Long reimbursementId);
 
   long countByReimbursementId(Long reimbursementId);
 
   Attachment findByFileUrlEndingWith(String fileUrlSuffix);
+
+  Attachment findByFileUrlEndingWithAndDeletedFalse(String fileUrlSuffix);
 }

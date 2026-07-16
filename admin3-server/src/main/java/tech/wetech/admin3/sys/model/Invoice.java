@@ -20,6 +20,12 @@ public class Invoice extends BaseEntity {
 
   private Long supportAttachmentId;
 
+  @Column(length = 100)
+  private String startPlace;
+
+  @Column(length = 100)
+  private String endPlace;
+
   @Column(length = 500)
   private String imagePath;
 
@@ -165,6 +171,22 @@ public class Invoice extends BaseEntity {
 
   public void setSupportAttachmentId(Long supportAttachmentId) {
     this.supportAttachmentId = supportAttachmentId;
+  }
+
+  public String getStartPlace() {
+    return startPlace;
+  }
+
+  public void setStartPlace(String startPlace) {
+    this.startPlace = startPlace;
+  }
+
+  public String getEndPlace() {
+    return endPlace;
+  }
+
+  public void setEndPlace(String endPlace) {
+    this.endPlace = endPlace;
   }
 
   public void setImagePath(String imagePath) {

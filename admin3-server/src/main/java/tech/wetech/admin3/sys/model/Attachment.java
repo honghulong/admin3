@@ -28,6 +28,11 @@ public class Attachment extends BaseEntity {
   @Column(nullable = false)
   private LocalDateTime createdAt;
 
+  @Column(nullable = false)
+  private Boolean deleted = false;
+
+  private LocalDateTime deletedAt;
+
   /** OCR 状态: pending=待识别, processing=识别中, completed=已完成, failed=识别失败 */
   @Column(length = 20)
   private String ocrStatus;
@@ -90,6 +95,22 @@ public class Attachment extends BaseEntity {
 
   public void setCreatedAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
+  }
+
+  public Boolean getDeleted() {
+    return deleted;
+  }
+
+  public void setDeleted(Boolean deleted) {
+    this.deleted = deleted;
+  }
+
+  public LocalDateTime getDeletedAt() {
+    return deletedAt;
+  }
+
+  public void setDeletedAt(LocalDateTime deletedAt) {
+    this.deletedAt = deletedAt;
   }
 
   public String getOcrStatus() {

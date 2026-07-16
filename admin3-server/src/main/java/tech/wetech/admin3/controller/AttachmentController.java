@@ -88,6 +88,7 @@ public class AttachmentController {
       attachment.setFileUrl("/attachments/" + storedName + "/download");
       attachment.setUploadedBy(userInfo.userId());
       attachment.setCreatedAt(LocalDateTime.now());
+      attachment.setDeleted(false);
       attachment.setOcrStatus("pending");
       attachment = attachmentRepository.save(attachment);
 
@@ -112,18 +113,9 @@ public class AttachmentController {
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
     log.info("Deleting attachment: id={}, file={}, reimbursementId={}", id, attachment.getFileName(), attachment.getReimbursementId());
     // 删除物理文件
-    try {
-      String fileUrl = attachment.getFileUrl();
-      int downloadSuffixIndex = fileUrl.lastIndexOf("/download");
-      int fileNameStartIndex = fileUrl.lastIndexOf("/", downloadSuffixIndex - 1) + 1;
-      String storedName = fileUrl.substring(fileNameStartIndex, downloadSuffixIndex);
-      Path filePath = uploadDir.resolve(storedName);
-      Files.deleteIfExists(filePath);
-      log.debug("Deleted physical file: {}", storedName);
-    } catch (IOException e) {
-      log.warn("Failed to delete physical file for attachment {}: {}", id, e.getMessage());
-    }
-    attachmentRepository.delete(attachment);
+    attachment.setDeleted(true);
+    attachment.setDeletedAt(LocalDateTime.now());
+    attachmentRepository.save(attachment);
     log.info("Attachment deleted: id={}", id);
     return ResponseEntity.noContent().build();
   }
@@ -137,7 +129,7 @@ public class AttachmentController {
         throw new BusinessException(RECORD_NOT_EXIST, "文件不存在");
       }
       // 从数据库获取文件信息以确定 MIME 类型
-      Attachment attachment = attachmentRepository.findByFileUrlEndingWith(storedName + "/download");
+      Attachment attachment = attachmentRepository.findByFileUrlEndingWithAndDeletedFalse(storedName + "/download");
       String contentType = attachment != null ? attachment.getFileType() : "application/octet-stream";
       String fileName = attachment != null ? attachment.getFileName() : storedName;
 

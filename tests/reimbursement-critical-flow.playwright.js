@@ -13,6 +13,12 @@ const fixtures = {
   vat001: path.join(ROOT, 'docs/xlf/organized/01_vat_general_pdf/2026-06-28_vat_26442000007273956556.pdf'),
   vat002: path.join(ROOT, 'docs/xlf/organized/01_vat_general_pdf/2026-07-09_vat_26442000007779083686.pdf'),
   didi001: path.join(ROOT, 'docs/xlf/organized/02_didi_invoice_pdf/2026-06-04_didi-invoice_26117000000804123309.pdf'),
+  didiSameTripA: path.join(ROOT, 'docs/xlf/organized/02_didi_invoice_pdf/2026-04-08_didi-invoice_26117000000530671207.pdf'),
+  didiSameTripB: path.join(ROOT, 'docs/xlf/organized/02_didi_invoice_pdf/2026-04-08_didi-invoice_26117000000531132508.pdf'),
+  didiSameTripVoucherA: path.join(ROOT, 'test-fixtures/same-date-same-trip-2026-04-08/voucher-for-2026-04-08-invoice-26117000000530671207-same-trip.pdf'),
+  didiSameTripVoucherB: path.join(ROOT, 'test-fixtures/same-date-same-trip-2026-04-08/voucher-for-2026-04-08-invoice-26117000000531132508-same-trip.pdf'),
+  fuel0712A: path.join(ROOT, 'docs/xlf/organized/01_vat_general_pdf/2026-07-12_vat_26442000007907200231.pdf'),
+  fuel0712B: path.join(ROOT, 'docs/xlf/organized/01_vat_general_pdf/2026-07-12_vat_26442000007907223466.pdf'),
 };
 
 function requireEnv() {
@@ -103,6 +109,19 @@ async function uploadAttachment(api, reimbursementId, filePath) {
   return payload(await expectOk(response, `upload ${filePath}`));
 }
 
+async function uploadInvoiceSupport(api, reimbursementId, invoiceId, filePath) {
+  const response = await api.post(`reimbursements/${reimbursementId}/invoices/${invoiceId}/support-attachment`, {
+    multipart: {
+      file: {
+        name: path.basename(filePath),
+        mimeType: 'application/pdf',
+        buffer: fs.readFileSync(filePath),
+      },
+    },
+  });
+  return payload(await expectOk(response, `upload support ${filePath}`));
+}
+
 async function waitForInvoices(api, reimbursementId, expectedCount) {
   const started = Date.now();
   let lastDetail = null;
@@ -120,6 +139,53 @@ async function waitForInvoices(api, reimbursementId, expectedCount) {
     await new Promise((resolve) => setTimeout(resolve, 2000));
   }
   throw new Error(`Timed out waiting for ${expectedCount} invoice(s). Last detail: ${JSON.stringify(lastDetail)}`);
+}
+
+async function waitForInvoiceNos(api, reimbursementId, invoiceNos) {
+  const started = Date.now();
+  let lastDetail = null;
+  while (Date.now() - started < OCR_TIMEOUT_MS) {
+    lastDetail = await getDetail(api, reimbursementId);
+    const foundNos = new Set((lastDetail.invoices || []).map((invoice) => String(invoice.invoiceNo || '')));
+    if (invoiceNos.every((invoiceNo) => foundNos.has(invoiceNo))) return lastDetail;
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+  throw new Error(`Timed out waiting for invoices ${invoiceNos.join(', ')}. Last detail: ${JSON.stringify(lastDetail)}`);
+}
+
+async function waitForSupportOcrCompleted(api, reimbursementId, invoiceNos) {
+  const started = Date.now();
+  let lastDetail = null;
+  while (Date.now() - started < OCR_TIMEOUT_MS) {
+    lastDetail = await getDetail(api, reimbursementId);
+    const invoices = lastDetail.invoices || [];
+    const matched = invoiceNos.map((invoiceNo) => invoices.find((invoice) => String(invoice.invoiceNo || '') === invoiceNo));
+    const failed = matched.filter((invoice) => invoice?.supportAttachment?.ocrStatus === 'failed');
+    if (failed.length) {
+      throw new Error(`Support OCR failed for invoices: ${failed.map((invoice) => invoice.invoiceNo).join(', ')}`);
+    }
+    if (matched.every((invoice) => invoice?.supportAttachment?.ocrStatus === 'completed')) return lastDetail;
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+  throw new Error(`Timed out waiting for support OCR ${invoiceNos.join(', ')}. Last detail: ${JSON.stringify(lastDetail)}`);
+}
+
+async function waitForGroupedExpense(api, reimbursementId, expenseType, invoiceNos, expectedAmount) {
+  const started = Date.now();
+  let lastDetail = null;
+  while (Date.now() - started < OCR_TIMEOUT_MS) {
+    lastDetail = await getDetail(api, reimbursementId);
+    const invoices = (lastDetail.invoices || []).filter((invoice) => invoiceNos.includes(String(invoice.invoiceNo || '')));
+    const invoiceIds = invoices.map((invoice) => invoice.id);
+    const item = (lastDetail.expenseItems || []).find((entry) => entry.expenseType === expenseType
+      && invoiceIds.length === invoiceNos.length
+      && invoiceIds.every((id) => (entry.invoiceIds || []).includes(id)));
+    if (item && money(item.amount) === money(expectedAmount) && Number(item.invoiceCount || 0) === invoiceNos.length) {
+      return { detail: lastDetail, item, invoices };
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+  throw new Error(`Timed out waiting for grouped ${expenseType} invoices ${invoiceNos.join(', ')}. Last detail: ${JSON.stringify(lastDetail)}`);
 }
 
 async function waitForExpenseInvoiceLink(api, reimbursementId, expenseType, invoiceNoSuffix) {
@@ -278,19 +344,69 @@ async function main() {
     assert(money(didiInvoice.amountBeforeTax) > 0, `expected Didi amountBeforeTax > 0, got ${didiInvoice.amountBeforeTax}`);
     assert(didiInvoice.taxRate, 'expected Didi taxRate extracted');
     assert(money(didiInvoice.taxAmount) > 0, `expected Didi taxAmount > 0, got ${didiInvoice.taxAmount}`);
-    const rideHailingItem = (detail.expenseItems || []).find((item) => item.expenseType === 'ride_hailing');
-    assert(rideHailingItem, 'expected existing ride_hailing expense item');
-    assert((rideHailingItem.invoiceIds || []).length >= 1, 'expected ride_hailing expense item to include OCR invoice');
+    const rideHailingItem = (detail.expenseItems || []).find((item) => item.expenseType === 'ride_hailing'
+      && ((item.invoiceIds || []).includes(didiInvoice.id) || item.id === didiInvoice.expenseItemId));
+    assert(rideHailingItem, 'expected OCR Didi invoice to generate one ride_hailing expense item');
+    assert((rideHailingItem.invoiceIds || []).includes(didiInvoice.id) || didiInvoice.expenseItemId === rideHailingItem.id, 'expected ride_hailing expense item to include OCR invoice');
     assert(money(rideHailingItem.amount) > 0, `expected ride_hailing item amount > 0, got ${rideHailingItem.amount}`);
     assert((detail.invoices || []).some((invoice) => invoice.expenseItemId === rideHailingItem.id), 'expected an invoice bound to ride_hailing expense item');
 
     tc('TC-043', '删除费用明细最后一张关联发票后清理明细并重算主表');
     detail = await deleteInvoice(api, reimbursementId, didiInvoice.id);
     assert((detail.invoices || []).every((invoice) => invoice.id !== didiInvoice.id), 'expected deleted Didi invoice removed from active invoice list');
-    assert((detail.expenseItems || []).every((item) => item.id !== rideHailingItem.id), 'expected empty ride_hailing expense item removed after deleting its last invoice');
+    assert((detail.expenseItems || []).every((item) => item.id !== rideHailingItem.id), 'expected empty OCR ride_hailing expense item removed after deleting its last invoice');
     assert(money(detail.amount) === money(detail.invoiceTotalAmount), `amount should fallback after deleting last linked invoice: ${detail.amount} vs ${detail.invoiceTotalAmount}`);
 
     tc('TC-030', '提交草稿报销单');
+    tc('TC-044', '同一报销单内网约车凭证后归集，非行程费用上传后按日期类型归集');
+    const aggregationDraft = await createDraft(api);
+    const aggregationId = aggregationDraft.id;
+    await uploadAttachment(api, aggregationId, fixtures.didiSameTripA);
+    await uploadAttachment(api, aggregationId, fixtures.didiSameTripB);
+    let aggregationDetail = await waitForInvoiceNos(api, aggregationId, [
+      '26117000000530671207',
+      '26117000000531132508',
+    ]);
+    let sameTripInvoices = (aggregationDetail.invoices || []).filter((invoice) => [
+      '26117000000530671207',
+      '26117000000531132508',
+    ].includes(String(invoice.invoiceNo || '')));
+    assert(sameTripInvoices.length === 2, `expected two same-trip Didi invoices, got ${sameTripInvoices.length}`);
+    assert(new Set(sameTripInvoices.map((invoice) => invoice.expenseItemId)).size === 2, 'Didi invoices should stay as one invoice one expense item before support vouchers');
+
+    const invoiceA = sameTripInvoices.find((invoice) => String(invoice.invoiceNo) === '26117000000530671207');
+    const invoiceB = sameTripInvoices.find((invoice) => String(invoice.invoiceNo) === '26117000000531132508');
+    await uploadInvoiceSupport(api, aggregationId, invoiceA.id, fixtures.didiSameTripVoucherA);
+    await uploadInvoiceSupport(api, aggregationId, invoiceB.id, fixtures.didiSameTripVoucherB);
+    await waitForSupportOcrCompleted(api, aggregationId, [
+      '26117000000530671207',
+      '26117000000531132508',
+    ]);
+    const didiGrouped = await waitForGroupedExpense(api, aggregationId, 'ride_hailing', [
+      '26117000000530671207',
+      '26117000000531132508',
+    ], 33.60);
+    assert(money(didiGrouped.item.amount) === 33.60, `same-trip Didi amount should be 33.60, got ${didiGrouped.item.amount}`);
+    assert(Number(didiGrouped.item.invoiceCount || 0) === 2, `same-trip Didi invoiceCount should be 2, got ${didiGrouped.item.invoiceCount}`);
+    assert(Number(didiGrouped.item.kilometers || 0) > 0, `same-trip Didi kilometers should be accumulated from vouchers, got ${didiGrouped.item.kilometers}`);
+    assert(didiGrouped.invoices.every((invoice) => invoice.startPlace && invoice.endPlace), 'same-trip Didi invoices should keep one-to-one start/end places from support vouchers');
+
+    await uploadAttachment(api, aggregationId, fixtures.fuel0712A);
+    await uploadAttachment(api, aggregationId, fixtures.fuel0712B);
+    aggregationDetail = await waitForInvoiceNos(api, aggregationId, [
+      '26442000007907200231',
+      '26442000007907223466',
+    ]);
+    const fuelGrouped = await waitForGroupedExpense(api, aggregationId, 'fuel', [
+      '26442000007907200231',
+      '26442000007907223466',
+    ], 213.47);
+    assert(money(fuelGrouped.item.amount) === 213.47, `same-date fuel amount should be 213.47, got ${fuelGrouped.item.amount}`);
+    assert(Number(fuelGrouped.item.invoiceCount || 0) === 2, `same-date fuel invoiceCount should be 2, got ${fuelGrouped.item.invoiceCount}`);
+    const aggregationInvoiceTotal = money((aggregationDetail.invoices || []).reduce((sum, invoice) => sum + Number(invoice.totalAmount || 0), 0));
+    aggregationDetail = await getDetail(api, aggregationId);
+    assert(money(aggregationDetail.invoiceTotalAmount) === aggregationInvoiceTotal, `aggregation invoice total mismatch: ${aggregationDetail.invoiceTotalAmount} vs ${aggregationInvoiceTotal}`);
+
     detail = await submit(api, reimbursementId);
     assert(detail.status === 'pending', `expected pending after submit, got ${detail.status}`);
     assert((detail.approvalLogs || []).some((log) => log.action === 'submit'), 'expected submit approval log');

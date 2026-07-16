@@ -65,6 +65,9 @@
       <resource>
         <directory>dist</directory>
         <targetPath>META-INF/resources/webjars/admin3-ui</targetPath>
+        <includes>
+          <include>**/*</include>
+        </includes>
         <filtering>false</filtering>
       </resource>
     </resources>
