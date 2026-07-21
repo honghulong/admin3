@@ -8,30 +8,67 @@ Standard Commons Logging discovery in action with spring-jcl: please remove comm
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.3)
 
-2026-07-16T17:18:47.893+08:00  INFO 28700 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 28700 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
-2026-07-16T17:18:47.896+08:00  INFO 28700 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
-2026-07-16T17:18:48.957+08:00  INFO 28700 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-07-16T17:18:49.161+08:00  INFO 28700 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 192 ms. Found 19 JPA repository interfaces.
-2026-07-16T17:18:50.778+08:00  INFO 28700 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
-2026-07-16T17:18:50.797+08:00  INFO 28700 --- [admin3] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-07-16T17:18:50.799+08:00  INFO 28700 --- [admin3] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
-2026-07-16T17:18:50.859+08:00  INFO 28700 --- [admin3] [           main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
-2026-07-16T17:18:50.860+08:00  INFO 28700 --- [admin3] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2879 ms
+2026-07-17T16:57:33.524+08:00  INFO 31840 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 31840 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-07-17T16:57:33.527+08:00  INFO 31840 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-07-17T16:57:34.791+08:00  INFO 31840 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-17T16:57:35.034+08:00  INFO 31840 --- [admin3] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 231 ms. Found 19 JPA repository interfaces.
+2026-07-17T16:57:37.400+08:00  INFO 31840 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-07-17T16:57:37.427+08:00  INFO 31840 --- [admin3] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-17T16:57:37.429+08:00  INFO 31840 --- [admin3] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-07-17T16:57:37.526+08:00  INFO 31840 --- [admin3] [           main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-07-17T16:57:37.528+08:00  INFO 31840 --- [admin3] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3905 ms
 Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
-2026-07-16T17:18:51.745+08:00  INFO 28700 --- [admin3] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-07-16T17:18:51.873+08:00  INFO 28700 --- [admin3] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
-2026-07-16T17:18:51.924+08:00  INFO 28700 --- [admin3] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2026-07-16T17:18:52.341+08:00  INFO 28700 --- [admin3] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-07-16T17:18:52.391+08:00  INFO 28700 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-07-16T17:18:53.042+08:00  INFO 28700 --- [admin3] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3b347439
-2026-07-16T17:18:53.051+08:00  INFO 28700 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-07-16T17:18:53.119+08:00  WARN 28700 --- [admin3] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
-2026-07-16T17:18:56.321+08:00  INFO 28700 --- [admin3] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-07-16T17:18:57.942+08:00  INFO 28700 --- [admin3] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-07-16T17:18:59.111+08:00  INFO 28700 --- [admin3] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-07-16T17:19:02.051+08:00  WARN 28700 --- [admin3] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-07-16T17:19:02.995+08:00  INFO 28700 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
-2026-07-16T17:19:03.019+08:00  INFO 28700 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 15.61 seconds (process running for 16.328)
-2026-07-16T17:32:59.435+08:00  INFO 28700 --- [admin3] [nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-07-16T17:32:59.435+08:00  INFO 28700 --- [admin3] [nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-07-16T17:32:59.436+08:00  INFO 28700 --- [admin3] [nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-07-17T16:57:38.677+08:00  INFO 31840 --- [admin3] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-17T16:57:38.814+08:00  INFO 31840 --- [admin3] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-07-17T16:57:38.888+08:00  INFO 31840 --- [admin3] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-07-17T16:57:39.390+08:00  INFO 31840 --- [admin3] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-17T16:57:39.443+08:00  INFO 31840 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-17T16:57:40.255+08:00  INFO 31840 --- [admin3] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3199a202
+2026-07-17T16:57:40.259+08:00  INFO 31840 --- [admin3] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-17T16:57:40.343+08:00  WARN 31840 --- [admin3] [           main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-07-17T16:57:44.034+08:00  INFO 31840 --- [admin3] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-17T16:57:44.322+08:00  INFO 31840 --- [admin3] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-17T16:57:45.717+08:00  INFO 31840 --- [admin3] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-17T16:57:48.500+08:00  WARN 31840 --- [admin3] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-17T16:57:49.354+08:00  INFO 31840 --- [admin3] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-07-17T16:57:49.389+08:00  INFO 31840 --- [admin3] [           main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 16.413 seconds (process running for 17.168)
+2026-07-17T16:58:27.081+08:00  INFO 31840 --- [admin3] [nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-17T16:58:27.088+08:00  INFO 31840 --- [admin3] [nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-17T16:58:27.090+08:00  INFO 31840 --- [admin3] [nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-07-17T16:58:27.792+08:00  INFO 31840 --- [admin3] [nio-9099-exec-3] t.w.a.controller.AttachmentController    : Attachment uploaded: id=187, file=2026-03-19_toll_26447902010300104452.ofd, size=64944, reimbursementId=74, stored=14e33bc8-633c-4442-8187-09286435b083.ofd
+2026-07-17T16:58:27.797+08:00  INFO 31840 --- [admin3] [nio-9099-exec-3] t.w.a.controller.AttachmentController    : OCR triggered for attachment 187
+2026-07-17T16:58:27.848+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 187, file: uploads\attachments\14e33bc8-633c-4442-8187-09286435b083.ofd
+2026-07-17T16:58:27.970+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 187, result length: 629
+2026-07-17T16:58:28.202+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Reimbursement 74 updated from OCR attachment 187, invoiceNo=26447902010300104452, amount=6.18
+2026-07-17T17:05:33.175+08:00  INFO 31840 --- [admin3] [nio-9099-exec-3] t.w.a.controller.AttachmentController    : Deleting attachment: id=181, file=2026-03-19_toll_26447902330300755956.ofd, reimbursementId=60
+2026-07-17T17:05:33.185+08:00  INFO 31840 --- [admin3] [nio-9099-exec-3] t.w.a.controller.AttachmentController    : Attachment deleted: id=181
+2026-07-17T17:05:41.652+08:00  INFO 31840 --- [admin3] [nio-9099-exec-6] t.w.a.controller.AttachmentController    : Attachment uploaded: id=188, file=2026-03-19_toll_26447902010300104452.xml, size=2303, reimbursementId=60, stored=05657b2d-6f04-4963-855e-3b04d6cc2561.xml
+2026-07-17T17:05:41.654+08:00  INFO 31840 --- [admin3] [nio-9099-exec-6] t.w.a.controller.AttachmentController    : OCR triggered for attachment 188
+2026-07-17T17:05:41.660+08:00  INFO 31840 --- [admin3] [nio-9099-exec-7] t.w.a.controller.AttachmentController    : Attachment uploaded: id=191, file=2026-03-19_toll_26447902010300104452.ofd, size=64944, reimbursementId=60, stored=6ca7f78c-08c2-4d3a-ae6b-3ae441e14e50.ofd
+2026-07-17T17:05:41.660+08:00  INFO 31840 --- [admin3] [nio-9099-exec-5] t.w.a.controller.AttachmentController    : Attachment uploaded: id=189, file=2026-03-19_toll_26447901730300239488.xml, size=2333, reimbursementId=60, stored=52c037b1-8c3c-49b0-8b7e-bb9273cc4d21.xml
+2026-07-17T17:05:41.663+08:00  INFO 31840 --- [admin3] [nio-9099-exec-7] t.w.a.controller.AttachmentController    : OCR triggered for attachment 191
+2026-07-17T17:05:41.661+08:00  INFO 31840 --- [admin3] [nio-9099-exec-9] t.w.a.controller.AttachmentController    : Attachment uploaded: id=190, file=2026-03-19_toll_26447901730300239488.ofd, size=64983, reimbursementId=60, stored=bad1a8fb-db70-42f6-bcb9-11347651ff35.ofd
+2026-07-17T17:05:41.663+08:00  INFO 31840 --- [admin3] [nio-9099-exec-5] t.w.a.controller.AttachmentController    : OCR triggered for attachment 189
+2026-07-17T17:05:41.663+08:00  INFO 31840 --- [admin3] [nio-9099-exec-9] t.w.a.controller.AttachmentController    : OCR triggered for attachment 190
+2026-07-17T17:05:41.677+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 188, file: uploads\attachments\05657b2d-6f04-4963-855e-3b04d6cc2561.xml
+2026-07-17T17:05:41.682+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 191, file: uploads\attachments\6ca7f78c-08c2-4d3a-ae6b-3ae441e14e50.ofd
+2026-07-17T17:05:41.682+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 189, file: uploads\attachments\52c037b1-8c3c-49b0-8b7e-bb9273cc4d21.xml
+2026-07-17T17:05:41.682+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 190, file: uploads\attachments\bad1a8fb-db70-42f6-bcb9-11347651ff35.ofd
+2026-07-17T17:05:41.712+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 188, result length: 2476
+2026-07-17T17:05:41.714+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 189, result length: 2490
+2026-07-17T17:05:41.808+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 190, result length: 638
+2026-07-17T17:05:41.806+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 191, result length: 629
+2026-07-17T17:05:42.411+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Reimbursement 60 updated from OCR attachment 189, invoiceNo=26447901730300239488, amount=29.45
+2026-07-17T17:05:42.540+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR attachment 190 matched duplicate invoice 153, skipped new invoice creation
+2026-07-17T17:05:42.954+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Reimbursement 60 updated from OCR attachment 191, invoiceNo=26447902010300104452, amount=6.18
+2026-07-17T17:05:43.062+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR attachment 188 matched duplicate invoice 154, skipped new invoice creation
+2026-07-17T17:06:53.508+08:00  INFO 31840 --- [admin3] [nio-9099-exec-9] t.w.a.controller.AttachmentController    : Attachment uploaded: id=192, file=2026-03-19_toll_26447902330300755956.xml, size=2297, reimbursementId=60, stored=e1df99dc-54b5-4c59-8f58-447d8c91fc64.xml
+2026-07-17T17:06:53.510+08:00  INFO 31840 --- [admin3] [nio-9099-exec-9] t.w.a.controller.AttachmentController    : OCR triggered for attachment 192
+2026-07-17T17:06:53.513+08:00  INFO 31840 --- [admin3] [nio-9099-exec-5] t.w.a.controller.AttachmentController    : Attachment uploaded: id=193, file=2026-03-19_toll_26447902330300755956.ofd, size=64974, reimbursementId=60, stored=1a48f720-6f36-4ade-983b-aa4013b73ef0.ofd
+2026-07-17T17:06:53.513+08:00  INFO 31840 --- [admin3] [nio-9099-exec-5] t.w.a.controller.AttachmentController    : OCR triggered for attachment 193
+2026-07-17T17:06:53.518+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 192, file: uploads\attachments\e1df99dc-54b5-4c59-8f58-447d8c91fc64.xml
+2026-07-17T17:06:53.521+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 193, file: uploads\attachments\1a48f720-6f36-4ade-983b-aa4013b73ef0.ofd
+2026-07-17T17:06:53.530+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 192, result length: 2479
+2026-07-17T17:06:53.548+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 193, result length: 632
+2026-07-17T17:06:53.973+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : Reimbursement 60 updated from OCR attachment 192, invoiceNo=26447902330300755956, amount=1.0
+2026-07-17T17:06:54.059+08:00  INFO 31840 --- [admin3] [               ] t.wetech.admin3.sys.service.OcrService   : OCR attachment 193 matched duplicate invoice 155, skipped new invoice creation

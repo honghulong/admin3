@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,6 +50,40 @@ class OcrServiceTest {
     String total = ocrService.reconcileTotalAmountFromSummary("15.24", List.of("12.23", "0.37"));
 
     assertThat(total).isEqualTo("15.24");
+  }
+
+  @Test
+  void extractInvoiceFieldsFromTextRecognizesRailwayElectronicTicketFields() throws Exception {
+    String railwayTicketText = """
+      电子发票（铁路电子客票）
+      发票号码：24110101234567890123
+      开票日期：2025年01月02日
+      购买方名称：示例科技有限公司
+      行程信息：北京南站至上海虹桥站
+      票价：￥128.50
+      """;
+
+    Map<String, String> fields = extractStructuredFields(railwayTicketText, "railway-ticket.pdf");
+
+    assertThat(fields)
+      .containsEntry("invoice_no", "24110101234567890123")
+      .containsEntry("date", "2025年01月02日")
+      .containsEntry("total_amount", "128.50")
+      .containsEntry("invoice_type", "电子发票（铁路电子客票）");
+  }
+
+  @Test
+  void classifyExpenseTypeSeparatesTaxiAndPassengerTransportFromRideHailing() throws Exception {
+    Invoice invoice = new Invoice();
+
+    assertThat(classifyExpenseType(invoice, "出租车客运服务"))
+      .isEqualTo("taxi");
+    assertThat(classifyExpenseType(invoice, "汽车客运服务 客运车票"))
+      .isEqualTo("passenger_transport");
+    assertThat(classifyExpenseType(invoice, "航空运输电子客票行程单"))
+      .isEqualTo("air_travel");
+    assertThat(classifyExpenseType(invoice, "电子发票（铁路电子客票）"))
+      .isEqualTo("rail");
   }
 
   @Test
@@ -232,5 +267,18 @@ class OcrServiceTest {
     item.setCreatedAt(LocalDateTime.now());
     item.setUpdatedAt(LocalDateTime.now());
     return item;
+  }
+
+  @SuppressWarnings("unchecked")
+  private Map<String, String> extractStructuredFields(String text, String filename) throws Exception {
+    Method method = OcrService.class.getDeclaredMethod("extractInvoiceFieldsFromText", String.class, String.class);
+    method.setAccessible(true);
+    return (Map<String, String>) method.invoke(ocrService, text, filename);
+  }
+
+  private String classifyExpenseType(Invoice invoice, String text) throws Exception {
+    Method method = OcrService.class.getDeclaredMethod("classifyExpenseType", Invoice.class, String.class);
+    method.setAccessible(true);
+    return (String) method.invoke(ocrService, invoice, text);
   }
 }

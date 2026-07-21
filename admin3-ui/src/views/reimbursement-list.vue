@@ -53,12 +53,12 @@
         <el-table-column label="操作" width="350" fixed="right">
           <template #default="scope">
             <el-button text :icon="View" @click="handleDetail(scope.row)" v-action:reimbursement:view>详情</el-button>
-            <el-button text :icon="Edit" @click="handleEdit(scope.row)" v-if="scope.row.status==='draft' || scope.row.status==='rejected' || scope.row.status==='recalled'" v-action:reimbursement:update>编辑</el-button>
-            <el-button text :icon="Upload" @click="handleSubmit(scope.row)" v-if="scope.row.status==='draft'" v-action:reimbursement:submit>提交</el-button>
+            <el-button text :icon="Edit" @click="handleEdit(scope.row)" v-if="isApplicantEditableStatus(scope.row.status)" v-action:reimbursement:update>编辑</el-button>
+            <el-button text :icon="Upload" @click="handleSubmit(scope.row)" v-if="isApplicantEditableStatus(scope.row.status)" v-action:reimbursement:submit>提交</el-button>
             <el-button text :icon="CircleCheck" @click="handleApprove(scope.row)" v-if="scope.row.status==='pending'" v-action:reimbursement:approve>通过</el-button>
             <el-button text :icon="CloseBold" class="orange" @click="handleReject(scope.row)" v-if="scope.row.status==='pending'" v-action:reimbursement:approve>退回</el-button>
             <el-button text :icon="Refresh" @click="handleRecall(scope.row)" v-if="scope.row.status==='pending'" v-action:reimbursement:recall>撤回</el-button>
-            <el-button text :icon="Delete" class="red" @click="handleDelete(scope.row)" v-if="scope.row.status==='draft'" v-action:reimbursement:delete>删除</el-button>
+            <el-button text :icon="Delete" class="red" @click="handleDelete(scope.row)" v-if="isApplicantEditableStatus(scope.row.status)" v-action:reimbursement:delete>删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -109,6 +109,9 @@
             <el-button type="primary" size="small" :icon="Plus" @click="addExpenseItem">新增费用明细</el-button>
           </div>
           <el-table :data="expenseItemList" border size="small" style="width: 100%;">
+            <el-table-column label="序号" width="60" align="center">
+              <template #default="{ $index }">{{ $index + 1 }}</template>
+            </el-table-column>
             <el-table-column label="日期" width="145">
               <template #default="{ row }">
                 <el-date-picker v-model="row.expenseDate" type="date" value-format="YYYY-MM-DDTHH:mm:ss" style="width: 125px"></el-date-picker>
@@ -175,6 +178,9 @@
                   </el-row>
                 </div>
               </template>
+            </el-table-column>
+            <el-table-column label="序号" width="60" align="center">
+              <template #default="{ $index }">{{ $index + 1 }}</template>
             </el-table-column>
             <el-table-column prop="invoiceNo" label="发票号码" min-width="230" show-overflow-tooltip>
               <template #default="{ row }"><span class="invoice-no-text" :title="row.invoiceNo">{{ row.invoiceNo || '-' }}</span></template>
@@ -268,7 +274,7 @@
               :auto-upload="false"
               :on-change="handleFileChange"
               :file-list="[]"
-              accept=".jpg,.png,.gif,.webp,.pdf"
+              accept=".jpg,.png,.gif,.webp,.pdf,.xml,.ofd"
               :limit="9"
               :show-file-list="false"
               multiple>
@@ -761,6 +767,10 @@ function getStatusType(status: string) {
   return statusTypeMap[status] || 'info';
 }
 
+function isApplicantEditableStatus(status: string) {
+  return status === 'draft' || status === 'rejected' || status === 'recalled';
+}
+
 function getLogActionLabel(action: string) {
   return logActionMap[action] || action;
 }
@@ -976,6 +986,11 @@ async function handleFileChange(uploadFile: any) {
   const reimbursementId = editId.value;
   if (!reimbursementId) {
     ElMessage.warning('请先保存报销单再上传附件');
+    return;
+  }
+  const fileName = uploadFile.raw?.name || uploadFile.name || '';
+  if (fileName && fileList.value.some((file: any) => file.name === fileName)) {
+    ElMessage.warning('该发票文件已上传，请勿重复上传');
     return;
   }
   try {
@@ -1608,6 +1623,8 @@ async function removeInvoice(row: any, index: number) {
     if (row.id && editId.value) {
       const res = await deleteInvoice(editId.value, row.id);
       invoiceList.value = res.data.invoices || [];
+      fileList.value = mapInvoiceAttachmentFiles(res.data.attachments || [], res.data.invoices || []);
+      uploadedAttachmentIds.value = invoiceAttachmentIds(res.data.attachments || [], res.data.invoices || []);
       expenseItemList.value = (res.data.expenseItems || []).map(normalizeExpenseItemForEdit);
       form.invoiceCount = res.data.invoiceCount || 0;
       form.amount = res.data.amount || form.amount;
@@ -1661,7 +1678,7 @@ async function waitInvoiceSupportOcr(invoiceId: number) {
     const invoice = (data.invoices || []).find((item: any) => item.id === invoiceId);
     const status = invoice?.supportAttachment?.ocrStatus;
     if (status === 'completed') {
-      ElMessage.success('凭证文件识别完成，已同步发票行程字段并统一归集');
+      ElMessage.success('凭证文件识别完成，已同步发票行程字段');
       return;
     }
     if (status === 'failed') {

@@ -1,11 +1,16 @@
 param(
-    [int]$Port = 9099
+    [int]$Port = 9099,
+    [string]$DbUrl = "jdbc:mysql://127.0.0.1:3306/admin3?characterEncoding=utf8",
+    [string]$DbUsername = "root",
+    [string]$DbPassword = "123456"
 )
 
+$ErrorActionPreference = "Stop"
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $JarFile = Join-Path $ProjectRoot "admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar"
 $LogDir = Join-Path $ProjectRoot "logs"
 $LogFile = Join-Path $LogDir "admin3-server.log"
+$ErrLogFile = Join-Path $LogDir "admin3-server.err.log"
 $PidFile = Join-Path $LogDir "admin3-server.pid"
 $JavaCandidates = @()
 if ($env:JAVA_HOME) {
@@ -37,36 +42,53 @@ if (-not (Test-Path $LogDir)) {
 }
 
 if (Test-Path $PidFile) {
-    $OldPid = Get-Content $PidFile
-    $proc = Get-Process -Id $OldPid -ErrorAction SilentlyContinue
+    $OldPid = (Get-Content $PidFile -Raw).Trim()
+    $proc = $null
+    if ($OldPid -match '^\d+$') {
+        $proc = Get-Process -Id ([int]$OldPid) -ErrorAction SilentlyContinue
+    }
     if ($proc -ne $null) {
         Write-Host "[INFO] Service already running (PID: $OldPid)"
         Write-Host "[INFO] Log file: $LogFile"
         Write-Host "[INFO] URL: http://localhost:$Port/admin3"
         exit 0
     }
+    Remove-Item $PidFile -Force
 }
 
 Write-Host "[INFO] Starting: $JarFile"
 Write-Host "[INFO] URL: http://localhost:$Port/admin3"
 Write-Host "[INFO] Log file: $LogFile"
-Write-Host "[INFO] Press Ctrl+C to stop"
 Write-Host ""
 
 $JavaArgs = @(
-    "-Dspring.datasource.url=jdbc:mysql://127.0.0.1:3306/admin3?characterEncoding=utf8",
-    "-Dspring.datasource.username=root",
-    "-Dspring.datasource.password=123456",
+    "-Dspring.datasource.url=$DbUrl",
+    "-Dspring.datasource.username=$DbUsername",
+    "-Dspring.datasource.password=$DbPassword",
+    "-Dlogging.file.name=$LogFile",
     "-jar",
     $JarFile,
     "--server.port=$Port"
 )
 
-& $JavaExe @JavaArgs 2>&1 | ForEach-Object { $_; $_ | Out-File -FilePath $LogFile -Encoding utf8 -Append }
+$process = Start-Process `
+    -FilePath $JavaExe `
+    -ArgumentList $JavaArgs `
+    -WorkingDirectory $ProjectRoot `
+    -WindowStyle Hidden `
+    -PassThru
 
-Write-Host ""
-Write-Host "[INFO] Service stopped"
+$process.Id | Set-Content -Path $PidFile -Encoding ascii
 
-if (Test-Path $PidFile) {
-    Remove-Item $PidFile -Force
+Start-Sleep -Seconds 2
+$started = Get-Process -Id $process.Id -ErrorAction SilentlyContinue
+if (-not $started) {
+    Remove-Item $PidFile -Force -ErrorAction SilentlyContinue
+    Write-Host "[ERROR] Service exited during startup. Check logs:"
+    Write-Host "        $LogFile"
+    Write-Host "        $ErrLogFile"
+    exit 1
 }
+
+Write-Host "[INFO] Service started (PID: $($process.Id))"
+Write-Host "[INFO] Stop with: .\stop.ps1"

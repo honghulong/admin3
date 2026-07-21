@@ -38,6 +38,8 @@ import java.nio.file.StandardCopyOption;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -247,8 +249,8 @@ public class ReimbursementService {
                                               List<Long> attachmentIds) {
     Reimbursement r = reimbursementRepository.findById(id)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
-    if (!"draft".equals(r.getStatus())) {
-      throw new BusinessException(PARAM_ERROR, "仅草稿状态可编辑");
+    if (!isApplicantEditableStatus(r.getStatus())) {
+      throw new BusinessException(PARAM_ERROR, "当前状态不可编辑");
     }
     r.setTitle(title);
     r.setCategory(category);
@@ -288,6 +290,7 @@ public class ReimbursementService {
         });
       }
     }
+    deduplicateInvoicesOnSave(id);
 
     return findReimbursementById(id);
   }
@@ -295,10 +298,11 @@ public class ReimbursementService {
   public void deleteReimbursement(Long id) {
     Reimbursement r = reimbursementRepository.findById(id)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
-    if (!"draft".equals(r.getStatus())) {
-      throw new BusinessException(PARAM_ERROR, "仅草稿状态可删除");
+    if (!isApplicantEditableStatus(r.getStatus())) {
+      throw new BusinessException(PARAM_ERROR, "当前状态不可删除");
     }
-    // 级联删除附件和审批日志
+    List<Invoice> invoices = invoiceRepository.findByReimbursementIdOrderByCreatedAtAsc(id);
+    invoiceRepository.deleteAll(invoices);
     attachmentRepository.deleteByReimbursementId(id);
     expenseItemRepository.deleteByReimbursementId(id);
     List<ApprovalLog> logs = approvalLogRepository.findByReimbursementIdOrderByCreatedAtAsc(id);
@@ -309,7 +313,7 @@ public class ReimbursementService {
   public ReimbursementDTO deleteInvoice(Long reimbursementId, Long invoiceId) {
     Reimbursement r = reimbursementRepository.findById(reimbursementId)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
-    if (!"draft".equals(r.getStatus()) && !"rejected".equals(r.getStatus()) && !"recalled".equals(r.getStatus())) {
+    if (!isApplicantEditableStatus(r.getStatus())) {
       throw new BusinessException(PARAM_ERROR, "当前状态不可删除发票");
     }
     Invoice invoice = invoiceRepository.findById(invoiceId)
@@ -351,8 +355,8 @@ public class ReimbursementService {
   public ReimbursementDTO uploadInvoiceSupportAttachment(Long reimbursementId, Long invoiceId, MultipartFile file) {
     Reimbursement r = reimbursementRepository.findById(reimbursementId)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
-    if (!"draft".equals(r.getStatus())) {
-      throw new BusinessException(PARAM_ERROR, "仅草稿状态可上传发票佐证文件");
+    if (!isApplicantEditableStatus(r.getStatus())) {
+      throw new BusinessException(PARAM_ERROR, "仅草稿、已退回或已撤回状态可上传发票佐证文件");
     }
     Invoice invoice = invoiceRepository.findById(invoiceId)
       .filter(item -> reimbursementId.equals(item.getReimbursementId()))
@@ -383,8 +387,8 @@ public class ReimbursementService {
   public ReimbursementDTO deleteInvoiceSupportAttachment(Long reimbursementId, Long invoiceId) {
     Reimbursement r = reimbursementRepository.findById(reimbursementId)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
-    if (!"draft".equals(r.getStatus())) {
-      throw new BusinessException(PARAM_ERROR, "仅草稿状态可删除发票佐证文件");
+    if (!isApplicantEditableStatus(r.getStatus())) {
+      throw new BusinessException(PARAM_ERROR, "仅草稿、已退回或已撤回状态可删除发票佐证文件");
     }
     Invoice invoice = invoiceRepository.findById(invoiceId)
       .filter(item -> reimbursementId.equals(item.getReimbursementId()))
@@ -464,8 +468,8 @@ public class ReimbursementService {
   public ReimbursementDTO submitReimbursement(Long id) {
     Reimbursement r = reimbursementRepository.findById(id)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
-    if (!"draft".equals(r.getStatus())) {
-      throw new BusinessException(PARAM_ERROR, "仅草稿状态可提交");
+    if (!isApplicantEditableStatus(r.getStatus())) {
+      throw new BusinessException(PARAM_ERROR, "当前状态不可提交");
     }
     if (r.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
       throw new BusinessException(PARAM_ERROR, "报销金额必须大于0");
@@ -552,6 +556,10 @@ public class ReimbursementService {
     log.setComment(comment);
     log.setCreatedAt(LocalDateTime.now());
     approvalLogRepository.save(log);
+  }
+
+  private boolean isApplicantEditableStatus(String status) {
+    return "draft".equals(status) || "rejected".equals(status) || "recalled".equals(status);
   }
 
   // ========== InvoiceTemp（临时发票）相关方法 ==========
@@ -676,11 +684,12 @@ public class ReimbursementService {
   public ReimbursementDTO saveExpenseItems(Long reimbursementId, List<ExpenseItemRequest> items) {
     Reimbursement r = reimbursementRepository.findById(reimbursementId)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
-    if (!"draft".equals(r.getStatus()) && !"rejected".equals(r.getStatus()) && !"recalled".equals(r.getStatus())) {
+    if (!isApplicantEditableStatus(r.getStatus())) {
       throw new BusinessException(PARAM_ERROR, "当前状态不可编辑费用明细");
     }
     UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
     LocalDateTime now = LocalDateTime.now();
+    deduplicateInvoicesOnSave(reimbursementId);
     List<Invoice> reimbursementInvoices = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(reimbursementId);
     Map<Long, Long> existingInvoiceCounts = reimbursementInvoices.stream()
       .map(Invoice::getExpenseItemId)
@@ -693,6 +702,7 @@ public class ReimbursementService {
       invoiceRepository.save(invoice);
     }
     expenseItemRepository.deleteByReimbursementId(reimbursementId);
+    items = mergeSameDateExpenseItems(items);
     if (items != null) {
       int index = 1;
       for (ExpenseItemRequest req : items) {
@@ -739,6 +749,67 @@ public class ReimbursementService {
     r.setUpdatedAt(now);
     reimbursementRepository.save(r);
     return findReimbursementById(reimbursementId);
+  }
+
+  private List<ExpenseItemRequest> mergeSameDateExpenseItems(List<ExpenseItemRequest> items) {
+    if (items == null || items.isEmpty()) return items;
+    Map<String, ExpenseItemRequest> merged = new LinkedHashMap<>();
+    for (ExpenseItemRequest item : items) {
+      if (item == null || item.expenseType() == null || item.expenseType().isBlank()) continue;
+      String key = expenseItemMergeKey(item);
+      if (key == null) {
+        merged.put("single|" + merged.size(), item);
+        continue;
+      }
+      ExpenseItemRequest existing = merged.get(key);
+      if (existing == null) {
+        merged.put(key, item);
+      } else {
+        merged.put(key, mergeExpenseItem(existing, item));
+      }
+    }
+    return new ArrayList<>(merged.values());
+  }
+
+  private String expenseItemMergeKey(ExpenseItemRequest item) {
+    if (item.expenseDate() == null) return null;
+    String date = item.expenseDate() == null ? "" : item.expenseDate().toLocalDate().toString();
+    return item.expenseType() + "|" + date;
+  }
+
+  private ExpenseItemRequest mergeExpenseItem(ExpenseItemRequest left, ExpenseItemRequest right) {
+    List<Long> invoiceIds = new ArrayList<>();
+    addInvoiceIds(invoiceIds, left.invoiceIds());
+    addInvoiceIds(invoiceIds, right.invoiceIds());
+    BigDecimal amount = left.amount() == null ? BigDecimal.ZERO : left.amount();
+    if (right.amount() != null) amount = amount.add(right.amount());
+    return new ExpenseItemRequest(
+      left.id(),
+      null,
+      invoiceIds,
+      firstNonNull(left.expenseDate(), right.expenseDate()),
+      firstNonBlank(left.startPlace(), right.startPlace()),
+      firstNonBlank(left.endPlace(), right.endPlace()),
+      firstNonNull(left.kilometers(), right.kilometers()),
+      left.expenseType(),
+      amount,
+      firstNonBlank(left.projectCostCategory(), right.projectCostCategory()),
+      firstNonBlank(left.customerName(), right.customerName()),
+      firstNonBlank(left.remark(), right.remark()),
+      firstNonBlank(left.description(), right.description()),
+      firstNonBlank(left.source(), right.source())
+    );
+  }
+
+  private void addInvoiceIds(List<Long> target, List<Long> source) {
+    if (source == null) return;
+    for (Long id : source) {
+      if (id != null && !target.contains(id)) target.add(id);
+    }
+  }
+
+  private <T> T firstNonNull(T left, T right) {
+    return left != null ? left : right;
   }
 
   public byte[] exportElectronicInvoiceRegister(Long reimbursementId) {
@@ -854,6 +925,52 @@ public class ReimbursementService {
     r.setInvoiceTotalAmount(invoiceTotal);
     r.setAmount(invoiceTotal);
     syncVoucherOcrDescription(r, invoices);
+  }
+
+  private void deduplicateInvoicesOnSave(Long reimbursementId) {
+    UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
+    Long userId = userInfo == null ? null : userInfo.userId();
+    LocalDateTime now = LocalDateTime.now();
+    Map<String, Invoice> seen = new LinkedHashMap<>();
+    List<Long> affectedExpenseItemIds = new ArrayList<>();
+    List<Invoice> invoices = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(reimbursementId);
+    for (Invoice invoice : invoices) {
+      String key = invoiceDeduplicateKey(invoice);
+      if (key == null) continue;
+      Invoice existing = seen.get(key);
+      if (existing == null) {
+        seen.put(key, invoice);
+        continue;
+      }
+      affectedExpenseItemIds.add(invoice.getExpenseItemId());
+      deleteInvoiceAttachments(invoice, now);
+      invoice.setDeleted(true);
+      invoice.setDeletedAt(now);
+      invoice.setAttachmentId(null);
+      invoice.setSupportAttachmentId(null);
+      invoice.setExpenseItemId(null);
+      invoice.setUpdatedBy(userId);
+      invoice.setUpdatedAt(now);
+      invoiceRepository.save(invoice);
+    }
+    affectedExpenseItemIds.stream()
+      .filter(Objects::nonNull)
+      .distinct()
+      .forEach(expenseItemId -> recalculateOrRemoveExpenseItem(reimbursementId, expenseItemId, userId, now));
+  }
+
+  private String invoiceDeduplicateKey(Invoice invoice) {
+    if (invoice == null) return null;
+    if (invoice.getInvoiceNo() != null && !invoice.getInvoiceNo().isBlank()) {
+      return "no|" + invoice.getInvoiceNo().trim();
+    }
+    if (invoice.getInvoiceCode() != null && !invoice.getInvoiceCode().isBlank()
+      && invoice.getInvoiceDate() != null && invoice.getTotalAmount() != null) {
+      return "fallback|" + invoice.getInvoiceCode().trim()
+        + "|" + invoice.getInvoiceDate().toLocalDate()
+        + "|" + invoice.getTotalAmount().setScale(2, java.math.RoundingMode.HALF_UP);
+    }
+    return null;
   }
 
   private void syncVoucherOcrDescription(Reimbursement r, List<Invoice> activeInvoices) {

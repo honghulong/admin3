@@ -63,13 +63,15 @@ public class AttachmentController {
     }
     // 校验文件类型
     String contentType = file.getContentType();
-    if (contentType == null || !(contentType.startsWith("image/") || contentType.equals("application/pdf"))) {
-      throw new BusinessException(PARAM_ERROR, "仅支持jpg/png/gif/webp/pdf格式");
+    String originalName = file.getOriginalFilename();
+    String lowerName = originalName == null ? "" : originalName.toLowerCase();
+    boolean structuredInvoiceFile = lowerName.endsWith(".xml") || lowerName.endsWith(".ofd");
+    if (contentType == null || !(contentType.startsWith("image/") || contentType.equals("application/pdf") || structuredInvoiceFile)) {
+      throw new BusinessException(PARAM_ERROR, "仅支持jpg/png/gif/webp/pdf/xml/ofd格式");
     }
 
     try {
       Files.createDirectories(uploadDir);
-      String originalName = file.getOriginalFilename();
       String ext = "";
       if (originalName != null && originalName.contains(".")) {
         ext = originalName.substring(originalName.lastIndexOf("."));

@@ -2,6 +2,11 @@ package tech.wetech.admin3.sys.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,18 +20,31 @@ import tech.wetech.admin3.sys.repository.ReimbursementRepository;
 import tech.wetech.admin3.sys.repository.ReimbursementExpenseItemRepository;
 
 import java.math.BigDecimal;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.awt.image.BufferedImage;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.imageio.ImageIO;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 @Service
 public class OcrService {
@@ -35,6 +53,20 @@ public class OcrService {
   private static final String OCR_SERVER_URL = "http://localhost:8765";
   private static final java.time.Duration OCR_REQUEST_TIMEOUT = java.time.Duration.ofSeconds(120);
   private static final Semaphore OCR_REQUESTS = new Semaphore(1, true);
+  private static final List<ExpenseTypeRule> EXPENSE_TYPE_RULES = List.of(
+    new ExpenseTypeRule("taxi", List.of("出租车", "的士", "taxi")),
+    new ExpenseTypeRule("passenger_transport", List.of("汽车客运", "客运车票", "长途客运")),
+    new ExpenseTypeRule("air_travel", List.of("航空运输", "机票", "民航")),
+    new ExpenseTypeRule("fuel", List.of("加油", "汽油", "柴油", "石化", "石油", "油品")),
+    new ExpenseTypeRule("toll", List.of("高速", "通行费", "过路", "etc")),
+    new ExpenseTypeRule("rail", List.of("高铁", "动车", "火车", "铁路")),
+    new ExpenseTypeRule("metro", List.of("地铁", "轨道交通")),
+    new ExpenseTypeRule("ride_hailing", List.of("网约车", "滴滴", "didi", "出行", "客运服务")),
+    new ExpenseTypeRule("carpool", List.of("顺风车")),
+    new ExpenseTypeRule("freight", List.of("货拉拉", "货运", "物流", "运输")),
+    new ExpenseTypeRule("parking", List.of("停车")),
+    new ExpenseTypeRule("meal", List.of("餐", "饭店", "餐饮", "酒楼", "美食"))
+  );
 
   private final AttachmentRepository attachmentRepository;
   private final ReimbursementRepository reimbursementRepository;
@@ -84,9 +116,7 @@ public class OcrService {
     attachmentRepository.save(attachment);
 
     try {
-      byte[] imageBytes = Files.readAllBytes(imagePath);
-      String base64 = Base64.getEncoder().encodeToString(imageBytes);
-      String ocrResultJson = callOcrService(base64, attachment.getFileName());
+      String ocrResultJson = recognizeInvoiceFile(imagePath, attachment.getFileName());
       log.info("OCR completed for attachment {}, result length: {}", attachmentId, ocrResultJson.length());
 
       attachment.setOcrStatus("completed");
@@ -131,7 +161,7 @@ public class OcrService {
     }
   }
 
-  private void updateReimbursementFromOcr(Attachment attachment, String ocrResultJson) {
+  private synchronized void updateReimbursementFromOcr(Attachment attachment, String ocrResultJson) {
     Long reimbursementId = attachment.getReimbursementId();
     if (reimbursementId == null) {
       log.debug("Attachment not linked to any reimbursement, skip auto-update");
@@ -174,6 +204,7 @@ public class OcrService {
         if (isBetterInvoiceNo(invoiceNoFromText, invoiceNo)) invoiceNo = invoiceNoFromText;
         if (isEmpty(invoiceCode)) invoiceCode = regexExtract(ocrText, "发票代码[：:\\s]*(\\d{10,20})");
         if (isEmpty(date)) date = regexExtract(ocrText, "开票日期[：:\\s]*(\\d{4}年\\d{1,2}月\\d{1,2}日)");
+        if (isEmpty(date)) date = extractDateFromText(ocrText);
         if (isEmpty(totalAmount)) {
           totalAmount = extractTotalAmountFromText(ocrText);
         }
@@ -202,6 +233,8 @@ public class OcrService {
         if (isEmpty(invoiceType) && ocrText.contains("普通发票")) invoiceType = "普通发票";
       }
 
+      if (isEmpty(date)) date = extractDateFromText(attachment.getFileName());
+
       LocalDateTime invoiceDate = parseInvoiceDate(date);
       boolean hasInvoiceData = hasInvoiceData(invoiceNo, invoiceCode, totalAmount, date, buyerName, sellerName,
         buyerTaxId, sellerTaxId, invoiceType, amountBeforeTax, taxAmount);
@@ -223,7 +256,7 @@ public class OcrService {
         return;
       }
       if (invoice == null) {
-        Invoice duplicate = findDuplicateInvoice(reimbursementId, invoiceNo, invoiceCode, attachment.getId());
+        Invoice duplicate = findDuplicateInvoice(reimbursementId, invoiceNo, invoiceCode, invoiceDate, totalAmount, attachment.getId());
         if (duplicate != null) {
           duplicate.setAttachmentId(duplicate.getAttachmentId() == null ? attachment.getId() : duplicate.getAttachmentId());
           duplicate.setUpdatedBy(attachment.getUploadedBy());
@@ -331,7 +364,6 @@ public class OcrService {
         invoice.setUpdatedAt(LocalDateTime.now());
         invoiceRepository.save(invoice);
         updateInvoiceExpenseItemKilometers(invoice, places.kilometers(), attachment.getUploadedBy());
-        regroupExpenseItemsByInvoiceTrips(invoice.getReimbursementId(), attachment.getUploadedBy());
         log.info("Support attachment {} updated trip places for invoice {}: {} -> {}",
           attachment.getId(), invoice.getId(), invoice.getStartPlace(), invoice.getEndPlace());
       }
@@ -371,6 +403,14 @@ public class OcrService {
 
   private LocalDateTime parseInvoiceDate(String date) {
     if (isEmpty(date)) return null;
+    var cnDate = Pattern.compile("(\\d{4})年(\\d{1,2})月(\\d{1,2})日").matcher(date);
+    if (cnDate.find()) {
+      return LocalDate.of(
+        Integer.parseInt(cnDate.group(1)),
+        Integer.parseInt(cnDate.group(2)),
+        Integer.parseInt(cnDate.group(3))
+      ).atStartOfDay();
+    }
     List<DateTimeFormatter> formatters = List.of(
       DateTimeFormatter.ofPattern("yyyy年M月d日"),
       DateTimeFormatter.ofPattern("yyyy-MM-dd"),
@@ -386,6 +426,14 @@ public class OcrService {
     } catch (DateTimeParseException ignored) {
       return null;
     }
+  }
+
+  private String extractDateFromText(String text) {
+    if (isEmpty(text)) return "";
+    var cnDate = Pattern.compile("(\\d{4}年\\d{1,2}月\\d{1,2}日)").matcher(text);
+    if (cnDate.find()) return cnDate.group(1);
+    var isoDate = Pattern.compile("(\\d{4}[-/]\\d{1,2}[-/]\\d{1,2})").matcher(text);
+    return isoDate.find() ? isoDate.group(1) : "";
   }
 
   private BigDecimal toBigDecimal(String value) {
@@ -497,9 +545,6 @@ public class OcrService {
   private ExpenseGroupKey groupKey(Invoice invoice) {
     if (invoice.getInvoiceDate() == null) return null;
     String date = invoice.getInvoiceDate().toLocalDate().toString();
-    if (hasCompleteTripSupport(invoice)) {
-      return new ExpenseGroupKey("trip", date, cleanGroupPlace(invoice.getStartPlace()), cleanGroupPlace(invoice.getEndPlace()));
-    }
     String expenseType = classifyExpenseType(invoice, firstNonBlank(invoice.getRemarks(), invoice.getSellerName()));
     if (!canGroupByDateAndType(expenseType)) return null;
     return new ExpenseGroupKey("type", date, expenseType, "");
@@ -557,17 +602,6 @@ public class OcrService {
       .forEach(expenseItemRepository::delete);
   }
 
-  private boolean hasCompleteTripSupport(Invoice invoice) {
-    return invoice.getSupportAttachmentId() != null
-      && invoice.getInvoiceDate() != null
-      && !isEmpty(invoice.getStartPlace())
-      && !isEmpty(invoice.getEndPlace());
-  }
-
-  private String cleanGroupPlace(String value) {
-    return value == null ? "" : value.replaceAll("\\s+", "").trim();
-  }
-
   private void updateInvoiceExpenseItemKilometers(Invoice invoice, BigDecimal kilometers, Long userId) {
     if (kilometers == null || invoice.getExpenseItemId() == null) return;
     ReimbursementExpenseItem item = expenseItemRepository.findById(invoice.getExpenseItemId()).orElse(null);
@@ -592,21 +626,37 @@ public class OcrService {
   }
 
   private boolean canGroupByDateAndType(String expenseType) {
-    return "fuel".equals(expenseType)
-      || "toll".equals(expenseType)
-      || "parking".equals(expenseType)
-      || "meal".equals(expenseType);
+    return expenseType != null && !expenseType.isBlank();
   }
 
   private record ExpenseGroupKey(String mode, String date, String first, String second) {}
 
-  private Invoice findDuplicateInvoice(Long reimbursementId, String invoiceNo, String invoiceCode, Long attachmentId) {
-    if (isEmpty(invoiceNo) || isEmpty(invoiceCode)) return null;
+  private Invoice findDuplicateInvoice(Long reimbursementId, String invoiceNo, String invoiceCode,
+                                       LocalDateTime invoiceDate, String totalAmount, Long attachmentId) {
+    BigDecimal amount = toBigDecimal(totalAmount);
     return invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(reimbursementId).stream()
-      .filter(invoice -> invoiceNo.equals(invoice.getInvoiceNo()) && invoiceCode.equals(invoice.getInvoiceCode()))
       .filter(invoice -> attachmentId == null || !attachmentId.equals(invoice.getAttachmentId()))
+      .filter(invoice -> isSameInvoice(invoice, invoiceNo, invoiceCode, invoiceDate, amount))
       .findFirst()
       .orElse(null);
+  }
+
+  private boolean isSameInvoice(Invoice invoice, String invoiceNo, String invoiceCode,
+                                LocalDateTime invoiceDate, BigDecimal amount) {
+    if (!isEmpty(invoiceNo) && invoiceNo.equals(invoice.getInvoiceNo())) return true;
+    if (!isEmpty(invoiceCode) && !isEmpty(invoiceNo)
+      && invoiceCode.equals(invoice.getInvoiceCode()) && invoiceNo.equals(invoice.getInvoiceNo())) {
+      return true;
+    }
+    if (isEmpty(invoiceNo) && !isEmpty(invoiceCode) && invoiceCode.equals(invoice.getInvoiceCode())) {
+      return sameExpenseDate(invoice.getInvoiceDate(), invoiceDate) && sameMoney(invoice.getTotalAmount(), amount);
+    }
+    return false;
+  }
+
+  private boolean sameMoney(BigDecimal left, BigDecimal right) {
+    if (left == null || right == null) return false;
+    return left.subtract(right).abs().compareTo(new BigDecimal("0.01")) <= 0;
   }
 
   private InvoiceParties extractInvoiceParties(String ocrText) {
@@ -726,23 +776,19 @@ public class OcrService {
   private record TripPlaces(String startPlace, String endPlace, BigDecimal kilometers) {}
 
   private String classifyExpenseType(Invoice invoice, String ocrText) {
-    String text = String.join(" ",
+    String normalizedText = String.join(" ",
       firstNonBlank(invoice.getRemarks()),
       firstNonBlank(invoice.getSellerName()),
       firstNonBlank(invoice.getInvoiceContentShortName()),
       firstNonBlank(ocrText)
     ).toLowerCase();
-    if (containsAny(text, "加油", "汽油", "柴油", "石化", "石油", "油品")) return "fuel";
-    if (containsAny(text, "高速", "通行费", "过路", "etc")) return "toll";
-    if (containsAny(text, "高铁", "动车", "火车", "铁路")) return "rail";
-    if (containsAny(text, "地铁", "轨道交通")) return "metro";
-    if (containsAny(text, "网约车", "滴滴", "didi", "出行", "客运服务")) return "ride_hailing";
-    if (containsAny(text, "顺风车")) return "carpool";
-    if (containsAny(text, "货拉拉", "货运", "物流", "运输")) return "freight";
-    if (containsAny(text, "停车")) return "parking";
-    if (containsAny(text, "餐", "饭店", "餐饮", "酒楼", "美食")) return "meal";
+    for (ExpenseTypeRule rule : EXPENSE_TYPE_RULES) {
+      if (containsAny(normalizedText, rule.keywords().toArray(String[]::new))) return rule.expenseType();
+    }
     return "other";
   }
+
+  private record ExpenseTypeRule(String expenseType, List<String> keywords) {}
 
   private boolean sameExpenseDate(LocalDateTime left, LocalDateTime right) {
     if (left == null || right == null) return left == null && right == null;
@@ -774,6 +820,9 @@ public class OcrService {
       case "fuel" -> "加油费";
       case "toll" -> "高速过路费";
       case "rail" -> "高铁/动车/火车费";
+      case "taxi" -> "出租车费";
+      case "passenger_transport" -> "客运交通费";
+      case "air_travel" -> "机票/航空运输费";
       case "metro" -> "地铁费";
       case "ride_hailing" -> "网约车费";
       case "carpool" -> "顺风车费";
@@ -888,6 +937,259 @@ public class OcrService {
 
   private boolean isEmpty(String s) {
     return s == null || s.isBlank();
+  }
+
+  private String recognizeInvoiceFile(Path filePath, String filename) throws Exception {
+    String ext = getExtension(filename);
+    if ("xml".equals(ext)) {
+      return buildStructuredInvoiceOcrResult("xml", Files.readString(filePath, StandardCharsets.UTF_8), filename);
+    }
+    if ("ofd".equals(ext)) {
+      return recognizeOfdInvoice(filePath, filename);
+    }
+    if ("pdf".equals(ext)) {
+      return recognizePdfInvoice(filePath, filename);
+    }
+    byte[] imageBytes = Files.readAllBytes(filePath);
+    String base64 = Base64.getEncoder().encodeToString(imageBytes);
+    return callOcrService(base64, filename);
+  }
+
+  private String recognizePdfInvoice(Path filePath, String filename) throws Exception {
+    try (PDDocument document = Loader.loadPDF(filePath.toFile())) {
+      String text = new PDFTextStripper().getText(document);
+      Map<String, String> fields = extractInvoiceFieldsFromText(text, filename);
+      if (!isEmpty(fields.get("total_amount"))) {
+        return buildStructuredInvoiceOcrResult("pdf-text", text, fields);
+      }
+      if (document.getNumberOfPages() == 0) {
+        throw new IllegalArgumentException("PDF没有可识别页面");
+      }
+      BufferedImage firstPage = new PDFRenderer(document).renderImageWithDPI(0, 200);
+      ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
+      ImageIO.write(firstPage, "png", imageBytes);
+      return callOcrService(Base64.getEncoder().encodeToString(imageBytes.toByteArray()), replaceExtension(filename, "png"));
+    }
+  }
+
+  private String recognizeOfdInvoice(Path filePath, String filename) throws Exception {
+    Map<String, String> fields = new LinkedHashMap<>();
+    List<String> textParts = new ArrayList<>();
+    try (ZipFile zipFile = new ZipFile(filePath.toFile())) {
+      var entries = zipFile.entries();
+      while (entries.hasMoreElements()) {
+        ZipEntry entry = entries.nextElement();
+        if (entry.isDirectory() || !entry.getName().toLowerCase().endsWith(".xml")) {
+          continue;
+        }
+        String xml = new String(zipFile.getInputStream(entry).readAllBytes(), StandardCharsets.UTF_8);
+        mergeMissing(fields, extractInvoiceFieldsFromXml(xml, filename));
+        String text = extractOfdTextCodes(xml);
+        if (!isEmpty(text)) {
+          textParts.add(text);
+          mergeMissing(fields, extractInvoiceFieldsFromText(text, filename));
+        }
+      }
+    }
+    if (fields.isEmpty()) {
+      throw new IllegalArgumentException("OFD文件未解析到发票字段");
+    }
+    return buildStructuredInvoiceOcrResult("ofd", String.join("\n", textParts), fields);
+  }
+
+  private String buildStructuredInvoiceOcrResult(String fileType, String xmlText, String filename) throws Exception {
+    Map<String, String> fields = extractInvoiceFieldsFromXml(xmlText, filename);
+    if (fields.isEmpty()) {
+      fields = extractInvoiceFieldsFromText(xmlText, filename);
+    }
+    if (fields.isEmpty()) {
+      throw new IllegalArgumentException(fileType.toUpperCase() + "文件未解析到发票字段");
+    }
+    return buildStructuredInvoiceOcrResult(fileType, xmlText, fields);
+  }
+
+  private String buildStructuredInvoiceOcrResult(String fileType, String ocrText, Map<String, String> fields) throws Exception {
+    ObjectNode root = objectMapper.createObjectNode();
+    root.put("status", "ok");
+    root.put("source_type", fileType);
+    root.put("ocr_text", ocrText == null ? "" : ocrText);
+    ObjectNode invoiceFields = objectMapper.createObjectNode();
+    fields.forEach((key, value) -> {
+      if (!isEmpty(value)) invoiceFields.put(key, value);
+    });
+    root.set("invoice_fields", invoiceFields);
+    return objectMapper.writeValueAsString(root);
+  }
+
+  private Map<String, String> extractInvoiceFieldsFromXml(String xmlText, String filename) {
+    Map<String, String> values = new LinkedHashMap<>();
+    if (isEmpty(xmlText)) return values;
+    try {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(false);
+      factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+      factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+      factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+      Document doc = factory.newDocumentBuilder().parse(new ByteArrayInputStream(xmlText.getBytes(StandardCharsets.UTF_8)));
+      NodeList nodes = doc.getElementsByTagName("*");
+      for (int i = 0; i < nodes.getLength(); i++) {
+        Element element = (Element) nodes.item(i);
+        String key = normalizeXmlKey(element.getNodeName());
+        String value = element.getTextContent() == null ? "" : element.getTextContent().trim();
+        if (!isEmpty(key) && !isEmpty(value) && !value.contains("<") && value.length() <= 200) {
+          values.putIfAbsent(key, value);
+        }
+      }
+    } catch (Exception e) {
+      log.warn("Failed to parse invoice XML text, fallback to text extraction: {}", e.getMessage());
+    }
+
+    Map<String, String> fields = new LinkedHashMap<>();
+    putFirst(fields, "invoice_no", values, "invoicenumber", "eiid", "invoiceno", "fphm");
+    putFirst(fields, "invoice_code", values, "invoicecode", "fpdm");
+    putFirst(fields, "date", values, "issuetime", "requesttime", "invoicedate", "kprq");
+    putFirst(fields, "seller_name", values, "sellername", "xsfmc");
+    putFirst(fields, "seller_tax_id", values, "selleridnum", "sellertaxno", "xsfnsrsbh");
+    putFirst(fields, "buyer_name", values, "buyername", "gmfmc");
+    putFirst(fields, "buyer_tax_id", values, "buyeridnum", "buyertaxno", "gmfnsrsbh");
+    putFirst(fields, "total_amount", values, "totaltaxincludedamount", "totaltaxincludedamountinchinese", "jshj");
+    putFirst(fields, "amount_before_tax", values, "totalamwithouttax", "amount");
+    putFirst(fields, "tax_amount", values, "totaltaxam", "comtaxam");
+    putFirst(fields, "tax_rate", values, "taxrate");
+    putFirst(fields, "issuer", values, "drawer", "issuer");
+    putFirst(fields, "invoice_type", values, "labelname", "invoicetype");
+
+    normalizeStructuredFields(fields, filename);
+    return fields;
+  }
+
+  private Map<String, String> extractInvoiceFieldsFromText(String text, String filename) {
+    Map<String, String> fields = new LinkedHashMap<>();
+    if (!isEmpty(text)) {
+      putIfNotEmpty(fields, "invoice_no", regexExtract(text, "发票号码[:：]?\\s*(\\d{8,30})"));
+      putIfNotEmpty(fields, "date", regexExtract(text, "(\\d{4}年\\d{1,2}月\\d{1,2}日|\\d{4}[-/]\\d{1,2}[-/]\\d{1,2})"));
+      if (text.contains("\u7535\u5b50\u53d1\u7968\uff08\u94c1\u8def\u7535\u5b50\u5ba2\u7968\uff09")) {
+        fields.put("invoice_type", "\u7535\u5b50\u53d1\u7968\uff08\u94c1\u8def\u7535\u5b50\u5ba2\u7968\uff09");
+      } else if (text.contains("\u822a\u7a7a\u8fd0\u8f93\u7535\u5b50\u5ba2\u7968\u884c\u7a0b\u5355")) {
+        fields.put("invoice_type", "\u7535\u5b50\u53d1\u7968\uff08\u822a\u7a7a\u8fd0\u8f93\u7535\u5b50\u5ba2\u7968\u884c\u7a0b\u5355\uff09");
+      }
+      Matcher partyMatcher = Pattern.compile("开票人:\\s*([0-9A-Z]{18})([0-9A-Z]{18})(.+?有限公司)(.+?有限公司)(\\d{8,30})").matcher(text);
+      if (partyMatcher.find()) {
+        putIfNotEmpty(fields, "buyer_tax_id", partyMatcher.group(1));
+        putIfNotEmpty(fields, "seller_tax_id", partyMatcher.group(2));
+        putIfNotEmpty(fields, "buyer_name", partyMatcher.group(3));
+        putIfNotEmpty(fields, "seller_name", partyMatcher.group(4));
+        putIfNotEmpty(fields, "invoice_no", partyMatcher.group(5));
+      }
+      Matcher amountMatcher = Pattern.compile("[¥￥]\\s*(\\d+\\.\\d{2})[\\s\\S]{0,40}?[¥￥]\\s*(\\d+\\.\\d{2})[\\s\\S]{0,10}?[¥￥]\\s*(\\d+\\.\\d{2})").matcher(text);
+      if (amountMatcher.find()) {
+        putIfNotEmpty(fields, "amount_before_tax", amountMatcher.group(1));
+        putIfNotEmpty(fields, "total_amount", amountMatcher.group(2));
+        putIfNotEmpty(fields, "tax_amount", amountMatcher.group(3));
+      }
+      String amountBeforeTax = fields.get("amount_before_tax");
+      if (!isEmpty(amountBeforeTax)) {
+        putIfNotEmpty(fields, "tax_rate", regexExtract(text, Pattern.quote(amountBeforeTax) + "(\\d+(?:\\.\\d+)?%)"));
+      }
+      putIfNotEmpty(fields, "issuer", regexExtract(text, "[¥￥]\\s*\\d+\\.\\d{2}([^\\d¥￥\\s]{1,20})$"));
+      if (isEmpty(fields.get("total_amount"))) {
+        putIfNotEmpty(fields, "total_amount", regexExtract(text, "价税合计[\\s\\S]{0,80}[¥￥]?\\s*(\\d+\\.\\d{2})"));
+      }
+      if (isEmpty(fields.get("total_amount"))) {
+        putIfNotEmpty(fields, "total_amount", regexExtract(text,
+          "(?:\\u7968\\u4ef7|\\u5e94\\u4ed8\\u91d1\\u989d|\\u5b9e\\u6536\\u91d1\\u989d)[:：\\s]*[¥￥]?\\s*(\\d+(?:\\.\\d{1,2})?)"));
+      }
+    }
+    normalizeStructuredFields(fields, filename);
+    return fields;
+  }
+
+  private void normalizeStructuredFields(Map<String, String> fields, String filename) {
+    String total = fields.get("total_amount");
+    if (!isEmpty(total) && !total.matches(".*\\d.*")) {
+      fields.remove("total_amount");
+    }
+    if (isEmpty(fields.get("total_amount"))) {
+      String amount = fields.get("amount_before_tax");
+      String tax = fields.get("tax_amount");
+      BigDecimal amountValue = toBigDecimal(amount);
+      BigDecimal taxValue = toBigDecimal(tax);
+      if (amountValue != null && taxValue != null) {
+        fields.put("total_amount", amountValue.add(taxValue).setScale(2, java.math.RoundingMode.HALF_UP).toPlainString());
+      }
+    }
+    if (isEmpty(fields.get("invoice_no"))) {
+      putIfNotEmpty(fields, "invoice_no", regexExtract(filename, "(\\d{12,30})"));
+    }
+    if (isEmpty(fields.get("date"))) {
+      putIfNotEmpty(fields, "date", extractDateFromText(filename));
+    }
+    String date = fields.get("date");
+    if (!isEmpty(date) && date.matches("\\d{4}[-/]\\d{1,2}[-/]\\d{1,2}.+")) {
+      fields.put("date", date.substring(0, 10));
+    }
+    String taxRate = fields.get("tax_rate");
+    if (!isEmpty(taxRate) && !taxRate.endsWith("%")) {
+      BigDecimal rate = toBigDecimal(taxRate);
+      if (rate != null && rate.compareTo(BigDecimal.ONE) < 0) {
+        fields.put("tax_rate", rate.multiply(new BigDecimal("100")).stripTrailingZeros().toPlainString() + "%");
+      }
+    } else if (!isEmpty(taxRate)) {
+      BigDecimal rate = toBigDecimal(taxRate.replace("%", ""));
+      if (rate != null && rate.compareTo(new BigDecimal("100")) > 0) {
+        fields.remove("tax_rate");
+      }
+    }
+  }
+
+  private String extractOfdTextCodes(String xml) {
+    if (isEmpty(xml)) return "";
+    Matcher matcher = Pattern.compile("<[^:>]*:?TextCode\\b[^>]*>(.*?)</[^:>]*:?TextCode>", Pattern.DOTALL).matcher(xml);
+    StringBuilder text = new StringBuilder();
+    while (matcher.find()) {
+      text.append(matcher.group(1).replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&").trim());
+    }
+    return text.toString();
+  }
+
+  private void putFirst(Map<String, String> fields, String target, Map<String, String> source, String... keys) {
+    if (!isEmpty(fields.get(target))) return;
+    for (String key : keys) {
+      String value = source.get(key);
+      if (!isEmpty(value)) {
+        fields.put(target, value);
+        return;
+      }
+    }
+  }
+
+  private void putIfNotEmpty(Map<String, String> fields, String key, String value) {
+    if (!isEmpty(value)) fields.put(key, value);
+  }
+
+  private void mergeMissing(Map<String, String> target, Map<String, String> source) {
+    source.forEach((key, value) -> {
+      if (isEmpty(target.get(key)) && !isEmpty(value)) target.put(key, value);
+    });
+  }
+
+  private String normalizeXmlKey(String key) {
+    if (key == null) return "";
+    int colon = key.indexOf(':');
+    if (colon >= 0) key = key.substring(colon + 1);
+    return key.replaceAll("[^A-Za-z0-9]", "").toLowerCase();
+  }
+
+  private String getExtension(String filename) {
+    if (filename == null) return "";
+    int dot = filename.lastIndexOf('.');
+    return dot >= 0 ? filename.substring(dot + 1).toLowerCase() : "";
+  }
+
+  private String replaceExtension(String filename, String extension) {
+    if (filename == null || filename.isBlank()) return "invoice." + extension;
+    int dot = filename.lastIndexOf('.');
+    return (dot >= 0 ? filename.substring(0, dot) : filename) + "." + extension;
   }
 
   private String callOcrService(String imageBase64, String filename) throws Exception {

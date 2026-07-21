@@ -358,7 +358,7 @@ async function main() {
     assert(money(detail.amount) === money(detail.invoiceTotalAmount), `amount should fallback after deleting last linked invoice: ${detail.amount} vs ${detail.invoiceTotalAmount}`);
 
     tc('TC-030', '提交草稿报销单');
-    tc('TC-044', '同一报销单内网约车凭证后归集，非行程费用上传后按日期类型归集');
+    tc('TC-044', '同一报销单内发票上传后按日期类型归集，行程凭证只更新发票行程字段');
     const aggregationDraft = await createDraft(api);
     const aggregationId = aggregationDraft.id;
     await uploadAttachment(api, aggregationId, fixtures.didiSameTripA);
@@ -371,8 +371,14 @@ async function main() {
       '26117000000530671207',
       '26117000000531132508',
     ].includes(String(invoice.invoiceNo || '')));
-    assert(sameTripInvoices.length === 2, `expected two same-trip Didi invoices, got ${sameTripInvoices.length}`);
-    assert(new Set(sameTripInvoices.map((invoice) => invoice.expenseItemId)).size === 2, 'Didi invoices should stay as one invoice one expense item before support vouchers');
+    assert(sameTripInvoices.length === 2, `expected two same-date Didi invoices, got ${sameTripInvoices.length}`);
+    const didiGroupedBeforeSupport = await waitForGroupedExpense(api, aggregationId, 'ride_hailing', [
+      '26117000000530671207',
+      '26117000000531132508',
+    ], 33.60);
+    const didiGroupedItemId = didiGroupedBeforeSupport.item.id;
+    assert(Number(didiGroupedBeforeSupport.item.invoiceCount || 0) === 2, `same-date Didi invoiceCount should be 2 before support vouchers, got ${didiGroupedBeforeSupport.item.invoiceCount}`);
+    assert(didiGroupedBeforeSupport.invoices.every((invoice) => invoice.expenseItemId === didiGroupedItemId), 'Didi invoices should be grouped by date and type before support vouchers');
 
     const invoiceA = sameTripInvoices.find((invoice) => String(invoice.invoiceNo) === '26117000000530671207');
     const invoiceB = sameTripInvoices.find((invoice) => String(invoice.invoiceNo) === '26117000000531132508');
@@ -386,10 +392,10 @@ async function main() {
       '26117000000530671207',
       '26117000000531132508',
     ], 33.60);
-    assert(money(didiGrouped.item.amount) === 33.60, `same-trip Didi amount should be 33.60, got ${didiGrouped.item.amount}`);
-    assert(Number(didiGrouped.item.invoiceCount || 0) === 2, `same-trip Didi invoiceCount should be 2, got ${didiGrouped.item.invoiceCount}`);
-    assert(Number(didiGrouped.item.kilometers || 0) > 0, `same-trip Didi kilometers should be accumulated from vouchers, got ${didiGrouped.item.kilometers}`);
-    assert(didiGrouped.invoices.every((invoice) => invoice.startPlace && invoice.endPlace), 'same-trip Didi invoices should keep one-to-one start/end places from support vouchers');
+    assert(didiGrouped.item.id === didiGroupedItemId, `support vouchers should not change Didi aggregation item: ${didiGrouped.item.id} vs ${didiGroupedItemId}`);
+    assert(money(didiGrouped.item.amount) === 33.60, `same-date Didi amount should remain 33.60 after support vouchers, got ${didiGrouped.item.amount}`);
+    assert(Number(didiGrouped.item.invoiceCount || 0) === 2, `same-date Didi invoiceCount should remain 2 after support vouchers, got ${didiGrouped.item.invoiceCount}`);
+    assert(didiGrouped.invoices.every((invoice) => invoice.startPlace && invoice.endPlace), 'Didi invoices should keep one-to-one start/end places from support vouchers');
 
     await uploadAttachment(api, aggregationId, fixtures.fuel0712A);
     await uploadAttachment(api, aggregationId, fixtures.fuel0712B);

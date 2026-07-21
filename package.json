@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "test:reimbursement:critical": "node tests/reimbursement-critical-flow.playwright.js"
+    "test:reimbursement:critical": "node tests/reimbursement-critical-flow.playwright.js",
+    "test:reimbursement:workflow": "node tests/reimbursement-workflow.playwright.js"
   },
   "dependencies": {
     "playwright": "^1.60.0"
