@@ -83,6 +83,14 @@ const routes: RouteRecordRaw[] = [
         component: () => import(/* webpackChunkName: "dashboard" */ '../views/storage-list.vue'),
       },
       {
+        path: '/ocr-engine-configs',
+        name: 'ocr-engine-configs',
+        meta: {
+          title: 'OCR 执行管理',
+        },
+        component: () => import(/* webpackChunkName: "dashboard" */ '../views/ocr-engine-config-list.vue'),
+      },
+      {
         path: '/tabs',
         name: 'tabs',
         meta: {

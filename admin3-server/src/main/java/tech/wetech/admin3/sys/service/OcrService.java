@@ -9,6 +9,7 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.wetech.admin3.sys.model.Attachment;
 import tech.wetech.admin3.sys.model.Invoice;
@@ -18,6 +19,7 @@ import tech.wetech.admin3.sys.repository.AttachmentRepository;
 import tech.wetech.admin3.sys.repository.InvoiceRepository;
 import tech.wetech.admin3.sys.repository.ReimbursementRepository;
 import tech.wetech.admin3.sys.repository.ReimbursementExpenseItemRepository;
+import tech.wetech.admin3.sys.service.ocr.OcrExecutionService;
 
 import java.math.BigDecimal;
 import java.io.ByteArrayInputStream;
@@ -73,15 +75,24 @@ public class OcrService {
   private final InvoiceRepository invoiceRepository;
   private final ReimbursementExpenseItemRepository expenseItemRepository;
   private final ObjectMapper objectMapper;
+  private final OcrExecutionService ocrExecutionService;
 
   public OcrService(AttachmentRepository attachmentRepository, ReimbursementRepository reimbursementRepository,
                     InvoiceRepository invoiceRepository, ReimbursementExpenseItemRepository expenseItemRepository,
                     ObjectMapper objectMapper) {
+    this(attachmentRepository, reimbursementRepository, invoiceRepository, expenseItemRepository, objectMapper, null);
+  }
+
+  @Autowired
+  public OcrService(AttachmentRepository attachmentRepository, ReimbursementRepository reimbursementRepository,
+                    InvoiceRepository invoiceRepository, ReimbursementExpenseItemRepository expenseItemRepository,
+                    ObjectMapper objectMapper, OcrExecutionService ocrExecutionService) {
     this.attachmentRepository = attachmentRepository;
     this.reimbursementRepository = reimbursementRepository;
     this.invoiceRepository = invoiceRepository;
     this.expenseItemRepository = expenseItemRepository;
     this.objectMapper = objectMapper;
+    this.ocrExecutionService = ocrExecutionService;
   }
 
   public void recognizeAttachmentAsync(Long attachmentId, Path imagePath) {
@@ -957,13 +968,16 @@ public class OcrService {
 
   private String recognizePdfInvoice(Path filePath, String filename) throws Exception {
     try (PDDocument document = Loader.loadPDF(filePath.toFile())) {
+      if (document.getNumberOfPages() == 0) {
+        throw new IllegalArgumentException("PDF没有可识别页面");
+      }
       String text = new PDFTextStripper().getText(document);
       Map<String, String> fields = extractInvoiceFieldsFromText(text, filename);
       if (!isEmpty(fields.get("total_amount"))) {
         return buildStructuredInvoiceOcrResult("pdf-text", text, fields);
       }
-      if (document.getNumberOfPages() == 0) {
-        throw new IllegalArgumentException("PDF没有可识别页面");
+      if (ocrExecutionService != null && ocrExecutionService.isExternalProviderSelected()) {
+        log.info("PDF {} has no structured text fields, render first page for managed OCR", filename);
       }
       BufferedImage firstPage = new PDFRenderer(document).renderImageWithDPI(0, 200);
       ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
@@ -1193,6 +1207,9 @@ public class OcrService {
   }
 
   private String callOcrService(String imageBase64, String filename) throws Exception {
+    if (ocrExecutionService != null) {
+      return ocrExecutionService.recognizeBase64(imageBase64, filename);
+    }
     long started = System.currentTimeMillis();
     byte[] imageBytes = Base64.getDecoder().decode(imageBase64);
     Path tempDir = java.nio.file.Paths.get(System.getProperty("java.io.tmpdir"), "reimbursement-ocr");
