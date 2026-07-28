@@ -1,0 +1,1 @@
+import java.nio.file.*; import org.apache.pdfbox.*; import org.apache.pdfbox.pdmodel.*; import org.apache.pdfbox.text.*; public class PdfBoxTextDump { public static void main(String[] x)throws Exception{try(PDDocument d=Loader.loadPDF(Path.of(x[0]).toFile())){System.out.print(new PDFTextStripper().getText(d));}}}

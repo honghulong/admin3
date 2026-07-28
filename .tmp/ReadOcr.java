@@ -1,0 +1,1 @@
+import java.sql.*; public class ReadOcr { public static void main(String[] a)throws Exception {try(var c=DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/admin3?characterEncoding=utf8","root","123456");var s=c.createStatement();var r=s.executeQuery("select ocr_result from attachment where id=244")){if(r.next())System.out.print(r.getString(1));}}}

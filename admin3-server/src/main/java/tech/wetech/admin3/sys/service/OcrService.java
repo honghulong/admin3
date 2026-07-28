@@ -212,6 +212,7 @@ public class OcrService {
 
       if (!isEmpty(ocrText)) {
         String invoiceNoFromText = regexExtract(ocrText, "发票号码[：:\\s]*(\\d{8,20})");
+        if (isEmpty(invoiceNoFromText)) invoiceNoFromText = regexExtract(ocrText, "(?<!\\d)(\\d{20})(?!\\d)");
         if (isBetterInvoiceNo(invoiceNoFromText, invoiceNo)) invoiceNo = invoiceNoFromText;
         if (isEmpty(invoiceCode)) invoiceCode = regexExtract(ocrText, "发票代码[：:\\s]*(\\d{10,20})");
         if (isEmpty(date)) date = regexExtract(ocrText, "开票日期[：:\\s]*(\\d{4}年\\d{1,2}月\\d{1,2}日)");
@@ -234,6 +235,25 @@ public class OcrService {
           taxAmount = summaryAmounts.get(1);
         }
         totalAmount = reconcileTotalAmountFromSummary(totalAmount, summaryAmounts);
+        Matcher trailingCurrencySummary = Pattern.compile(
+          "(\\d+\\.\\d{2})[\u00a5\uffe5?]\\s*(\\d+\\.\\d{2})[\u00a5\uffe5?][\\s\\S]{0,80}?[\u00a5\uffe5?]\\s*(\\d+\\.\\d{2})")
+          .matcher(ocrText);
+        if (trailingCurrencySummary.find()) {
+          amountBeforeTax = trailingCurrencySummary.group(1);
+          taxAmount = trailingCurrencySummary.group(2);
+          totalAmount = trailingCurrencySummary.group(3);
+        }
+        Matcher lineAmountTax = Pattern.compile("(\\d+\\.\\d{2})\\s+\\1\\s+\\d+(?:\\.\\d+)?%\\s+(\\d+\\.\\d{2})")
+          .matcher(ocrText);
+        if (lineAmountTax.find()) {
+          BigDecimal lineAmount = toBigDecimal(lineAmountTax.group(1));
+          BigDecimal lineTax = toBigDecimal(lineAmountTax.group(2));
+          BigDecimal expectedTotal = lineAmount.add(lineTax).setScale(2, java.math.RoundingMode.HALF_UP);
+          if (sameMoney(toBigDecimal(totalAmount), expectedTotal)) {
+            amountBeforeTax = lineAmount.toPlainString();
+            taxAmount = lineTax.toPlainString();
+          }
+        }
         InvoiceParties parties = extractInvoiceParties(ocrText);
         if (!isEmpty(parties.buyerName())) buyerName = parties.buyerName();
         if (!isEmpty(parties.sellerName())) sellerName = parties.sellerName();
@@ -1081,6 +1101,7 @@ public class OcrService {
     Map<String, String> fields = new LinkedHashMap<>();
     if (!isEmpty(text)) {
       putIfNotEmpty(fields, "invoice_no", regexExtract(text, "发票号码[:：]?\\s*(\\d{8,30})"));
+      putIfNotEmpty(fields, "invoice_no", regexExtract(text, "(?<!\\d)(\\d{20})(?!\\d)"));
       putIfNotEmpty(fields, "date", regexExtract(text, "(\\d{4}年\\d{1,2}月\\d{1,2}日|\\d{4}[-/]\\d{1,2}[-/]\\d{1,2})"));
       if (text.contains("\u7535\u5b50\u53d1\u7968\uff08\u94c1\u8def\u7535\u5b50\u5ba2\u7968\uff09")) {
         fields.put("invoice_type", "\u7535\u5b50\u53d1\u7968\uff08\u94c1\u8def\u7535\u5b50\u5ba2\u7968\uff09");
@@ -1106,12 +1127,118 @@ public class OcrService {
         putIfNotEmpty(fields, "tax_rate", regexExtract(text, Pattern.quote(amountBeforeTax) + "(\\d+(?:\\.\\d+)?%)"));
       }
       putIfNotEmpty(fields, "issuer", regexExtract(text, "[¥￥]\\s*\\d+\\.\\d{2}([^\\d¥￥\\s]{1,20})$"));
+      if (isEmpty(fields.get("issuer"))) {
+        int issuerLabelIndex = text.indexOf("\u5f00\u7968\u4eba");
+        if (issuerLabelIndex >= 0) {
+          int issuerValueIndex = issuerLabelIndex;
+          String totalAmount = fields.get("total_amount");
+          if (!isEmpty(totalAmount)) {
+            int totalAmountIndex = text.indexOf(totalAmount, issuerLabelIndex);
+            if (totalAmountIndex >= 0) issuerValueIndex = totalAmountIndex + totalAmount.length();
+          }
+          String issuerText = text.substring(issuerValueIndex).replaceFirst("^.*?[\uff1a:]", "");
+          List<String> issuerCandidates = regexExtractAll(issuerText,
+            "(?m)^\\s*([^\\r\\n\\d\u00a5\uffe5?]{1,20})\\s*$");
+          if (!issuerCandidates.isEmpty()) {
+            fields.put("issuer", issuerCandidates.get(0).trim());
+          }
+        }
+      }
       if (isEmpty(fields.get("total_amount"))) {
         putIfNotEmpty(fields, "total_amount", regexExtract(text, "价税合计[\\s\\S]{0,80}[¥￥]?\\s*(\\d+\\.\\d{2})"));
       }
       if (isEmpty(fields.get("total_amount"))) {
         putIfNotEmpty(fields, "total_amount", regexExtract(text,
           "(?:\\u7968\\u4ef7|\\u5e94\\u4ed8\\u91d1\\u989d|\\u5b9e\\u6536\\u91d1\\u989d)[:：\\s]*[¥￥]?\\s*(\\d+(?:\\.\\d{1,2})?)"));
+      }
+      String summaryTotal = regexExtract(text,
+        "\\u4ef7\\u7a0e\\u5408\\u8ba1[\\s\\S]{0,120}?(\\d+\\.\\d{2})");
+      int summaryLabelIndex = text.indexOf("\u4ef7\u7a0e\u5408\u8ba1");
+      if (summaryLabelIndex >= 0) {
+        Matcher trailingCurrencySummary = Pattern.compile(
+          "(\\d+\\.\\d{2})[\u00a5\uffe5?]\\s*(\\d+\\.\\d{2})[\u00a5\uffe5?][\\s\\S]{0,80}?[\u00a5\uffe5?]\\s*(\\d+\\.\\d{2})")
+          .matcher(text.substring(summaryLabelIndex));
+        if (trailingCurrencySummary.find()) {
+          fields.put("amount_before_tax", trailingCurrencySummary.group(1));
+          fields.put("tax_amount", trailingCurrencySummary.group(2));
+          fields.put("total_amount", trailingCurrencySummary.group(3));
+          summaryTotal = "";
+        }
+        List<String> currencySummaryAmounts = regexExtractAll(text.substring(summaryLabelIndex),
+          "[\u00a5\uffe5]\\s*(\\d+\\.\\d{2})");
+        if (!isEmpty(summaryTotal) && currencySummaryAmounts.size() >= 3) {
+          BigDecimal firstAmount = toBigDecimal(currencySummaryAmounts.get(0));
+          BigDecimal secondAmount = toBigDecimal(currencySummaryAmounts.get(1));
+          BigDecimal thirdAmount = toBigDecimal(currencySummaryAmounts.get(2));
+          if (sameMoney(firstAmount.add(secondAmount), thirdAmount)) {
+            fields.put("amount_before_tax", currencySummaryAmounts.get(0));
+            fields.put("tax_amount", currencySummaryAmounts.get(1));
+            fields.put("total_amount", currencySummaryAmounts.get(2));
+            summaryTotal = "";
+          } else if (sameMoney(secondAmount.add(thirdAmount), firstAmount)) {
+            fields.put("total_amount", currencySummaryAmounts.get(0));
+            fields.put("amount_before_tax", currencySummaryAmounts.get(1));
+            fields.put("tax_amount", currencySummaryAmounts.get(2));
+            summaryTotal = "";
+          }
+        }
+      }
+      if (!isEmpty(summaryTotal)) {
+        BigDecimal currentTotal = toBigDecimal(fields.get("total_amount"));
+        BigDecimal summaryTotalValue = toBigDecimal(summaryTotal);
+        if (summaryTotalValue != null && !sameMoney(currentTotal, summaryTotalValue)) {
+          fields.put("total_amount", summaryTotal);
+          int summaryTotalIndex = text.indexOf(summaryTotal, text.indexOf("\\u4ef7\\u7a0e\\u5408\\u8ba1"));
+          if (summaryTotalIndex >= 0) {
+            List<String> summaryAmounts = regexExtractAll(text.substring(summaryTotalIndex + summaryTotal.length()),
+              "(\\d+\\.\\d{2})");
+            if (summaryAmounts.size() >= 2) {
+              fields.put("amount_before_tax", summaryAmounts.get(0));
+              fields.put("tax_amount", summaryAmounts.get(1));
+            }
+          }
+        }
+      }
+      String condensedText = text.replaceAll("\\s+", "");
+      if (condensedText.contains("\u8d2d\u4e70\u65b9\u4fe1\u606f")
+        && condensedText.contains("\u9500\u552e\u65b9\u4fe1\u606f")) {
+        putIfNotEmpty(fields, "invoice_no", regexExtract(text, "(?<!\\d)(\\d{20})(?!\\d)"));
+        List<String> taxIds = regexExtractAll(text, "(?<![0-9A-Z])([0-9A-Z]{18})(?![0-9A-Z])");
+        if (taxIds.size() >= 2) {
+          putIfNotEmpty(fields, "buyer_tax_id", taxIds.get(0));
+          putIfNotEmpty(fields, "seller_tax_id", taxIds.get(1));
+        }
+        List<String> companyNames = regexExtractAll(text,
+          "(?m)^\\s*([^\\r\\n]{2,80}(?:\u80a1\u4efd\u6709\u9650\u516c\u53f8|\u6709\u9650\u516c\u53f8|\u5206\u516c\u53f8))\\s*$");
+        if (companyNames.size() >= 2) {
+          putIfNotEmpty(fields, "buyer_name", companyNames.get(0).trim());
+          putIfNotEmpty(fields, "seller_name", companyNames.get(1).trim());
+        }
+      }
+      if (text.contains("\u4e0d\u5f81\u7a0e")) {
+        BigDecimal currentTotal = toBigDecimal(fields.get("total_amount"));
+        String nonTaxAmount = regexExtract(text, "(\\d+(?:\\.\\d{1,2})?)\\s*\u4e0d\u5f81\u7a0e");
+        if ((currentTotal == null || currentTotal.compareTo(BigDecimal.ZERO) == 0) && !isEmpty(nonTaxAmount)) {
+          fields.put("total_amount", nonTaxAmount);
+          fields.put("amount_before_tax", nonTaxAmount);
+          fields.put("tax_amount", "0.00");
+        }
+      }
+      String currentIssuer = fields.get("issuer");
+      if (isEmpty(currentIssuer) || currentIssuer.contains("\u516c\u53f8")
+        || currentIssuer.replaceAll("\\s+", "").equals("\u5408\u8ba1")) {
+        int issuerLabelIndex = text.indexOf("\u5f00\u7968\u4eba");
+        String totalAmount = fields.get("total_amount");
+        if (issuerLabelIndex >= 0 && !isEmpty(totalAmount)) {
+          int totalAmountIndex = text.indexOf(totalAmount, issuerLabelIndex);
+          if (totalAmountIndex >= 0) {
+            List<String> issuerCandidates = regexExtractAll(text.substring(totalAmountIndex + totalAmount.length()),
+              "(?m)^\\s*([^\\r\\n\\d\u00a5\uffe5?]{1,20})\\s*$");
+            if (!issuerCandidates.isEmpty()) {
+              fields.put("issuer", issuerCandidates.get(0).trim());
+            }
+          }
+        }
       }
     }
     normalizeStructuredFields(fields, filename);
