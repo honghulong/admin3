@@ -136,6 +136,24 @@ export function uploadInvoiceSupportAttachment(reimbursementId: number, invoiceI
     });
 };
 
+export function uploadSupportAttachment(reimbursementId: number, file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return request({
+        url: `${BASE_URI}/reimbursements/${reimbursementId}/support-attachments`,
+        method: 'post',
+        headers: {'Content-Type': 'multipart/form-data'},
+        data: formData
+    });
+};
+
+export function linkInvoiceSupportAttachment(reimbursementId: number, invoiceId: number, attachmentId: number) {
+    return request({
+        url: `${BASE_URI}/reimbursements/${reimbursementId}/invoices/${invoiceId}/support-attachment/${attachmentId}`,
+        method: 'put'
+    });
+};
+
 export function deleteInvoiceSupportAttachment(reimbursementId: number, invoiceId: number) {
     return request({
         url: `${BASE_URI}/reimbursements/${reimbursementId}/invoices/${invoiceId}/support-attachment`,
@@ -148,6 +166,13 @@ export function saveExpenseItems(reimbursementId: number, items: any[]) {
         url: `${BASE_URI}/reimbursements/${reimbursementId}/expense-items`,
         method: 'put',
         data: {items}
+    });
+};
+
+export function regroupExpenseItems(reimbursementId: number) {
+    return request({
+        url: `${BASE_URI}/reimbursements/${reimbursementId}:regroup-expense-items`,
+        method: 'post'
     });
 };
 

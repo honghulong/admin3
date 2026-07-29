@@ -34,9 +34,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,14 +61,17 @@ public class OcrService {
   private static final List<ExpenseTypeRule> EXPENSE_TYPE_RULES = List.of(
     new ExpenseTypeRule("taxi", List.of("出租车", "的士", "taxi")),
     new ExpenseTypeRule("passenger_transport", List.of("汽车客运", "客运车票", "长途客运")),
+    new ExpenseTypeRule("insurance", List.of("保险", "保费", "财产保险")),
+    new ExpenseTypeRule("hotel", List.of("住宿", "酒店", "宾馆", "旅店")),
     new ExpenseTypeRule("air_travel", List.of("航空运输", "机票", "民航")),
     new ExpenseTypeRule("fuel", List.of("加油", "汽油", "柴油", "石化", "石油", "油品")),
     new ExpenseTypeRule("toll", List.of("高速", "通行费", "过路", "etc")),
     new ExpenseTypeRule("rail", List.of("高铁", "动车", "火车", "铁路")),
     new ExpenseTypeRule("metro", List.of("地铁", "轨道交通")),
-    new ExpenseTypeRule("ride_hailing", List.of("网约车", "滴滴", "didi", "出行", "客运服务")),
+    new ExpenseTypeRule("ride_hailing", List.of("网约车", "滴滴", "didi", "出行", "客运服务", "接机", "送机", "用车")),
     new ExpenseTypeRule("carpool", List.of("顺风车")),
     new ExpenseTypeRule("freight", List.of("货拉拉", "货运", "物流", "运输")),
+    new ExpenseTypeRule("delivery", List.of("配送", "快递", "速运", "运费")),
     new ExpenseTypeRule("parking", List.of("停车")),
     new ExpenseTypeRule("meal", List.of("餐", "饭店", "餐饮", "酒楼", "美食"))
   );
@@ -128,18 +134,19 @@ public class OcrService {
 
     try {
       String ocrResultJson = recognizeInvoiceFile(imagePath, attachment.getFileName());
+      String safeOcrResultJson = stripSupplementaryChars(ocrResultJson);
       log.info("OCR completed for attachment {}, result length: {}", attachmentId, ocrResultJson.length());
 
       attachment.setOcrStatus("completed");
-      attachment.setOcrResult(ocrResultJson);
+      attachment.setOcrResult(safeOcrResultJson);
       attachmentRepository.save(attachment);
 
-      updateReimbursementFromOcr(attachment, ocrResultJson);
+      updateReimbursementFromOcr(attachment, safeOcrResultJson);
     } catch (Exception e) {
       log.error("OCR failed for attachment {}: {}", attachmentId, e.getMessage(), e);
       attachment.setOcrStatus("failed");
       String errMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
-      attachment.setOcrResult("{\"error\":\"" + errMsg.replace("\"", "'") + "\"}");
+      attachment.setOcrResult(stripSupplementaryChars("{\"error\":\"" + errMsg.replace("\"", "'") + "\"}"));
       attachmentRepository.save(attachment);
     }
   }
@@ -159,17 +166,26 @@ public class OcrService {
       byte[] imageBytes = Files.readAllBytes(imagePath);
       String base64 = Base64.getEncoder().encodeToString(imageBytes);
       String ocrResultJson = callOcrService(base64, attachment.getFileName());
+      String safeOcrResultJson = stripSupplementaryChars(ocrResultJson);
       attachment.setOcrStatus("completed");
-      attachment.setOcrResult(ocrResultJson);
+      attachment.setOcrResult(safeOcrResultJson);
       attachmentRepository.save(attachment);
-      updateExpenseItemTripFromSupportOcr(attachment, ocrResultJson);
+      updateExpenseItemTripFromSupportOcr(attachment, safeOcrResultJson);
     } catch (Exception e) {
       log.error("Support attachment OCR failed for attachment {}: {}", attachmentId, e.getMessage(), e);
       attachment.setOcrStatus("failed");
       String errMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
-      attachment.setOcrResult("{\"error\":\"" + errMsg.replace("\"", "'") + "\"}");
+      attachment.setOcrResult(stripSupplementaryChars("{\"error\":\"" + errMsg.replace("\"", "'") + "\"}"));
       attachmentRepository.save(attachment);
     }
+  }
+
+  public void applySupportAttachmentOcr(Long attachmentId) {
+    Attachment attachment = attachmentRepository.findById(attachmentId).orElse(null);
+    if (attachment == null || attachment.getOcrResult() == null) {
+      return;
+    }
+    updateExpenseItemTripFromSupportOcr(attachment, attachment.getOcrResult());
   }
 
   private synchronized void updateReimbursementFromOcr(Attachment attachment, String ocrResultJson) {
@@ -254,6 +270,12 @@ public class OcrService {
             taxAmount = lineTax.toPlainString();
           }
         }
+        if (ocrText.contains("\u4e0d\u5f81\u7a0e")) {
+          totalAmount = firstNonBlank(totalAmount, amountBeforeTax);
+          amountBeforeTax = firstNonBlank(totalAmount, amountBeforeTax);
+          taxAmount = "0.00";
+          taxRate = "\u4e0d\u5f81\u7a0e";
+        }
         InvoiceParties parties = extractInvoiceParties(ocrText);
         if (!isEmpty(parties.buyerName())) buyerName = parties.buyerName();
         if (!isEmpty(parties.sellerName())) sellerName = parties.sellerName();
@@ -278,8 +300,7 @@ public class OcrService {
           invoice.setUpdatedAt(LocalDateTime.now());
           invoiceRepository.save(invoice);
         }
-        if (!isEmpty(ocrText)) r.setDescription(ocrText);
-        r.setOcrRawJson(ocrResultJson);
+        r.setOcrRawJson(stripSupplementaryChars(ocrResultJson));
         updateInvoiceSummary(r);
         r.setUpdatedAt(LocalDateTime.now());
         reimbursementRepository.save(r);
@@ -290,6 +311,10 @@ public class OcrService {
         Invoice duplicate = findDuplicateInvoice(reimbursementId, invoiceNo, invoiceCode, invoiceDate, totalAmount, attachment.getId());
         if (duplicate != null) {
           duplicate.setAttachmentId(duplicate.getAttachmentId() == null ? attachment.getId() : duplicate.getAttachmentId());
+          applyInvoiceOcrFields(duplicate, attachment, ocrResultJson, invoiceNo, invoiceCode, invoiceDate,
+            buyerName, sellerName, buyerTaxId, sellerTaxId, totalAmount, invoiceType, invoiceStatus,
+            amountBeforeTax, taxRate, taxAmount, payee, reviewer, issuer, buyerAddressPhone, buyerBankInfo,
+            sellerAddressPhone, sellerBankInfo, remarks);
           duplicate.setUpdatedBy(attachment.getUploadedBy());
           duplicate.setUpdatedAt(LocalDateTime.now());
           Invoice savedDuplicate = invoiceRepository.save(duplicate);
@@ -299,8 +324,7 @@ public class OcrService {
             savedDuplicate.setUpdatedAt(LocalDateTime.now());
             invoiceRepository.save(savedDuplicate);
           }
-          if (!isEmpty(ocrText)) r.setDescription(ocrText);
-          r.setOcrRawJson(ocrResultJson);
+          r.setOcrRawJson(stripSupplementaryChars(ocrResultJson));
           updateInvoiceSummary(r);
           r.setUpdatedAt(LocalDateTime.now());
           reimbursementRepository.save(r);
@@ -315,31 +339,10 @@ public class OcrService {
         invoice.setCreatedBy(attachment.getUploadedBy());
         invoice.setCreatedAt(LocalDateTime.now());
       }
-      invoice.setImagePath(attachment.getFileUrl());
-      invoice.setOcrRawJson(ocrResultJson);
-      invoice.setInvoiceNo(invoiceNo);
-      invoice.setInvoiceCode(invoiceCode);
-      invoice.setInvoiceDate(invoiceDate);
-      invoice.setBuyerName(buyerName);
-      invoice.setSellerName(sellerName);
-      invoice.setBuyerTaxId(buyerTaxId);
-      invoice.setSellerTaxId(sellerTaxId);
-      invoice.setTotalAmount(toBigDecimal(totalAmount));
-      invoice.setInvoiceType(invoiceType);
-      invoice.setInvoiceStatus(invoiceStatus);
-      invoice.setAmountBeforeTax(toBigDecimal(amountBeforeTax));
-      invoice.setTaxRate(taxRate);
-      invoice.setTaxAmount(toBigDecimal(taxAmount));
-      invoice.setPayee(payee);
-      invoice.setReviewer(reviewer);
-      invoice.setIssuer(issuer);
-      invoice.setBuyerAddressPhone(buyerAddressPhone);
-      invoice.setBuyerBankInfo(buyerBankInfo);
-      invoice.setSellerAddressPhone(sellerAddressPhone);
-      invoice.setSellerBankInfo(sellerBankInfo);
-      invoice.setRemarks(remarks);
-      invoice.setUpdatedBy(attachment.getUploadedBy());
-      invoice.setUpdatedAt(LocalDateTime.now());
+      applyInvoiceOcrFields(invoice, attachment, ocrResultJson, invoiceNo, invoiceCode, invoiceDate,
+        buyerName, sellerName, buyerTaxId, sellerTaxId, totalAmount, invoiceType, invoiceStatus,
+        amountBeforeTax, taxRate, taxAmount, payee, reviewer, issuer, buyerAddressPhone, buyerBankInfo,
+        sellerAddressPhone, sellerBankInfo, remarks);
       Invoice savedInvoice = invoiceRepository.save(invoice);
       ReimbursementExpenseItem expenseItem = upsertExpenseItemFromInvoice(r, savedInvoice, attachment, ocrText);
       if (expenseItem != null) {
@@ -358,8 +361,7 @@ public class OcrService {
       if (!isEmpty(sellerTaxId) && isEmpty(r.getSellerTaxId())) r.setSellerTaxId(sellerTaxId);
       if (!isEmpty(invoiceType) && isEmpty(r.getInvoiceType())) r.setInvoiceType(invoiceType);
       if (!isEmpty(invoiceStatus) && isEmpty(r.getInvoiceStatus())) r.setInvoiceStatus(invoiceStatus);
-      if (!isEmpty(ocrText)) r.setDescription(ocrText);
-      r.setOcrRawJson(ocrResultJson);
+      r.setOcrRawJson(stripSupplementaryChars(ocrResultJson));
       updateInvoiceSummary(r);
       r.setUpdatedAt(LocalDateTime.now());
       reimbursementRepository.save(r);
@@ -373,14 +375,22 @@ public class OcrService {
 
   private void updateExpenseItemTripFromSupportOcr(Attachment attachment, String ocrResultJson) {
     try {
+      JsonNode data = unwrapOcrData(objectMapper.readTree(ocrResultJson));
       Invoice invoice = invoiceRepository.findBySupportAttachmentIdAndDeletedFalse(attachment.getId()).orElse(null);
+      if (invoice == null) {
+        invoice = linkSupportAttachmentByInvoiceNo(attachment, data);
+      }
       if (invoice == null) {
         log.debug("Support attachment {} not linked to active invoice, skip trip update", attachment.getId());
         return;
       }
-      JsonNode data = unwrapOcrData(objectMapper.readTree(ocrResultJson));
       String ocrText = data.has("ocr_text") ? data.get("ocr_text").asText() : "";
-      TripPlaces places = extractTripPlaces(ocrText);
+      TripPlaces places = ocrText.contains("货拉拉") && data.has("ocr_raw")
+        ? extractHuolalaTripPlacesFromOcrRaw(data.get("ocr_raw"))
+        : extractTripPlaces(ocrText);
+      if (isEmpty(places.startPlace()) && isEmpty(places.endPlace()) && data.has("ocr_raw")) {
+        places = extractHuolalaTripPlacesFromOcrRaw(data.get("ocr_raw"));
+      }
       boolean changed = false;
       if (!isEmpty(places.startPlace())) {
         invoice.setStartPlace(stripSupplementaryChars(places.startPlace()));
@@ -390,17 +400,40 @@ public class OcrService {
         invoice.setEndPlace(stripSupplementaryChars(places.endPlace()));
         changed = true;
       }
-      if (changed) {
+      if (changed || places.kilometers() != null) {
         invoice.setUpdatedBy(attachment.getUploadedBy());
         invoice.setUpdatedAt(LocalDateTime.now());
         invoiceRepository.save(invoice);
-        updateInvoiceExpenseItemKilometers(invoice, places.kilometers(), attachment.getUploadedBy());
+        updateInvoiceExpenseItemTrip(invoice, places, attachment.getUploadedBy());
         log.info("Support attachment {} updated trip places for invoice {}: {} -> {}",
           attachment.getId(), invoice.getId(), invoice.getStartPlace(), invoice.getEndPlace());
       }
     } catch (Exception e) {
       log.warn("Failed to update trip places from support OCR attachment {}: {}", attachment.getId(), e.getMessage(), e);
     }
+  }
+
+  private Invoice linkSupportAttachmentByInvoiceNo(Attachment attachment, JsonNode data) {
+    if (attachment.getReimbursementId() == null) return null;
+    String invoiceNo = getJsonField(data, "invoice_no");
+    String ocrText = data.has("ocr_text") ? data.get("ocr_text").asText() : "";
+    if (isEmpty(invoiceNo) && !isEmpty(ocrText)) {
+      invoiceNo = regexExtract(ocrText, "发票号码[：:\\s]*(\\d{8,20})");
+      if (isEmpty(invoiceNo)) invoiceNo = regexExtract(ocrText, "(?<!\\d)(\\d{20})(?!\\d)");
+    }
+    if (isEmpty(invoiceNo)) return null;
+    String matchedInvoiceNo = invoiceNo;
+    List<Invoice> matches = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(attachment.getReimbursementId()).stream()
+      .filter(invoice -> matchedInvoiceNo.equals(invoice.getInvoiceNo()))
+      .toList();
+    if (matches.size() != 1) return null;
+    Invoice invoice = matches.get(0);
+    Long existingSupportId = invoice.getSupportAttachmentId();
+    if (existingSupportId != null && !existingSupportId.equals(attachment.getId())) return null;
+    invoice.setSupportAttachmentId(attachment.getId());
+    invoice.setUpdatedBy(attachment.getUploadedBy());
+    invoice.setUpdatedAt(LocalDateTime.now());
+    return invoiceRepository.save(invoice);
   }
 
   private JsonNode unwrapOcrData(JsonNode root) {
@@ -418,6 +451,41 @@ public class OcrService {
       }
     }
     return root;
+  }
+
+  private void applyInvoiceOcrFields(Invoice invoice, Attachment attachment, String ocrResultJson,
+                                     String invoiceNo, String invoiceCode, LocalDateTime invoiceDate,
+                                     String buyerName, String sellerName, String buyerTaxId, String sellerTaxId,
+                                     String totalAmount, String invoiceType, String invoiceStatus,
+                                     String amountBeforeTax, String taxRate, String taxAmount,
+                                     String payee, String reviewer, String issuer,
+                                     String buyerAddressPhone, String buyerBankInfo,
+                                     String sellerAddressPhone, String sellerBankInfo, String remarks) {
+    invoice.setImagePath(attachment.getFileUrl());
+    invoice.setOcrRawJson(stripSupplementaryChars(ocrResultJson));
+    invoice.setInvoiceNo(invoiceNo);
+    invoice.setInvoiceCode(invoiceCode);
+    invoice.setInvoiceDate(invoiceDate);
+    invoice.setBuyerName(buyerName);
+    invoice.setSellerName(sellerName);
+    invoice.setBuyerTaxId(buyerTaxId);
+    invoice.setSellerTaxId(sellerTaxId);
+    invoice.setTotalAmount(toBigDecimal(totalAmount));
+    invoice.setInvoiceType(invoiceType);
+    invoice.setInvoiceStatus(invoiceStatus);
+    invoice.setAmountBeforeTax(toBigDecimal(amountBeforeTax));
+    invoice.setTaxRate(taxRate);
+    invoice.setTaxAmount(toBigDecimal(taxAmount));
+    invoice.setPayee(payee);
+    invoice.setReviewer(reviewer);
+    invoice.setIssuer(issuer);
+    invoice.setBuyerAddressPhone(buyerAddressPhone);
+    invoice.setBuyerBankInfo(buyerBankInfo);
+    invoice.setSellerAddressPhone(sellerAddressPhone);
+    invoice.setSellerBankInfo(sellerBankInfo);
+    invoice.setRemarks(remarks);
+    invoice.setUpdatedBy(attachment.getUploadedBy());
+    invoice.setUpdatedAt(LocalDateTime.now());
   }
 
   private String getJsonField(JsonNode node, String field) {
@@ -492,7 +560,7 @@ public class OcrService {
     BigDecimal amount = invoice.getTotalAmount();
     if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) return null;
     LocalDateTime now = LocalDateTime.now();
-    String expenseType = classifyExpenseType(invoice, ocrText + " " + attachment.getFileName());
+    String expenseType = classifyExpenseType(invoice, ocrText);
     ReimbursementExpenseItem item = invoice.getExpenseItemId() == null ? null : expenseItemRepository.findById(invoice.getExpenseItemId()).orElse(null);
     if (item == null) item = expenseItemRepository.findByInvoiceId(invoice.getId()).orElse(null);
     if (item == null) {
@@ -509,8 +577,7 @@ public class OcrService {
     item.setExpenseDate(invoice.getInvoiceDate());
     item.setExpenseType(expenseType);
     item.setOaExpenseName(oaExpenseName(expenseType));
-    item.setRemark(invoice.getSellerName());
-    item.setDescription(stripSupplementaryChars(firstNonBlank(invoice.getRemarks(), invoice.getSellerName(), ocrText)));
+    item.setRemark(null);
     item.setSource("ocr");
     item.setUpdatedBy(attachment.getUploadedBy());
     item.setUpdatedAt(now);
@@ -551,12 +618,11 @@ public class OcrService {
       Invoice first = group.get(0);
       target.setInvoiceId(null);
       target.setExpenseDate(first.getInvoiceDate());
-      target.setExpenseType(classifyExpenseType(first, firstNonBlank(first.getRemarks(), first.getSellerName())));
+      target.setExpenseType(classifyExpenseType(first, first.getOcrRawJson()));
       target.setOaExpenseName(oaExpenseName(target.getExpenseType()));
       target.setAmount(total);
       target.setKilometers(kilometers);
-      target.setRemark(first.getSellerName());
-      target.setDescription(stripSupplementaryChars(firstNonBlank(first.getRemarks(), first.getSellerName())));
+      target.setRemark(null);
       target.setSource("ocr");
       target.setUpdatedBy(userId);
       target.setUpdatedAt(now);
@@ -576,7 +642,7 @@ public class OcrService {
   private ExpenseGroupKey groupKey(Invoice invoice) {
     if (invoice.getInvoiceDate() == null) return null;
     String date = invoice.getInvoiceDate().toLocalDate().toString();
-    String expenseType = classifyExpenseType(invoice, firstNonBlank(invoice.getRemarks(), invoice.getSellerName()));
+    String expenseType = classifyExpenseType(invoice, invoice.getOcrRawJson());
     if (!canGroupByDateAndType(expenseType)) return null;
     return new ExpenseGroupKey("type", date, expenseType, "");
   }
@@ -611,11 +677,10 @@ public class OcrService {
     }
     item.setInvoiceId(invoice.getId());
     item.setExpenseDate(invoice.getInvoiceDate());
-    item.setExpenseType(classifyExpenseType(invoice, firstNonBlank(invoice.getRemarks(), invoice.getSellerName())));
+    item.setExpenseType(classifyExpenseType(invoice, invoice.getOcrRawJson()));
     item.setOaExpenseName(oaExpenseName(item.getExpenseType()));
     item.setAmount(invoice.getTotalAmount() == null ? BigDecimal.ZERO : invoice.getTotalAmount());
-    item.setRemark(invoice.getSellerName());
-    item.setDescription(stripSupplementaryChars(firstNonBlank(invoice.getRemarks(), invoice.getSellerName())));
+    item.setRemark(null);
     item.setSource("ocr");
     item.setUpdatedBy(userId);
     item.setUpdatedAt(now);
@@ -633,11 +698,13 @@ public class OcrService {
       .forEach(expenseItemRepository::delete);
   }
 
-  private void updateInvoiceExpenseItemKilometers(Invoice invoice, BigDecimal kilometers, Long userId) {
-    if (kilometers == null || invoice.getExpenseItemId() == null) return;
+  private void updateInvoiceExpenseItemTrip(Invoice invoice, TripPlaces places, Long userId) {
+    if (invoice.getExpenseItemId() == null) return;
     ReimbursementExpenseItem item = expenseItemRepository.findById(invoice.getExpenseItemId()).orElse(null);
     if (item == null) return;
-    item.setKilometers(kilometers);
+    if (!isEmpty(places.startPlace())) item.setStartPlace(stripSupplementaryChars(places.startPlace()));
+    if (!isEmpty(places.endPlace())) item.setEndPlace(stripSupplementaryChars(places.endPlace()));
+    if (places.kilometers() != null) item.setKilometers(places.kilometers());
     item.setUpdatedBy(userId);
     item.setUpdatedAt(LocalDateTime.now());
     expenseItemRepository.save(item);
@@ -657,7 +724,23 @@ public class OcrService {
   }
 
   private boolean canGroupByDateAndType(String expenseType) {
-    return expenseType != null && !expenseType.isBlank();
+    return expenseType != null && !expenseType.isBlank() && !isTransportExpenseType(expenseType);
+  }
+
+  private boolean isTransportExpenseType(String expenseType) {
+    return Set.of(
+      "toll",
+      "rail",
+      "metro",
+      "ride_hailing",
+      "carpool",
+      "freight",
+      "air_travel",
+      "taxi",
+      "bus",
+      "rental_car",
+      "parking"
+    ).contains(expenseType);
   }
 
   private record ExpenseGroupKey(String mode, String date, String first, String second) {}
@@ -712,10 +795,19 @@ public class OcrService {
     return value.trim().replaceAll("\\s+", "");
   }
 
+  private boolean isLikelyIssuerName(String value) {
+    if (isEmpty(value)) return false;
+    String compact = value.trim().replaceAll("\\s+", "");
+    if (compact.length() <= 1 || compact.length() > 8) return false;
+    return !compact.matches(".*[\u5143\u5706\u6574\u58f9\u8d30\u53c1\u8086\u4f0d\u9646\u67d2\u634c\u7396\u62fe\u4f70\u4edf].*");
+  }
+
   private record InvoiceParties(String buyerName, String sellerName, String buyerTaxId, String sellerTaxId) {}
 
   private TripPlaces extractTripPlaces(String ocrText) {
     if (isEmpty(ocrText)) return new TripPlaces("", "", null);
+    TripPlaces ctripTrip = extractCtripTripPlaces(ocrText);
+    if (!isEmpty(ctripTrip.startPlace()) || !isEmpty(ctripTrip.endPlace())) return ctripTrip;
     TripPlaces didiTrip = extractDidiTripTablePlaces(ocrText);
     if (!isEmpty(didiTrip.startPlace()) || !isEmpty(didiTrip.endPlace())) return didiTrip;
     String start = firstNonBlank(
@@ -729,9 +821,133 @@ public class OcrService {
     return new TripPlaces(cleanTripPlace(start), cleanTripPlace(end), extractKilometers(ocrText));
   }
 
+  private TripPlaces extractHuolalaTripPlacesFromOcrRaw(JsonNode ocrRaw) {
+    if (ocrRaw == null || !ocrRaw.isArray() || ocrRaw.isEmpty()) return new TripPlaces("", "", null);
+    double maxX = 0;
+    for (JsonNode item : ocrRaw) {
+      JsonNode bbox = item.get("bbox");
+      if (bbox == null || bbox.size() < 8) continue;
+      for (int i = 0; i < bbox.size(); i += 2) {
+        maxX = Math.max(maxX, bbox.get(i).asDouble());
+      }
+    }
+    if (maxX <= 0) return new TripPlaces("", "", null);
+
+    double addressCenter = 0;
+    double kilometerCenter = 0;
+    for (JsonNode item : ocrRaw) {
+      JsonNode bbox = item.get("bbox");
+      String text = item.has("text") ? item.get("text").asText() : "";
+      if (bbox == null || bbox.size() < 8 || isEmpty(text)) continue;
+      double x = averageBboxCoordinate(bbox, 0);
+      if (text.contains("地址")) addressCenter = x;
+      if (text.contains("里程")) kilometerCenter = x;
+    }
+
+    double firstAddressY = 0;
+    for (JsonNode item : ocrRaw) {
+      JsonNode bbox = item.get("bbox");
+      String text = item.has("text") ? item.get("text").asText() : "";
+      if (bbox == null || bbox.size() < 8 || isEmpty(text) || !text.trim().startsWith("●")) continue;
+      double y = averageBboxCoordinate(bbox, 1);
+      firstAddressY = firstAddressY == 0 ? y : Math.min(firstAddressY, y);
+    }
+
+    List<OcrRawText> addressTexts = new ArrayList<>();
+    List<OcrRawText> kilometerTexts = new ArrayList<>();
+    for (JsonNode item : ocrRaw) {
+      JsonNode bbox = item.get("bbox");
+      String text = item.has("text") ? item.get("text").asText() : "";
+      if (bbox == null || bbox.size() < 8 || isEmpty(text)) continue;
+      double x = averageBboxCoordinate(bbox, 0);
+      double y = averageBboxCoordinate(bbox, 1);
+      double ratio = x / maxX;
+      boolean inAddressColumn = addressCenter > 0
+        ? Math.abs(x - addressCenter) <= Math.max(70, maxX * 0.08)
+        : ratio >= 0.46 && ratio <= 0.64;
+      boolean inKilometerColumn = kilometerCenter > 0
+        ? Math.abs(x - kilometerCenter) <= Math.max(45, maxX * 0.05)
+        : ratio >= 0.67 && ratio <= 0.75;
+      boolean afterAddressStart = firstAddressY == 0 || text.trim().startsWith("●") || y > firstAddressY + 5;
+      if (inAddressColumn && afterAddressStart && !text.contains("地址")) {
+        addressTexts.add(new OcrRawText(y, text));
+      }
+      if (inKilometerColumn && y > 360 && text.matches("\\d+(?:\\.\\d+)?")) {
+        kilometerTexts.add(new OcrRawText(y, text));
+      }
+    }
+    addressTexts.sort(java.util.Comparator.comparingDouble(OcrRawText::y));
+    kilometerTexts.sort(java.util.Comparator.comparingDouble(OcrRawText::y));
+
+    List<String> places = new ArrayList<>();
+    StringBuilder current = new StringBuilder();
+    for (OcrRawText rawText : addressTexts) {
+      String text = rawText.text().trim();
+      if (text.startsWith("●")) {
+        if (!current.isEmpty()) places.add(cleanTripPlace(current.toString()));
+        current.setLength(0);
+      }
+      current.append(text);
+    }
+    if (!current.isEmpty()) places.add(cleanTripPlace(current.toString()));
+
+    String start = places.isEmpty() ? "" : places.get(0);
+    String end = places.size() < 2 ? "" : places.get(1);
+    BigDecimal kilometers = kilometerTexts.isEmpty() ? null : toBigDecimal(kilometerTexts.get(0).text());
+    return new TripPlaces(start, end, kilometers);
+  }
+
+  private double averageBboxCoordinate(JsonNode bbox, int offset) {
+    double total = 0;
+    int count = 0;
+    for (int i = offset; i < bbox.size(); i += 2) {
+      total += bbox.get(i).asDouble();
+      count++;
+    }
+    return count == 0 ? 0 : total / count;
+  }
+
+  private record OcrRawText(double y, String text) {}
+
+  private record BboxWord(String text, JsonNode bbox) {
+    double cx() {
+      return (min(true) + max(true)) / 2;
+    }
+
+    double cy() {
+      return (min(false) + max(false)) / 2;
+    }
+
+    double maxX() {
+      return max(true);
+    }
+
+    private double min(boolean xAxis) {
+      double result = Double.MAX_VALUE;
+      for (int i = xAxis ? 0 : 1; i < bbox.size(); i += 2) result = Math.min(result, bbox.get(i).asDouble());
+      return result == Double.MAX_VALUE ? 0 : result;
+    }
+
+    private double max(boolean xAxis) {
+      double result = -Double.MAX_VALUE;
+      for (int i = xAxis ? 0 : 1; i < bbox.size(); i += 2) result = Math.max(result, bbox.get(i).asDouble());
+      return result == -Double.MAX_VALUE ? 0 : result;
+    }
+  }
+
+  private TripPlaces extractCtripTripPlaces(String ocrText) {
+    String normalized = ocrText.replace("\r", "\n");
+    String start = nextNonBlankLineAfter(normalized, "上车点：", "上车点:");
+    String end = nextNonBlankLineAfter(normalized, "下车点：", "下车点:");
+    if (isEmpty(start) && isEmpty(end)) return new TripPlaces("", "", null);
+    return new TripPlaces(cleanTripPlace(start), cleanTripPlace(end), extractKilometers(ocrText));
+  }
+
   private TripPlaces extractDidiTripTablePlaces(String ocrText) {
     String normalized = ocrText.replace("\r", "\n").replace('|', '\n');
     String[] lines = normalized.split("\\n+");
+    TripPlaces qunarPlaces = extractQunarTripTablePlaces(lines);
+    if (!isEmpty(qunarPlaces.startPlace()) || !isEmpty(qunarPlaces.endPlace())) return qunarPlaces;
     TripPlaces verticalPlaces = extractDidiVerticalTripTablePlaces(lines);
     if (!isEmpty(verticalPlaces.startPlace()) || !isEmpty(verticalPlaces.endPlace())) return verticalPlaces;
     for (String line : lines) {
@@ -744,6 +960,24 @@ public class OcrService {
       }
     }
     return new TripPlaces("", "", extractKilometers(ocrText));
+  }
+
+  private TripPlaces extractQunarTripTablePlaces(String[] lines) {
+    for (int i = 0; i < lines.length; i++) {
+      String line = lines[i].trim();
+      if (!line.matches("\\d+")) continue;
+      String previous = String.join("\n", java.util.Arrays.copyOfRange(lines, Math.max(0, i - 12), i));
+      if (!previous.contains("起点") || !previous.contains("终点") || !previous.contains("金额")) continue;
+      if (i + 5 >= lines.length) continue;
+      String time = lines[i + 2].trim();
+      String start = lines[i + 3].trim();
+      String end = lines[i + 4].trim();
+      String amount = lines[i + 5].trim();
+      if (!time.matches(".*\\d{4}-\\d{2}-\\d{2}.*\\d{1,2}:\\d{2}.*")) continue;
+      if (!amount.matches("\\d+(?:\\.\\d+)?")) continue;
+      return new TripPlaces(cleanTripPlace(start), cleanTripPlace(end), null);
+    }
+    return new TripPlaces("", "", null);
   }
 
   private TripPlaces extractDidiVerticalTripTablePlaces(String[] lines) {
@@ -780,6 +1014,7 @@ public class OcrService {
   private String cleanTripPlace(String value) {
     if (isEmpty(value)) return "";
     return value
+      .replaceAll("^[●•·\\s]+", "")
       .replaceAll("^(起点|终点|出发地|到达地)$", "")
       .replaceAll("(出发地|到达地|始发地|目的地|起点|终点|里程\\[公里\\]|里程|金额\\[元\\]|备注|等级|交通工具类型|金额|税率|税额).*$", "")
       .replaceAll("[：:]+$", "")
@@ -789,6 +1024,21 @@ public class OcrService {
   private String regexExtractGroup(String text, String pattern, int group) {
     var m = Pattern.compile(pattern).matcher(text);
     return m.find() ? m.group(group) : "";
+  }
+
+  private String nextNonBlankLineAfter(String text, String... labels) {
+    String[] lines = text.split("\\n+");
+    for (int i = 0; i < lines.length; i++) {
+      String line = lines[i].trim();
+      for (String label : labels) {
+        if (!line.equals(label)) continue;
+        for (int j = i + 1; j < lines.length; j++) {
+          String candidate = lines[j].trim();
+          if (!candidate.isBlank()) return candidate;
+        }
+      }
+    }
+    return "";
   }
 
   private BigDecimal extractKilometers(String ocrText) {
@@ -810,6 +1060,7 @@ public class OcrService {
     String normalizedText = String.join(" ",
       firstNonBlank(invoice.getRemarks()),
       firstNonBlank(invoice.getSellerName()),
+      firstNonBlank(invoice.getSellerShortName()),
       firstNonBlank(invoice.getInvoiceContentShortName()),
       firstNonBlank(ocrText)
     ).toLowerCase();
@@ -848,16 +1099,19 @@ public class OcrService {
 
   private String oaExpenseName(String expenseType) {
     return switch (expenseType == null ? "" : expenseType) {
-      case "fuel" -> "加油费";
-      case "toll" -> "高速过路费";
+      case "fuel" -> "油费金额";
+      case "toll" -> "高速费";
       case "rail" -> "高铁/动车/火车费";
       case "taxi" -> "出租车费";
       case "passenger_transport" -> "客运交通费";
-      case "air_travel" -> "机票/航空运输费";
+      case "air_travel" -> "机票/航空费";
+      case "hotel" -> "住宿费";
+      case "insurance" -> "保险费";
       case "metro" -> "地铁费";
       case "ride_hailing" -> "网约车费";
       case "carpool" -> "顺风车费";
-      case "freight" -> "货拉拉货运费";
+      case "freight" -> "货拉拉费";
+      case "delivery" -> "快递/配送费";
       case "parking" -> "停车费";
       case "meal" -> "餐费";
       default -> "其他";
@@ -993,7 +1247,8 @@ public class OcrService {
       }
       String text = new PDFTextStripper().getText(document);
       Map<String, String> fields = extractInvoiceFieldsFromText(text, filename);
-      if (!isEmpty(fields.get("total_amount"))) {
+      boolean useBboxParser = ocrExecutionService != null && ocrExecutionService.useBboxInvoiceParser();
+      if (!useBboxParser && !isEmpty(fields.get("total_amount"))) {
         return buildStructuredInvoiceOcrResult("pdf-text", text, fields);
       }
       if (ocrExecutionService != null && ocrExecutionService.isExternalProviderSelected()) {
@@ -1002,7 +1257,11 @@ public class OcrService {
       BufferedImage firstPage = new PDFRenderer(document).renderImageWithDPI(0, 200);
       ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
       ImageIO.write(firstPage, "png", imageBytes);
-      return callOcrService(Base64.getEncoder().encodeToString(imageBytes.toByteArray()), replaceExtension(filename, "png"));
+      String ocrJson = callOcrService(Base64.getEncoder().encodeToString(imageBytes.toByteArray()), replaceExtension(filename, "png"));
+      if (useBboxParser) {
+        return enhanceInvoiceFieldsFromOcrRaw(ocrJson, filename, fields);
+      }
+      return ocrJson;
     }
   }
 
@@ -1053,6 +1312,196 @@ public class OcrService {
     });
     root.set("invoice_fields", invoiceFields);
     return objectMapper.writeValueAsString(root);
+  }
+
+  String enhanceInvoiceFieldsFromOcrRaw(String ocrJson, String filename) throws Exception {
+    return enhanceInvoiceFieldsFromOcrRaw(ocrJson, filename, Map.of());
+  }
+
+  private String enhanceInvoiceFieldsFromOcrRaw(String ocrJson, String filename, Map<String, String> textFields) throws Exception {
+    JsonNode root = objectMapper.readTree(ocrJson);
+    Map<String, String> bboxFields = extractInvoiceFieldsFromOcrRaw(root, filename);
+    if (!textFields.isEmpty()) {
+      mergeMissing(bboxFields, textFields);
+      if (!isEmpty(textFields.get("issuer"))) {
+        bboxFields.put("issuer", textFields.get("issuer"));
+      }
+    }
+    if (bboxFields.isEmpty()) return ocrJson;
+    ObjectNode mutable = root.deepCopy();
+    ObjectNode invoiceFields = mutable.withObject("/invoice_fields");
+    bboxFields.forEach((key, value) -> {
+      if (!isEmpty(value)) invoiceFields.put(key, value);
+    });
+    mutable.put("parse_strategy", "BBOX_REGION");
+    return objectMapper.writeValueAsString(mutable);
+  }
+
+  Map<String, String> extractInvoiceFieldsFromOcrRaw(JsonNode root, String filename) {
+    JsonNode raw = root.has("ocr_raw") ? root.path("ocr_raw") : root.path("raw").path("ocr_raw");
+    if (!raw.isArray()) return Map.of();
+    List<BboxWord> boxes = new ArrayList<>();
+    for (JsonNode item : raw) {
+      JsonNode bbox = item.path("bbox");
+      if (bbox.isArray() && bbox.size() >= 8) {
+        boxes.add(new BboxWord(item.path("text").asText(""), bbox));
+      }
+    }
+    if (boxes.isEmpty()) return Map.of();
+    boxes.sort(Comparator.comparingDouble(BboxWord::cy).thenComparingDouble(BboxWord::cx));
+
+    String text = boxes.stream().map(BboxWord::text).reduce("", (a, b) -> a + "\n" + b);
+    Map<String, String> fields = new LinkedHashMap<>();
+    putIfNotEmpty(fields, "invoice_no", regexExtract(text, "(\\d{20})"));
+    putIfNotEmpty(fields, "date", regexExtract(text, "(\\d{4}年\\d{1,2}月\\d{1,2}日)"));
+    fillPartyFieldsFromBbox(fields, boxes);
+    fillAmountFieldsFromBbox(fields, boxes);
+    putIfNotEmpty(fields, "issuer", extractIssuerFromBbox(boxes));
+    normalizeStructuredFields(fields, filename);
+    return fields;
+  }
+
+  private void fillPartyFieldsFromBbox(Map<String, String> fields, List<BboxWord> boxes) {
+    double splitX = maxX(boxes) / 2;
+    List<String> taxIds = boxes.stream()
+      .map(BboxWord::text)
+      .map(text -> regexExtract(text, "([0-9A-Z]{15,20})"))
+      .filter(value -> !isEmpty(value))
+      .distinct()
+      .toList();
+    if (taxIds.size() >= 2) {
+      putIfNotEmpty(fields, "buyer_tax_id", taxIds.get(0));
+      putIfNotEmpty(fields, "seller_tax_id", taxIds.get(1));
+    }
+    putIfNotEmpty(fields, "buyer_name", extractNameNearLabel(boxes, b -> b.cx() < splitX));
+    putIfNotEmpty(fields, "seller_name", extractNameNearLabel(boxes, b -> b.cx() >= splitX));
+  }
+
+  private String extractNameNearLabel(List<BboxWord> boxes, java.util.function.Predicate<BboxWord> side) {
+    return boxes.stream()
+      .filter(side)
+      .filter(box -> box.text().contains("名称"))
+      .map(box -> {
+        String value = afterColon(box.text());
+        if (!isEmpty(value)) return value;
+        return nearestText(boxes, box, candidate -> candidate.cx() > box.cx() && Math.abs(candidate.cy() - box.cy()) < 35, 260);
+      })
+      .filter(value -> !isEmpty(value) && !value.contains("信息"))
+      .findFirst()
+      .orElse("");
+  }
+
+  private void fillAmountFieldsFromBbox(Map<String, String> fields, List<BboxWord> boxes) {
+    List<BboxWord> summaryAmounts = moneyBoxesNearAnchor(boxes, "合计", 55);
+    if (summaryAmounts.size() >= 2) {
+      putIfNotEmpty(fields, "amount_before_tax", money(summaryAmounts.get(0).text()));
+      putIfNotEmpty(fields, "tax_amount", money(summaryAmounts.get(summaryAmounts.size() - 1).text()));
+    }
+    if (isEmpty(fields.get("amount_before_tax")) || isEmpty(fields.get("tax_amount"))) {
+      List<BboxWord> lineAmounts = tableLineAmountBoxes(boxes);
+      if (lineAmounts.size() >= 2) {
+        putIfNotEmpty(fields, "amount_before_tax", money(lineAmounts.get(lineAmounts.size() - 2).text()));
+        putIfNotEmpty(fields, "tax_amount", money(lineAmounts.get(lineAmounts.size() - 1).text()));
+      }
+    }
+    putIfNotEmpty(fields, "total_amount", extractTotalAmountFromBbox(boxes));
+  }
+
+  private List<BboxWord> moneyBoxesNearAnchor(List<BboxWord> boxes, String anchorText, double yWindow) {
+    Optional<BboxWord> anchor = boxes.stream()
+      .filter(box -> box.text().contains(anchorText) || ("合计".equals(anchorText) && ("合".equals(box.text()) || "计".equals(box.text()))))
+      .filter(box -> !box.text().contains("价税"))
+      .findFirst();
+    if (anchor.isEmpty()) return List.of();
+    double y = anchor.get().cy();
+    return boxes.stream()
+      .filter(box -> box.cx() > anchor.get().cx())
+      .filter(box -> box.cy() >= y - 45 && box.cy() <= y + yWindow)
+      .filter(box -> !isEmpty(money(box.text())))
+      .sorted(Comparator.comparingDouble(BboxWord::cx))
+      .toList();
+  }
+
+  private List<BboxWord> tableLineAmountBoxes(List<BboxWord> boxes) {
+    double headerY = boxes.stream()
+      .filter(box -> box.text().contains("项目名称"))
+      .mapToDouble(BboxWord::cy)
+      .findFirst()
+      .orElse(0);
+    if (headerY == 0) return List.of();
+    double bottomY = boxes.stream()
+      .filter(box -> box.text().contains("合计") || "计".equals(box.text()))
+      .mapToDouble(BboxWord::cy)
+      .filter(y -> y > headerY)
+      .findFirst()
+      .orElse(headerY + 260);
+    return boxes.stream()
+      .filter(box -> box.cy() > headerY && box.cy() < bottomY)
+      .filter(box -> !isEmpty(money(box.text())))
+      .sorted(Comparator.comparingDouble(BboxWord::cy).thenComparingDouble(BboxWord::cx))
+      .toList();
+  }
+
+  private String extractTotalAmountFromBbox(List<BboxWord> boxes) {
+    Optional<BboxWord> withSmall = boxes.stream()
+      .filter(box -> box.text().contains("小写"))
+      .findFirst();
+    if (withSmall.isPresent()) {
+      String own = money(withSmall.get().text());
+      if (!isEmpty(own)) return own;
+      String near = nearestText(boxes, withSmall.get(), box -> box.cx() > withSmall.get().cx() - 20 && Math.abs(box.cy() - withSmall.get().cy()) < 60, 360);
+      return money(near);
+    }
+    List<BboxWord> totalAmounts = moneyBoxesNearAnchor(boxes, "价税合计", 120);
+    return totalAmounts.isEmpty() ? "" : money(totalAmounts.get(totalAmounts.size() - 1).text());
+  }
+
+  private String extractIssuerFromBbox(List<BboxWord> boxes) {
+    Optional<BboxWord> label = boxes.stream()
+      .filter(box -> box.text().contains("开票人"))
+      .reduce((first, second) -> second);
+    if (label.isEmpty()) return "";
+    String own = cleanPersonName(afterColon(label.get().text()));
+    if (!isEmpty(own)) return own;
+    String near = nearestText(boxes, label.get(),
+      box -> Math.abs(box.cy() - label.get().cy()) < 55 || (box.cy() > label.get().cy() && box.cy() - label.get().cy() < 90),
+      320);
+    return cleanPersonName(near);
+  }
+
+  private String nearestText(List<BboxWord> boxes, BboxWord anchor, java.util.function.Predicate<BboxWord> predicate, double maxDistance) {
+    return boxes.stream()
+      .filter(box -> box != anchor)
+      .filter(predicate)
+      .filter(box -> !isEmpty(box.text()))
+      .min(Comparator.comparingDouble(box -> Math.abs(box.cy() - anchor.cy()) + Math.abs(box.cx() - anchor.cx()) / 3))
+      .filter(box -> Math.abs(box.cy() - anchor.cy()) + Math.abs(box.cx() - anchor.cx()) / 3 <= maxDistance)
+      .map(BboxWord::text)
+      .orElse("");
+  }
+
+  private String afterColon(String text) {
+    if (text == null) return "";
+    int colon = Math.max(text.indexOf('：'), text.indexOf(':'));
+    if (colon >= 0 && colon + 1 < text.length()) return text.substring(colon + 1).trim();
+    int comma = Math.max(text.indexOf('，'), text.indexOf(','));
+    if (comma >= 0 && comma + 1 < text.length()) return text.substring(comma + 1).trim();
+    return "";
+  }
+
+  private String money(String text) {
+    return regexExtract(text, "[¥￥]?\\s*(\\d+\\.\\d{1,2})");
+  }
+
+  private String cleanPersonName(String text) {
+    if (isEmpty(text)) return "";
+    String value = text.replace("开票人", "").replace("：", "").replace(":", "").replace("，", "").replace(",", "").trim();
+    if (value.length() > 8 || value.matches(".*\\d.*") || value.contains("备注")) return "";
+    return value;
+  }
+
+  private double maxX(List<BboxWord> boxes) {
+    return boxes.stream().mapToDouble(BboxWord::maxX).max().orElse(0);
   }
 
   private Map<String, String> extractInvoiceFieldsFromXml(String xmlText, String filename) {
@@ -1121,6 +1570,23 @@ public class OcrService {
         putIfNotEmpty(fields, "amount_before_tax", amountMatcher.group(1));
         putIfNotEmpty(fields, "total_amount", amountMatcher.group(2));
         putIfNotEmpty(fields, "tax_amount", amountMatcher.group(3));
+      }
+      List<String> prefixedCurrencyAmounts = regexExtractAll(text, "[\u00a5\uffe5]\\s*(\\d+\\.\\d{2})");
+      if (prefixedCurrencyAmounts.size() >= 3) {
+        BigDecimal amountValue = toBigDecimal(prefixedCurrencyAmounts.get(0));
+        BigDecimal taxValue = toBigDecimal(prefixedCurrencyAmounts.get(1));
+        BigDecimal totalValue = toBigDecimal(prefixedCurrencyAmounts.get(2));
+        if (amountValue != null && taxValue != null && totalValue != null
+          && sameMoney(amountValue.add(taxValue), totalValue)) {
+          fields.put("amount_before_tax", prefixedCurrencyAmounts.get(0));
+          fields.put("tax_amount", prefixedCurrencyAmounts.get(1));
+          fields.put("total_amount", prefixedCurrencyAmounts.get(2));
+        } else if (amountValue != null && taxValue != null && totalValue != null
+          && sameMoney(taxValue.add(totalValue), amountValue)) {
+          fields.put("total_amount", prefixedCurrencyAmounts.get(0));
+          fields.put("amount_before_tax", prefixedCurrencyAmounts.get(1));
+          fields.put("tax_amount", prefixedCurrencyAmounts.get(2));
+        }
       }
       String amountBeforeTax = fields.get("amount_before_tax");
       if (!isEmpty(amountBeforeTax)) {
@@ -1210,23 +1676,38 @@ public class OcrService {
         }
         List<String> companyNames = regexExtractAll(text,
           "(?m)^\\s*([^\\r\\n]{2,80}(?:\u80a1\u4efd\u6709\u9650\u516c\u53f8|\u6709\u9650\u516c\u53f8|\u5206\u516c\u53f8))\\s*$");
+        if (companyNames.size() < 2) {
+          companyNames = regexExtractAll(text,
+            "([\u4e00-\u9fffA-Za-z0-9\uff08\uff09()·]{2,80}?(?:\u80a1\u4efd\u6709\u9650\u516c\u53f8|\u6709\u9650\u8d23\u4efb\u516c\u53f8|\u6709\u9650\u516c\u53f8|\u5206\u516c\u53f8))");
+        }
         if (companyNames.size() >= 2) {
           putIfNotEmpty(fields, "buyer_name", companyNames.get(0).trim());
           putIfNotEmpty(fields, "seller_name", companyNames.get(1).trim());
         }
       }
-      if (text.contains("\u4e0d\u5f81\u7a0e")) {
-        BigDecimal currentTotal = toBigDecimal(fields.get("total_amount"));
-        String nonTaxAmount = regexExtract(text, "(\\d+(?:\\.\\d{1,2})?)\\s*\u4e0d\u5f81\u7a0e");
-        if ((currentTotal == null || currentTotal.compareTo(BigDecimal.ZERO) == 0) && !isEmpty(nonTaxAmount)) {
-          fields.put("total_amount", nonTaxAmount);
-          fields.put("amount_before_tax", nonTaxAmount);
-          fields.put("tax_amount", "0.00");
+      if (isEmpty(fields.get("buyer_name")) || isEmpty(fields.get("seller_name"))
+        || isEmpty(fields.get("buyer_tax_id")) || isEmpty(fields.get("seller_tax_id"))) {
+        List<String> taxIds = regexExtractAll(text, "(?<![0-9A-Z])([0-9A-Z]{18})(?![0-9A-Z])");
+        if (taxIds.size() >= 2) {
+          if (isEmpty(fields.get("buyer_tax_id"))) fields.put("buyer_tax_id", taxIds.get(0));
+          if (isEmpty(fields.get("seller_tax_id"))) fields.put("seller_tax_id", taxIds.get(1));
+        }
+        List<String> companyNames = regexExtractAll(text,
+          "(?m)^\\s*([^\\r\\n]{2,80}(?:\u80a1\u4efd\u6709\u9650\u516c\u53f8|\u6709\u9650\u516c\u53f8|\u5206\u516c\u53f8))\\s*$");
+        if (companyNames.size() < 2) {
+          companyNames = regexExtractAll(text,
+            "([\u4e00-\u9fffA-Za-z0-9\uff08\uff09()·]{2,80}?(?:\u80a1\u4efd\u6709\u9650\u516c\u53f8|\u6709\u9650\u8d23\u4efb\u516c\u53f8|\u6709\u9650\u516c\u53f8|\u5206\u516c\u53f8))");
+        }
+        if (companyNames.size() >= 2) {
+          if (isEmpty(fields.get("buyer_name"))) fields.put("buyer_name", companyNames.get(0).trim());
+          if (isEmpty(fields.get("seller_name"))) fields.put("seller_name", companyNames.get(1).trim());
         }
       }
+      normalizeNonTaxAmounts(fields, text);
       String currentIssuer = fields.get("issuer");
       if (isEmpty(currentIssuer) || currentIssuer.contains("\u516c\u53f8")
-        || currentIssuer.replaceAll("\\s+", "").equals("\u5408\u8ba1")) {
+        || currentIssuer.replaceAll("\\s+", "").equals("\u5408\u8ba1")
+        || !isLikelyIssuerName(currentIssuer)) {
         int issuerLabelIndex = text.indexOf("\u5f00\u7968\u4eba");
         String totalAmount = fields.get("total_amount");
         if (issuerLabelIndex >= 0 && !isEmpty(totalAmount)) {
@@ -1234,8 +1715,12 @@ public class OcrService {
           if (totalAmountIndex >= 0) {
             List<String> issuerCandidates = regexExtractAll(text.substring(totalAmountIndex + totalAmount.length()),
               "(?m)^\\s*([^\\r\\n\\d\u00a5\uffe5?]{1,20})\\s*$");
-            if (!issuerCandidates.isEmpty()) {
-              fields.put("issuer", issuerCandidates.get(0).trim());
+            for (String issuerCandidate : issuerCandidates) {
+              String candidate = issuerCandidate.trim();
+              if (isLikelyIssuerName(candidate)) {
+                fields.put("issuer", candidate);
+                break;
+              }
             }
           }
         }
@@ -1243,6 +1728,23 @@ public class OcrService {
     }
     normalizeStructuredFields(fields, filename);
     return fields;
+  }
+
+  private void normalizeNonTaxAmounts(Map<String, String> fields, String text) {
+    if (fields == null || isEmpty(text) || !text.contains("\u4e0d\u5f81\u7a0e")) return;
+    String total = fields.get("total_amount");
+    String lineAmount = regexExtract(text, "(\\d+(?:\\.\\d{1,2})?)\\s*\u4e0d\u5f81\u7a0e");
+    if (isEmpty(total)) total = firstNonBlank(lineAmount, fields.get("amount_before_tax"));
+    if (isEmpty(total)) return;
+    fields.put("total_amount", normalizeMoney(total));
+    fields.put("amount_before_tax", normalizeMoney(total));
+    fields.put("tax_amount", "0.00");
+    fields.put("tax_rate", "\u4e0d\u5f81\u7a0e");
+  }
+
+  private String normalizeMoney(String value) {
+    BigDecimal amount = toBigDecimal(value);
+    return amount == null ? value : amount.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString();
   }
 
   private void normalizeStructuredFields(Map<String, String> fields, String filename) {

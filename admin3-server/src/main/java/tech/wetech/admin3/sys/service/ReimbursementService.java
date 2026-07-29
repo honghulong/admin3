@@ -39,6 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -278,6 +279,7 @@ public class ReimbursementService {
       // 解除旧关联
       List<Attachment> oldAttachments = attachmentRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(id);
       for (Attachment a : oldAttachments) {
+        if ("support".equalsIgnoreCase(a.getAttachmentRole())) continue;
         if (supportAttachmentIds.contains(a.getId())) continue;
         a.setReimbursementId(null);
         attachmentRepository.save(a);
@@ -339,7 +341,7 @@ public class ReimbursementService {
   }
 
   private void deleteInvoiceAttachments(Invoice invoice, LocalDateTime now) {
-    Set<Long> attachmentIds = java.util.stream.Stream.of(invoice.getAttachmentId(), invoice.getSupportAttachmentId())
+    Set<Long> attachmentIds = java.util.stream.Stream.of(invoice.getAttachmentId())
       .filter(Objects::nonNull)
       .collect(Collectors.toSet());
     for (Long attachmentId : attachmentIds) {
@@ -363,10 +365,6 @@ public class ReimbursementService {
       .filter(item -> !Boolean.TRUE.equals(item.getDeleted()))
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
     validateSupportAttachmentFile(file);
-    if (invoice.getSupportAttachmentId() != null) {
-      deleteAttachmentRecord(invoice.getSupportAttachmentId());
-      invoice.setSupportAttachmentId(null);
-    }
     Attachment attachment = saveSupportAttachment(file, reimbursementId);
     invoice.setSupportAttachmentId(attachment.getId());
     UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
@@ -384,6 +382,51 @@ public class ReimbursementService {
   }
 
   @Transactional
+  public ReimbursementDTO uploadSupportAttachment(Long reimbursementId, MultipartFile file) {
+    Reimbursement r = reimbursementRepository.findById(reimbursementId)
+      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    if (!isApplicantEditableStatus(r.getStatus())) {
+      throw new BusinessException(PARAM_ERROR, "浠呰崏绋裤€佸凡閫€鍥炴垨宸叉挙鍥炵姸鎬佸彲涓婁紶琛岀▼鍗曟枃浠�");
+    }
+    validateSupportAttachmentFile(file);
+    Attachment attachment = saveSupportAttachment(file, reimbursementId);
+    Path supportPath = uploadDir.resolve(storedFileName(attachment));
+    TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+      @Override
+      public void afterCommit() {
+        ocrService.recognizeInvoiceSupportAttachmentAsync(attachment.getId(), supportPath);
+      }
+    });
+    return findReimbursementById(reimbursementId);
+  }
+
+  @Transactional
+  public ReimbursementDTO linkInvoiceSupportAttachment(Long reimbursementId, Long invoiceId, Long attachmentId) {
+    Reimbursement r = reimbursementRepository.findById(reimbursementId)
+      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    if (!isApplicantEditableStatus(r.getStatus())) {
+      throw new BusinessException(PARAM_ERROR, "浠呰崏绋裤€佸凡閫€鍥炴垨宸叉挙鍥炵姸鎬佸彲鍏宠仈鍙戠エ浣愯瘉鏂囦欢");
+    }
+    Invoice invoice = invoiceRepository.findById(invoiceId)
+      .filter(item -> reimbursementId.equals(item.getReimbursementId()))
+      .filter(item -> !Boolean.TRUE.equals(item.getDeleted()))
+      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    Attachment attachment = attachmentRepository.findById(attachmentId)
+      .filter(item -> reimbursementId.equals(item.getReimbursementId()))
+      .filter(item -> !Boolean.TRUE.equals(item.getDeleted()))
+      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
+    invoice.setSupportAttachmentId(attachment.getId());
+    invoice.setUpdatedBy(userInfo.userId());
+    invoice.setUpdatedAt(LocalDateTime.now());
+    invoiceRepository.save(invoice);
+    if ("completed".equals(attachment.getOcrStatus()) && attachment.getOcrResult() != null) {
+      ocrService.applySupportAttachmentOcr(attachment.getId());
+    }
+    return findReimbursementById(reimbursementId);
+  }
+
+  @Transactional
   public ReimbursementDTO deleteInvoiceSupportAttachment(Long reimbursementId, Long invoiceId) {
     Reimbursement r = reimbursementRepository.findById(reimbursementId)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
@@ -395,7 +438,6 @@ public class ReimbursementService {
       .filter(item -> !Boolean.TRUE.equals(item.getDeleted()))
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
     if (invoice.getSupportAttachmentId() != null) {
-      deleteAttachmentRecord(invoice.getSupportAttachmentId());
       invoice.setSupportAttachmentId(null);
       invoice.setStartPlace(null);
       invoice.setEndPlace(null);
@@ -440,6 +482,7 @@ public class ReimbursementService {
       attachment.setFileSize(file.getSize());
       attachment.setFileType(file.getContentType());
       attachment.setFileUrl("/attachments/" + storedName + "/download");
+      attachment.setAttachmentRole("support");
       attachment.setUploadedBy(userInfo.userId());
       attachment.setCreatedAt(LocalDateTime.now());
       attachment.setDeleted(false);
@@ -702,53 +745,229 @@ public class ReimbursementService {
       invoiceRepository.save(invoice);
     }
     expenseItemRepository.deleteByReimbursementId(reimbursementId);
-    items = mergeSameDateExpenseItems(items);
-    if (items != null) {
-      int index = 1;
-      for (ExpenseItemRequest req : items) {
-        if (req == null || req.expenseType() == null || req.expenseType().isBlank()) continue;
-        BigDecimal invoiceTotal = sumInvoices(reimbursementInvoices, req.invoiceIds());
-        BigDecimal requestedAmount = req.amount() == null ? BigDecimal.ZERO : req.amount();
-        if (shouldDropEmptyExpenseItem(req, existingInvoiceCounts, invoiceTotal, requestedAmount)) continue;
-        ReimbursementExpenseItem item = new ReimbursementExpenseItem();
-        item.setReimbursementId(reimbursementId);
-        item.setInvoiceId(req.invoiceId());
-        item.setExpenseDate(req.expenseDate());
-        item.setStartPlace(req.startPlace());
-        item.setEndPlace(req.endPlace());
-        item.setKilometers(req.kilometers());
-        item.setExpenseType(req.expenseType());
-        item.setOaExpenseName(oaExpenseName(req.expenseType()));
-        item.setAmount(invoiceTotal.compareTo(BigDecimal.ZERO) > 0 ? invoiceTotal : requestedAmount);
-        item.setProjectCostCategory(req.projectCostCategory());
-        item.setCustomerName(req.customerName());
-        item.setRemark(req.remark());
-        item.setDescription(req.description());
-        item.setSource(req.source() == null || req.source().isBlank() ? "manual" : req.source());
-        item.setSortOrder(index++);
-        item.setCreatedBy(userInfo.userId());
-        item.setCreatedAt(now);
-        item.setUpdatedBy(userInfo.userId());
-        item.setUpdatedAt(now);
-        ReimbursementExpenseItem saved = expenseItemRepository.save(item);
-        if (req.invoiceIds() != null) {
-          for (Long invoiceId : req.invoiceIds()) {
-            invoiceRepository.findById(invoiceId)
-              .filter(invoice -> reimbursementId.equals(invoice.getReimbursementId()))
-              .ifPresent(invoice -> {
-                invoice.setExpenseItemId(saved.getId());
-                invoice.setUpdatedBy(userInfo.userId());
-                invoice.setUpdatedAt(now);
-                invoiceRepository.save(invoice);
-              });
-          }
-        }
-      }
-    }
+    items = rebuildOcrExpenseItemsFromInvoices(items, reimbursementInvoices);
+    items = sortExpenseItemsByDate(mergeSameDateExpenseItems(items));
+    saveExpenseItemRequests(reimbursementId, items, reimbursementInvoices, existingInvoiceCounts, userInfo.userId(), now);
+    createFallbackExpenseItemsForUnboundInvoices(reimbursementId, userInfo.userId(), now);
     updateExpenseSummary(r);
     r.setUpdatedAt(now);
     reimbursementRepository.save(r);
     return findReimbursementById(reimbursementId);
+  }
+
+  private void saveExpenseItemRequests(Long reimbursementId, List<ExpenseItemRequest> items, List<Invoice> reimbursementInvoices,
+                                       Map<Long, Long> existingInvoiceCounts, Long userId, LocalDateTime now) {
+    if (items == null) return;
+    int index = 1;
+    for (ExpenseItemRequest req : items) {
+      if (req == null || req.expenseType() == null || req.expenseType().isBlank()) continue;
+      BigDecimal invoiceTotal = sumInvoices(reimbursementInvoices, req.invoiceIds());
+      BigDecimal requestedAmount = req.amount() == null ? BigDecimal.ZERO : req.amount();
+      if (shouldDropEmptyExpenseItem(req, existingInvoiceCounts, invoiceTotal, requestedAmount)) continue;
+      ReimbursementExpenseItem item = new ReimbursementExpenseItem();
+      item.setReimbursementId(reimbursementId);
+      item.setInvoiceId(req.invoiceId());
+      item.setExpenseDate(req.expenseDate());
+      item.setStartPlace(req.startPlace());
+      item.setEndPlace(req.endPlace());
+      item.setKilometers(req.kilometers());
+      item.setExpenseType(req.expenseType());
+      item.setOaExpenseName(oaExpenseName(req.expenseType()));
+      item.setAmount(invoiceTotal.compareTo(BigDecimal.ZERO) > 0 ? invoiceTotal : requestedAmount);
+      item.setProjectCostCategory(req.projectCostCategory());
+      item.setCustomerName(req.customerName());
+      item.setRemark(isOcrSource(req.source()) || hasLinkedInvoices(req) ? null : req.remark());
+      item.setDescription(isOcrSource(req.source()) || hasLinkedInvoices(req) ? null : req.description());
+      item.setSource(req.source() == null || req.source().isBlank() ? "manual" : req.source());
+      item.setSortOrder(index++);
+      item.setCreatedBy(userId);
+      item.setCreatedAt(now);
+      item.setUpdatedBy(userId);
+      item.setUpdatedAt(now);
+      ReimbursementExpenseItem saved = expenseItemRepository.save(item);
+      if (req.invoiceIds() != null) {
+        for (Long invoiceId : req.invoiceIds()) {
+          invoiceRepository.findById(invoiceId)
+            .filter(invoice -> reimbursementId.equals(invoice.getReimbursementId()))
+            .ifPresent(invoice -> {
+              invoice.setExpenseItemId(saved.getId());
+              invoice.setUpdatedBy(userId);
+              invoice.setUpdatedAt(now);
+              invoiceRepository.save(invoice);
+            });
+        }
+      }
+    }
+  }
+
+  public ReimbursementDTO regroupOcrExpenseItems(Long reimbursementId) {
+    Reimbursement r = reimbursementRepository.findById(reimbursementId)
+      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    if (!isApplicantEditableStatus(r.getStatus())) {
+      throw new BusinessException(PARAM_ERROR, "当前状态不可归集费用明细");
+    }
+    UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
+    LocalDateTime now = LocalDateTime.now();
+    deduplicateInvoicesOnSave(reimbursementId);
+    List<Invoice> invoices = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(reimbursementId);
+    List<ReimbursementExpenseItem> existingItems = expenseItemRepository.findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(reimbursementId);
+    Map<Long, TripInfo> tripInfoByInvoiceId = existingTripInfoByInvoiceId(invoices, existingItems);
+    List<ExpenseItemRequest> manualItems = existingItems.stream()
+      .filter(item -> !"ocr".equalsIgnoreCase(firstNonBlank(item.getSource())))
+      .map(item -> toExpenseItemRequest(item, invoices))
+      .toList();
+    for (Invoice invoice : invoices) {
+      invoice.setExpenseItemId(null);
+      invoice.setUpdatedBy(userInfo.userId());
+      invoice.setUpdatedAt(now);
+      invoiceRepository.save(invoice);
+    }
+    expenseItemRepository.deleteByReimbursementId(reimbursementId);
+    List<ExpenseItemRequest> rebuiltItems = new ArrayList<>(manualItems);
+    for (Invoice invoice : invoices) {
+      if (invoice.getTotalAmount() == null || invoice.getTotalAmount().compareTo(BigDecimal.ZERO) <= 0) continue;
+      rebuiltItems.add(expenseItemFromInvoice(invoice, emptyOcrExpenseItem(), tripInfoByInvoiceId.get(invoice.getId())));
+    }
+    rebuiltItems = sortExpenseItemsByDate(mergeSameDateExpenseItems(rebuiltItems));
+    saveExpenseItemRequests(reimbursementId, rebuiltItems, invoices, Map.of(), userInfo.userId(), now);
+    updateExpenseSummary(r);
+    r.setUpdatedAt(now);
+    reimbursementRepository.save(r);
+    return findReimbursementById(reimbursementId);
+  }
+
+  private void createFallbackExpenseItemsForUnboundInvoices(Long reimbursementId, Long userId, LocalDateTime now) {
+    List<Invoice> unboundInvoices = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(reimbursementId).stream()
+      .filter(invoice -> invoice.getExpenseItemId() == null)
+      .filter(invoice -> invoice.getTotalAmount() != null && invoice.getTotalAmount().compareTo(BigDecimal.ZERO) > 0)
+      .toList();
+    if (unboundInvoices.isEmpty()) return;
+    int nextOrder = expenseItemRepository.findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(reimbursementId).size() + 1;
+    for (Invoice invoice : unboundInvoices) {
+      String expenseType = classifyExpenseType(invoice);
+      ReimbursementExpenseItem item = new ReimbursementExpenseItem();
+      item.setReimbursementId(reimbursementId);
+      item.setInvoiceId(invoice.getId());
+      item.setExpenseDate(invoice.getInvoiceDate());
+      item.setExpenseType(expenseType);
+      item.setOaExpenseName(oaExpenseName(expenseType));
+      item.setAmount(invoice.getTotalAmount());
+      item.setRemark(null);
+      item.setSource("ocr");
+      item.setSortOrder(nextOrder++);
+      item.setCreatedBy(userId);
+      item.setCreatedAt(now);
+      item.setUpdatedBy(userId);
+      item.setUpdatedAt(now);
+      ReimbursementExpenseItem saved = expenseItemRepository.save(item);
+      invoice.setExpenseItemId(saved.getId());
+      invoice.setUpdatedBy(userId);
+      invoice.setUpdatedAt(now);
+      invoiceRepository.save(invoice);
+    }
+  }
+
+  private List<ExpenseItemRequest> rebuildOcrExpenseItemsFromInvoices(List<ExpenseItemRequest> items, List<Invoice> invoices) {
+    if (items == null || items.isEmpty()) return items;
+    Map<Long, Invoice> invoiceById = invoices.stream()
+      .filter(invoice -> invoice.getId() != null)
+      .collect(Collectors.toMap(Invoice::getId, invoice -> invoice, (left, right) -> left, LinkedHashMap::new));
+    List<ExpenseItemRequest> rebuilt = new ArrayList<>();
+    for (ExpenseItemRequest item : items) {
+      if (!isOcrExpenseItem(item) || item.invoiceIds() == null || item.invoiceIds().isEmpty()) {
+        rebuilt.add(item);
+        continue;
+      }
+      boolean hasMatchedInvoice = false;
+      for (Long invoiceId : item.invoiceIds()) {
+        Invoice invoice = invoiceById.get(invoiceId);
+        if (invoice == null) continue;
+        hasMatchedInvoice = true;
+        rebuilt.add(expenseItemFromInvoice(invoice, item));
+      }
+      if (!hasMatchedInvoice) rebuilt.add(item);
+    }
+    return rebuilt;
+  }
+
+  private boolean isOcrExpenseItem(ExpenseItemRequest item) {
+    return item != null && "ocr".equalsIgnoreCase(firstNonBlank(item.source()));
+  }
+
+  private boolean isOcrSource(String source) {
+    return "ocr".equalsIgnoreCase(firstNonBlank(source));
+  }
+
+  private boolean hasLinkedInvoices(ExpenseItemRequest item) {
+    return item != null && item.invoiceIds() != null && !item.invoiceIds().isEmpty();
+  }
+
+  private ExpenseItemRequest emptyOcrExpenseItem() {
+    return new ExpenseItemRequest(null, null, List.of(), null, null, null, null,
+      "other", BigDecimal.ZERO, null, null, null, null, "ocr");
+  }
+
+  private ExpenseItemRequest toExpenseItemRequest(ReimbursementExpenseItem item, List<Invoice> invoices) {
+    List<Long> invoiceIds = invoices.stream()
+      .filter(invoice -> Objects.equals(invoice.getExpenseItemId(), item.getId()))
+      .map(Invoice::getId)
+      .toList();
+    return new ExpenseItemRequest(
+      item.getId(),
+      item.getInvoiceId(),
+      invoiceIds,
+      item.getExpenseDate(),
+      item.getStartPlace(),
+      item.getEndPlace(),
+      item.getKilometers(),
+      item.getExpenseType(),
+      item.getAmount(),
+      item.getProjectCostCategory(),
+      item.getCustomerName(),
+      isOcrSource(item.getSource()) ? null : item.getRemark(),
+      item.getDescription(),
+      item.getSource()
+    );
+  }
+
+  private ExpenseItemRequest expenseItemFromInvoice(Invoice invoice, ExpenseItemRequest original) {
+    return expenseItemFromInvoice(invoice, original, null);
+  }
+
+  private ExpenseItemRequest expenseItemFromInvoice(Invoice invoice, ExpenseItemRequest original, TripInfo tripInfo) {
+    return new ExpenseItemRequest(
+      null,
+      invoice.getId(),
+      List.of(invoice.getId()),
+      invoice.getInvoiceDate(),
+      firstNonBlank(invoice.getStartPlace(), tripInfo == null ? null : tripInfo.startPlace(), original.startPlace()),
+      firstNonBlank(invoice.getEndPlace(), tripInfo == null ? null : tripInfo.endPlace(), original.endPlace()),
+      firstNonNull(tripInfo == null ? null : tripInfo.kilometers(), original.kilometers()),
+      classifyExpenseType(invoice),
+      invoice.getTotalAmount() == null ? BigDecimal.ZERO : invoice.getTotalAmount(),
+      original.projectCostCategory(),
+      original.customerName(),
+      null,
+      null,
+      "ocr"
+    );
+  }
+
+  private Map<Long, TripInfo> existingTripInfoByInvoiceId(List<Invoice> invoices, List<ReimbursementExpenseItem> existingItems) {
+    Map<Long, ReimbursementExpenseItem> itemById = existingItems.stream()
+      .filter(item -> item.getId() != null)
+      .collect(Collectors.toMap(ReimbursementExpenseItem::getId, item -> item, (left, right) -> left, LinkedHashMap::new));
+    Map<Long, TripInfo> result = new LinkedHashMap<>();
+    for (Invoice invoice : invoices) {
+      if (invoice.getId() == null || invoice.getExpenseItemId() == null) continue;
+      if (invoice.getSupportAttachmentId() == null
+        && firstNonBlank(invoice.getStartPlace(), invoice.getEndPlace()).isBlank()) continue;
+      ReimbursementExpenseItem item = itemById.get(invoice.getExpenseItemId());
+      if (item == null) continue;
+      if (firstNonBlank(item.getStartPlace(), item.getEndPlace()).isBlank() && item.getKilometers() == null) continue;
+      result.put(invoice.getId(), new TripInfo(item.getStartPlace(), item.getEndPlace(), item.getKilometers()));
+    }
+    return result;
   }
 
   private List<ExpenseItemRequest> mergeSameDateExpenseItems(List<ExpenseItemRequest> items) {
@@ -773,6 +992,7 @@ public class ReimbursementService {
 
   private String expenseItemMergeKey(ExpenseItemRequest item) {
     if (item.expenseDate() == null) return null;
+    if (isTransportExpenseType(item.expenseType())) return null;
     String date = item.expenseDate() == null ? "" : item.expenseDate().toLocalDate().toString();
     return item.expenseType() + "|" + date;
   }
@@ -790,13 +1010,13 @@ public class ReimbursementService {
       firstNonNull(left.expenseDate(), right.expenseDate()),
       firstNonBlank(left.startPlace(), right.startPlace()),
       firstNonBlank(left.endPlace(), right.endPlace()),
-      firstNonNull(left.kilometers(), right.kilometers()),
+      sumNullable(left.kilometers(), right.kilometers()),
       left.expenseType(),
       amount,
       firstNonBlank(left.projectCostCategory(), right.projectCostCategory()),
       firstNonBlank(left.customerName(), right.customerName()),
-      firstNonBlank(left.remark(), right.remark()),
-      firstNonBlank(left.description(), right.description()),
+      "ocr".equalsIgnoreCase(firstNonBlank(left.source(), right.source())) ? null : firstNonBlank(left.remark(), right.remark()),
+      "ocr".equalsIgnoreCase(firstNonBlank(left.source(), right.source())) ? null : firstNonBlank(left.description(), right.description()),
       firstNonBlank(left.source(), right.source())
     );
   }
@@ -810,6 +1030,21 @@ public class ReimbursementService {
 
   private <T> T firstNonNull(T left, T right) {
     return left != null ? left : right;
+  }
+
+  private BigDecimal sumNullable(BigDecimal left, BigDecimal right) {
+    if (left == null) return right;
+    if (right == null) return left;
+    return left.add(right);
+  }
+
+  private List<ExpenseItemRequest> sortExpenseItemsByDate(List<ExpenseItemRequest> items) {
+    if (items == null || items.size() < 2) return items;
+    return items.stream()
+      .sorted(Comparator
+        .comparing(ExpenseItemRequest::expenseDate, Comparator.nullsLast(Comparator.naturalOrder()))
+        .thenComparing(item -> firstNonBlank(item.expenseType()), Comparator.nullsLast(Comparator.naturalOrder())))
+      .toList();
   }
 
   public byte[] exportElectronicInvoiceRegister(Long reimbursementId) {
@@ -850,11 +1085,17 @@ public class ReimbursementService {
     List<ReimbursementExpenseItem> items = expenseItemRepository.findByReimbursementIdOrderBySortOrderAscCreatedAtAsc(reimbursementId);
     try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
       Sheet sheet = workbook.createSheet("报销费用明细表");
-      createTitle(sheet, workbook, "报销费用明细表", 0, 15);
+      Map<String, String> expenseColumns = expenseColumns(items);
+      int totalColumn = 4 + expenseColumns.size();
+      int remarkColumn = totalColumn + 1;
+      int descriptionColumn = totalColumn + 2;
+      createTitle(sheet, workbook, "报销费用明细表", 0, descriptionColumn);
       Row applicant = sheet.createRow(2);
       setCell(applicant, 0, "报销人：");
       setCell(applicant, 1, r.getApplicantName());
-      String[] headers = {"时间", "始发", "终点", "公里数", "加油金额", "高速费", "高（城际/动车）铁费", "地铁费", "网约车费", "顺风车费", "货拉拉费", "停车费", "餐费", "合计", "备注", "说明"};
+      List<String> headers = new ArrayList<>(List.of("时间", "始发", "终点", "公里数"));
+      headers.addAll(expenseColumns.values());
+      headers.addAll(List.of("合计", "备注", "说明"));
       writeHeader(sheet, workbook, 4, headers);
       int rowIndex = 5;
       BigDecimal total = BigDecimal.ZERO;
@@ -864,17 +1105,17 @@ public class ReimbursementService {
         setCell(row, 1, item.getStartPlace());
         setCell(row, 2, item.getEndPlace());
         setCell(row, 3, item.getKilometers());
-        int amountColumn = expenseAmountColumn(item.getExpenseType());
+        int amountColumn = expenseColumnIndex(expenseColumns, item.getExpenseType());
         if (amountColumn >= 0) setCell(row, amountColumn, item.getAmount());
-        setCell(row, 13, item.getAmount());
-        setCell(row, 14, item.getRemark());
-        setCell(row, 15, item.getDescription());
+        setCell(row, totalColumn, item.getAmount());
+        setCell(row, remarkColumn, item.getRemark());
+        setCell(row, descriptionColumn, item.getDescription());
         if (item.getAmount() != null) total = total.add(item.getAmount());
       }
       Row totalRow = sheet.createRow(rowIndex);
       setCell(totalRow, 0, "合计：");
-      setCell(totalRow, 13, total);
-      applyReadableLayout(sheet, headers.length, 4);
+      setCell(totalRow, totalColumn, total);
+      applyReadableLayout(sheet, headers.size(), 4);
       workbook.write(out);
       return out.toByteArray();
     } catch (Exception e) {
@@ -979,12 +1220,10 @@ public class ReimbursementService {
       .reduce((first, second) -> second)
       .orElse(null);
     if (latestOcrInvoice == null) {
-      r.setDescription("");
       r.setOcrRawJson("");
       return;
     }
     r.setOcrRawJson(latestOcrInvoice.getOcrRawJson());
-    r.setDescription(stripSupplementaryChars(extractOcrText(latestOcrInvoice.getOcrRawJson())));
   }
 
   private String extractOcrText(String ocrRawJson) {
@@ -1076,6 +1315,38 @@ public class ReimbursementService {
       .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
+  private String classifyExpenseType(Invoice invoice) {
+    String text = String.join(" ",
+      firstNonBlank(invoice.getRemarks()),
+      firstNonBlank(invoice.getSellerName()),
+      firstNonBlank(invoice.getSellerShortName()),
+      firstNonBlank(invoice.getInvoiceContentShortName()),
+      firstNonBlank(invoice.getOcrRawJson())
+    ).toLowerCase();
+    if (containsAny(text, "保险", "保费", "财产保险")) return "insurance";
+    if (containsAny(text, "住宿", "酒店", "宾馆", "旅店")) return "hotel";
+    if (containsAny(text, "航空", "机票", "民航", "航旅")) return "air_travel";
+    if (containsAny(text, "加油", "汽油", "柴油", "石化", "石油", "油品")) return "fuel";
+    if (containsAny(text, "高速", "通行费", "过路", "etc")) return "toll";
+    if (containsAny(text, "高铁", "动车", "火车", "铁路")) return "rail";
+    if (containsAny(text, "地铁", "轨道交通")) return "metro";
+    if (containsAny(text, "网约车", "滴滴", "出行", "客运服务", "接机", "送机", "用车")) return "ride_hailing";
+    if (containsAny(text, "顺风车")) return "carpool";
+    if (containsAny(text, "货拉拉", "货运", "物流", "运输")) return "freight";
+    if (containsAny(text, "配送", "快递", "速运", "运费")) return "delivery";
+    if (containsAny(text, "停车")) return "parking";
+    if (containsAny(text, "餐", "饭店", "餐饮", "酒楼", "美食")) return "meal";
+    return "other";
+  }
+
+  private boolean containsAny(String text, String... keywords) {
+    if (text == null) return false;
+    for (String keyword : keywords) {
+      if (text.contains(keyword.toLowerCase())) return true;
+    }
+    return false;
+  }
+
   private void createTitle(Sheet sheet, Workbook workbook, String title, int firstCol, int lastCol) {
     Row row = sheet.createRow(0);
     row.setHeightInPoints(26);
@@ -1090,6 +1361,10 @@ public class ReimbursementService {
   }
 
   private void writeHeader(Sheet sheet, Workbook workbook, int rowIndex, String[] headers) {
+    writeHeader(sheet, workbook, rowIndex, List.of(headers));
+  }
+
+  private void writeHeader(Sheet sheet, Workbook workbook, int rowIndex, List<String> headers) {
     Row row = sheet.createRow(rowIndex);
     row.setHeightInPoints(24);
     CellStyle style = workbook.createCellStyle();
@@ -1099,8 +1374,8 @@ public class ReimbursementService {
     style.setAlignment(HorizontalAlignment.CENTER);
     style.setVerticalAlignment(VerticalAlignment.CENTER);
     style.setWrapText(true);
-    for (int i = 0; i < headers.length; i++) {
-      setCell(row, i, headers[i]);
+    for (int i = 0; i < headers.size(); i++) {
+      setCell(row, i, headers.get(i));
       row.getCell(i).setCellStyle(style);
     }
   }
@@ -1150,30 +1425,54 @@ public class ReimbursementService {
     return date == null ? "" : date.format(DateTimeFormatter.ofPattern("yyyy年M月d日"));
   }
 
-  private int expenseAmountColumn(String expenseType) {
-    return switch (expenseType == null ? "" : expenseType) {
-      case "fuel" -> 4;
-      case "toll" -> 5;
-      case "rail" -> 6;
-      case "metro" -> 7;
-      case "ride_hailing" -> 8;
-      case "carpool" -> 9;
-      case "freight" -> 10;
-      case "parking" -> 11;
-      case "meal" -> 12;
-      default -> -1;
-    };
+  private Map<String, String> expenseColumns(List<ReimbursementExpenseItem> items) {
+    Map<String, String> columns = new LinkedHashMap<>();
+    for (ReimbursementExpenseItem item : items) {
+      String expenseType = firstNonBlank(item.getExpenseType(), "other");
+      columns.putIfAbsent(expenseType, firstNonBlank(item.getOaExpenseName(), oaExpenseName(expenseType)));
+    }
+    return columns;
+  }
+
+  private int expenseColumnIndex(Map<String, String> expenseColumns, String expenseType) {
+    int index = 4;
+    String normalizedType = firstNonBlank(expenseType, "other");
+    for (String type : expenseColumns.keySet()) {
+      if (type.equals(normalizedType)) return index;
+      index++;
+    }
+    return -1;
+  }
+
+  private boolean isTransportExpenseType(String expenseType) {
+    return Set.of(
+      "toll",
+      "rail",
+      "metro",
+      "ride_hailing",
+      "carpool",
+      "freight",
+      "air_travel",
+      "taxi",
+      "bus",
+      "rental_car",
+      "parking"
+    ).contains(firstNonBlank(expenseType));
   }
 
   private String oaExpenseName(String expenseType) {
     return switch (expenseType == null ? "" : expenseType) {
-      case "fuel" -> "加油费";
-      case "toll" -> "高速过路费";
+      case "fuel" -> "油费金额";
+      case "toll" -> "高速费";
       case "rail" -> "高铁/动车/火车费";
+      case "air_travel" -> "机票/航空费";
+      case "hotel" -> "住宿费";
+      case "insurance" -> "保险费";
       case "metro" -> "地铁费";
       case "ride_hailing" -> "网约车费";
       case "carpool" -> "顺风车费";
-      case "freight" -> "货拉拉货运费";
+      case "freight" -> "货拉拉费";
+      case "delivery" -> "快递/配送费";
       case "parking" -> "停车费";
       case "meal" -> "餐费";
       default -> "其他";
@@ -1202,6 +1501,8 @@ public class ReimbursementService {
     }
     return "";
   }
+
+  private record TripInfo(String startPlace, String endPlace, BigDecimal kilometers) {}
 
   public record ExpenseItemRequest(
     Long id,

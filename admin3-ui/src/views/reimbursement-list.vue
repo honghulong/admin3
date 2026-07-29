@@ -80,19 +80,24 @@
         <div class="form-section form-section-compact">
           <div class="form-section-title">报销信息</div>
           <el-row :gutter="14">
-          <el-col :span="9">
+          <el-col :span="8">
             <el-form-item label="报销标题">
               <el-input v-model="form.title" placeholder="请输入报销标题"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="7">
+          <el-col :span="6">
             <el-form-item label="报销金额">
               <el-input v-model="form.amount" inputmode="decimal" placeholder="由有效发票自动汇总，可手动修正"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="5">
             <el-form-item label="有效发票数">
               <el-input v-model="form.invoiceCount" disabled placeholder="自动计算"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="5">
+            <el-form-item label="有效凭证数">
+              <el-input :model-value="validSupportCount" disabled placeholder="自动计算"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -193,10 +198,10 @@
             </el-table-column>
             <el-table-column prop="startPlace" label="起点" min-width="150" show-overflow-tooltip></el-table-column>
             <el-table-column prop="endPlace" label="终点" min-width="150" show-overflow-tooltip></el-table-column>
-            <el-table-column label="操作" min-width="430" fixed="right">
+            <el-table-column label="操作" min-width="300" fixed="right">
               <template #default="{ row, $index }">
                 <div class="invoice-actions">
-                  <el-button text size="small" type="primary" @click="editInvoice(row)">编辑发票数据</el-button>
+                  <el-button text size="small" type="primary" @click="editInvoice(row)">编辑</el-button>
                   <el-upload
                     class="invoice-support-upload"
                     :auto-upload="false"
@@ -207,6 +212,7 @@
                       <el-button text size="small" type="primary">上传凭证</el-button>
                     </template>
                   </el-upload>
+                  <el-button text size="small" type="primary" @click="openSupportLinkDialog(row)">关联凭证</el-button>
                   <el-button
                     text
                     size="small"
@@ -216,12 +222,12 @@
                     查看凭证
                   </el-button>
                   <el-button
-                    text
                     size="small"
-                    type="danger"
+                    :type="row.supportAttachment ? 'warning' : 'info'"
+                    plain
                     :disabled="!row.supportAttachment"
                     @click="removeInvoiceSupportAttachment(row)">
-                    删除凭证
+                    解除凭证
                   </el-button>
                   <el-button text size="small" type="danger" @click="removeInvoice(row, $index)">删除发票</el-button>
                 </div>
@@ -234,56 +240,114 @@
         </div>
 
         <div class="form-section">
-          <div class="form-section-title">上传发票</div>
-          <el-form-item label="发票文件">
-            <div class="upload-content">
-            <!-- 文件列表 -->
-            <div v-for="file in fileList" :key="file.id || file.uid" class="file-item">
-              <div class="file-item-header">
-                <span class="file-name" :title="file.name">{{ file.name }}</span>
-                <span class="file-size">{{ formatFileSize(file.size) }}</span>
-                <el-tag
-                  :type="file.ocrStatus === 'completed' ? 'success' : file.ocrStatus === 'failed' ? 'danger' : file.ocrStatus === 'processing' ? 'warning' : 'info'"
-                  size="small"
-                  effect="dark">
-                  <span v-if="file.ocrStatus === 'processing'" class="ocr-animation">
-                    <span class="dot-animation">正在OCR识别</span>
-                  </span>
-                  <span v-else>{{ getStatusLabel2(file.ocrStatus) }}</span>
-                </el-tag>
-                <el-popover v-if="file.ocrResult" placement="top" :width="520" trigger="hover">
-                  <template #reference>
-                    <el-button text size="small" type="primary">识别结果</el-button>
+          <div class="form-section-title">上传文件</div>
+          <el-tabs v-model="uploadTab" class="upload-tabs">
+            <el-tab-pane label="上传发票" name="invoice">
+              <div class="upload-content">
+                <div v-for="(file, index) in fileList" :key="file.id || file.uid" class="file-item">
+                  <div class="file-item-header">
+                    <span class="file-index">{{ index + 1 }}</span>
+                    <span class="file-name" :title="file.name">{{ file.name }}</span>
+                    <span class="file-size">{{ formatFileSize(file.size) }}</span>
+                    <span class="file-linked-invoice">发票号码：{{ file.linkedInvoiceNo || file.ocrInvoiceNo || '-' }}</span>
+                    <el-tag :type="file.linkedInvoiceId ? 'success' : 'info'" size="small" effect="plain">
+                      {{ file.linkedInvoiceId ? '已关联发票' : '未关联发票' }}
+                    </el-tag>
+                    <el-tag
+                      :type="file.ocrStatus === 'completed' ? 'success' : file.ocrStatus === 'failed' ? 'danger' : file.ocrStatus === 'processing' ? 'warning' : 'info'"
+                      size="small"
+                      effect="dark">
+                      <span v-if="file.ocrStatus === 'processing'" class="ocr-animation">
+                        <span class="dot-animation">正在OCR识别</span>
+                      </span>
+                      <span v-else>{{ getStatusLabel2(file.ocrStatus) }}</span>
+                    </el-tag>
+                    <el-popover v-if="file.ocrResult" placement="top" :width="520" trigger="hover">
+                      <template #reference>
+                        <el-button text size="small" type="primary">识别结果</el-button>
+                      </template>
+                      <pre class="file-ocr-popover">{{ formatOcrJson(file.ocrResult) }}</pre>
+                    </el-popover>
+                    <el-button text size="small" type="primary" @click="previewImage(file)">
+                      <el-icon><ZoomIn /></el-icon>
+                    </el-button>
+                    <el-button text size="small" type="danger" @click="handleDeleteAttachment(file)">
+                      <el-icon><Delete /></el-icon>
+                    </el-button>
+                  </div>
+                  <div v-if="file.ocrStatus === 'failed' && file.ocrResult" class="file-ocr-error">
+                    {{ getOcrError(file.ocrResult) }}
+                  </div>
+                </div>
+                <el-upload
+                  ref="uploadRef"
+                  :auto-upload="false"
+                  :on-change="(file: any) => handleFileChange(file, 'invoice')"
+                  :on-exceed="handleUploadExceed"
+                  :file-list="[]"
+                  accept=".jpg,.png,.gif,.webp,.pdf,.xml,.ofd"
+                  :limit="50"
+                  :show-file-list="false"
+                  multiple>
+                  <template #trigger>
+                    <el-button type="primary" :icon="Plus">选择发票文件</el-button>
                   </template>
-                  <pre class="file-ocr-popover">{{ formatOcrJson(file.ocrResult) }}</pre>
-                </el-popover>
-                <el-button text size="small" type="primary" @click="previewImage(file)">
-                  <el-icon><ZoomIn /></el-icon>
-                </el-button>
-                <el-button text size="small" type="danger" @click="handleDeleteAttachment(file)">
-                  <el-icon><Delete /></el-icon>
-                </el-button>
+                </el-upload>
               </div>
-              <div v-if="file.ocrStatus === 'failed' && file.ocrResult" class="file-ocr-error">
-                {{ getOcrError(file.ocrResult) }}
+            </el-tab-pane>
+            <el-tab-pane label="上传行程单" name="support">
+              <div class="upload-content">
+                <div v-for="(file, index) in supportFileList" :key="file.id || file.uid" class="file-item">
+                  <div class="file-item-header support-file-header">
+                    <span class="file-index">{{ index + 1 }}</span>
+                    <span class="file-name" :title="file.name">{{ file.name }}</span>
+                    <span class="file-size">{{ formatFileSize(file.size) }}</span>
+                    <span class="file-linked-invoice">关联发票：{{ file.linkedInvoiceNo || '-' }}</span>
+                    <el-tag :type="file.linkedInvoiceId ? 'success' : 'info'" size="small" effect="plain">
+                      {{ file.linkedInvoiceId ? '已关联发票' : '未关联发票' }}
+                    </el-tag>
+                    <el-tag
+                      :type="file.ocrStatus === 'completed' ? 'success' : file.ocrStatus === 'failed' ? 'danger' : file.ocrStatus === 'processing' ? 'warning' : 'info'"
+                      size="small"
+                      effect="dark">
+                      <span v-if="file.ocrStatus === 'processing'" class="ocr-animation">
+                        <span class="dot-animation">正在OCR识别</span>
+                      </span>
+                      <span v-else>{{ getStatusLabel2(file.ocrStatus) }}</span>
+                    </el-tag>
+                    <el-popover v-if="file.ocrResult" placement="top" :width="520" trigger="hover">
+                      <template #reference>
+                        <el-button text size="small" type="primary">识别结果</el-button>
+                      </template>
+                      <pre class="file-ocr-popover">{{ formatOcrJson(file.ocrResult) }}</pre>
+                    </el-popover>
+                    <el-button text size="small" type="primary" @click="previewImage(file)">
+                      <el-icon><ZoomIn /></el-icon>
+                    </el-button>
+                    <el-button text size="small" type="danger" @click="handleDeleteAttachment(file)">
+                      <el-icon><Delete /></el-icon>
+                    </el-button>
+                  </div>
+                  <div v-if="file.ocrStatus === 'failed' && file.ocrResult" class="file-ocr-error">
+                    {{ getOcrError(file.ocrResult) }}
+                  </div>
+                </div>
+                <el-upload
+                  :auto-upload="false"
+                  :on-change="(file: any) => handleFileChange(file, 'support')"
+                  :on-exceed="handleUploadExceed"
+                  :file-list="[]"
+                  accept=".jpg,.png,.gif,.webp,.pdf"
+                  :limit="50"
+                  :show-file-list="false"
+                  multiple>
+                  <template #trigger>
+                    <el-button type="primary" :icon="Plus">选择行程单文件</el-button>
+                  </template>
+                </el-upload>
               </div>
-            </div>
-            <!-- 上传按钮 -->
-            <el-upload
-              ref="uploadRef"
-              :auto-upload="false"
-              :on-change="handleFileChange"
-              :file-list="[]"
-              accept=".jpg,.png,.gif,.webp,.pdf,.xml,.ofd"
-              :limit="9"
-              :show-file-list="false"
-              multiple>
-              <template #trigger>
-                <el-button type="primary" :icon="Plus">选择发票文件</el-button>
-              </template>
-            </el-upload>
-            </div>
-          </el-form-item>
+            </el-tab-pane>
+          </el-tabs>
         </div>
       </el-form>
       <template #footer>
@@ -291,6 +355,61 @@
           <el-button @click="dialogVisible = false">取 消</el-button>
           <el-button @click="saveReimbursement(true)">保存不退出</el-button>
           <el-button type="primary" @click="saveReimbursement(false)">保 存</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <el-dialog title="关联凭证" v-model="supportLinkDialogVisible" width="76%" class="expense-invoice-dialog">
+      <div v-if="currentSupportInvoice" class="expense-link-content">
+        <el-form label-width="80px" class="expense-link-form">
+          <el-row :gutter="16">
+            <el-col :span="8">
+              <el-form-item label="发票号码">
+                <el-input :model-value="currentSupportInvoice.invoiceNo || '-'" disabled></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="销售方">
+                <el-input :model-value="currentSupportInvoice.sellerName || '-'" disabled></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="金额">
+                <el-input :model-value="'¥' + formatMoney(currentSupportInvoice.totalAmount)" disabled></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+        <el-table :data="supportLinkRows" border size="small" height="360" highlight-current-row @current-change="handleSupportLinkSelection">
+          <el-table-column label="文件名" min-width="260" show-overflow-tooltip>
+            <template #default="{ row }">{{ row.name }}</template>
+          </el-table-column>
+          <el-table-column label="识别状态" width="110" align="center">
+            <template #default="{ row }">
+              <el-tag
+                :type="row.ocrStatus === 'completed' ? 'success' : row.ocrStatus === 'failed' ? 'danger' : row.ocrStatus === 'processing' ? 'warning' : 'info'"
+                size="small">
+                {{ getStatusLabel2(row.ocrStatus) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="当前关联发票" min-width="220" show-overflow-tooltip>
+            <template #default="{ row }">{{ row.linkedInvoiceNo || '-' }}</template>
+          </el-table-column>
+          <el-table-column label="大小" width="100">
+            <template #default="{ row }">{{ formatFileSize(row.size) }}</template>
+          </el-table-column>
+          <el-table-column label="操作" width="100" align="center">
+            <template #default="{ row }">
+              <el-button text size="small" type="primary" @click.stop="previewImage(row)">查看</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="supportLinkDialogVisible = false">取 消</el-button>
+          <el-button type="primary" :disabled="!selectedSupportAttachment" @click="confirmSupportLink">关 联</el-button>
         </span>
       </template>
     </el-dialog>
@@ -414,29 +533,30 @@
     <!-- 详情对话框 -->
     <el-dialog title="报销详情" v-model="detailVisible" width="94%" top="2vh" class="detail-dialog reimbursement-edit-dialog">
       <div v-if="detailData" class="detail-content">
-        <div class="detail-section">
-          <div class="detail-section-title">报销信息</div>
+        <div class="form-section form-section-compact">
+          <div class="form-section-header">
+            <div class="form-section-title">报销信息</div>
+            <div class="detail-section-actions">
+              <el-button type="primary" size="small" @click="detailData && downloadElectronicInvoiceRegister(detailData.id)">下载电子发票登记表</el-button>
+              <el-button type="primary" size="small" @click="detailData && downloadExpenseDetails(detailData.id)">下载报销费用明细表</el-button>
+            </div>
+          </div>
           <el-form label-width="92px" class="detail-form">
             <el-row :gutter="14">
               <el-col :span="8"><el-form-item label="报销标题"><div class="detail-value">{{ detailData.title }}</div></el-form-item></el-col>
-              <el-col :span="5"><el-form-item label="报销金额"><div class="detail-value detail-amount">¥{{ detailData.amount.toFixed(2) }}</div></el-form-item></el-col>
+              <el-col :span="6"><el-form-item label="报销金额"><div class="detail-value detail-amount">¥{{ detailData.amount.toFixed(2) }}</div></el-form-item></el-col>
               <el-col :span="5"><el-form-item label="有效发票数"><div class="detail-value">{{ detailData.invoiceCount || 0 }}</div></el-form-item></el-col>
-              <el-col :span="6"><el-form-item label="当前状态"><div class="detail-value"><el-tag :type="getStatusType(detailData.status)">{{ getStatusLabel(detailData.status) }}</el-tag></div></el-form-item></el-col>
+              <el-col :span="5"><el-form-item label="有效凭证数"><div class="detail-value">{{ detailValidSupportCount }}</div></el-form-item></el-col>
               <el-col :span="24"><el-form-item label="报销事项"><div class="detail-value detail-value-multiline">{{ detailData.matterDescription || '无' }}</div></el-form-item></el-col>
               <el-col :span="8"><el-form-item label="申请人"><div class="detail-value">{{ detailData.applicantName }}</div></el-form-item></el-col>
               <el-col :span="8"><el-form-item label="创建时间"><div class="detail-value">{{ detailData.createdAt }}</div></el-form-item></el-col>
-              <el-col :span="24">
-                <el-form-item label="OA表格">
-                  <el-button type="primary" size="small" @click="detailData && downloadElectronicInvoiceRegister(detailData.id)">下载电子发票登记表</el-button>
-                  <el-button type="primary" size="small" @click="detailData && downloadExpenseDetails(detailData.id)">下载报销费用明细表</el-button>
-                </el-form-item>
-              </el-col>
+              <el-col :span="8"><el-form-item label="当前状态"><div class="detail-value"><el-tag :type="getStatusType(detailData.status)">{{ getStatusLabel(detailData.status) }}</el-tag></div></el-form-item></el-col>
             </el-row>
           </el-form>
         </div>
 
-        <div class="detail-section">
-          <div class="detail-section-title">费用明细</div>
+        <div class="form-section">
+          <div class="form-section-title">费用明细</div>
           <el-table v-if="detailData.expenseItems && detailData.expenseItems.length > 0" :data="detailData.expenseItems" border size="small" style="width: 100%">
             <el-table-column type="expand" width="45">
               <template #default="{ row }">
@@ -471,8 +591,8 @@
           <div v-else class="detail-empty">暂无费用明细</div>
         </div>
 
-        <div class="detail-section">
-          <div class="detail-section-title">发票列表</div>
+        <div class="form-section">
+          <div class="form-section-title">发票列表</div>
           <el-table v-if="detailData.invoices && detailData.invoices.length > 0" :data="detailData.invoices" border size="small" style="width: 100%">
             <el-table-column type="expand">
               <template #default="{ row }">
@@ -513,25 +633,49 @@
           <div v-else class="detail-empty">暂无发票</div>
         </div>
 
-        <div class="detail-section">
-          <div class="detail-section-title">附件</div>
-          <div v-if="detailInvoiceAttachments(detailData.attachments || [], detailData.invoices || []).length > 0" class="detail-attachment-list">
-            <div v-for="att in detailInvoiceAttachments(detailData.attachments || [], detailData.invoices || [])" :key="att.id" class="detail-attachment-item">
-              <span class="detail-attachment-name" :title="att.fileName">{{ att.fileName }}</span>
-              <el-tag v-if="att.ocrStatus === 'pending'" size="small" type="info">待识别</el-tag>
-              <el-tag v-else-if="att.ocrStatus === 'processing'" size="small" type="warning">识别中</el-tag>
-              <el-tag v-else-if="att.ocrStatus === 'completed'" size="small" type="success">已识别</el-tag>
-              <el-tag v-else-if="att.ocrStatus === 'failed'" size="small" type="danger">识别失败</el-tag>
-              <el-button text size="small" type="primary" @click="previewAttachment(att)">
-                <el-icon><ZoomIn /></el-icon>
-              </el-button>
-            </div>
-          </div>
-          <div v-else class="detail-empty">暂无附件</div>
+        <div class="form-section">
+          <div class="form-section-title">附件</div>
+          <el-tabs class="detail-attachment-tabs">
+            <el-tab-pane label="发票附件">
+              <div v-if="detailInvoiceAttachments(detailData.attachments || [], detailData.invoices || []).length > 0" class="detail-attachment-list">
+                <div v-for="att in detailInvoiceAttachments(detailData.attachments || [], detailData.invoices || [])" :key="att.id" class="detail-attachment-item">
+                  <span class="detail-attachment-name" :title="att.fileName">{{ att.fileName }}</span>
+                  <span class="detail-attachment-invoice">发票号码：{{ att.linkedInvoiceNo || extractOcrInvoiceNo(att.ocrResult) || '-' }}</span>
+                  <el-tag v-if="att.ocrStatus === 'pending'" size="small" type="info">待识别</el-tag>
+                  <el-tag v-else-if="att.ocrStatus === 'processing'" size="small" type="warning">识别中</el-tag>
+                  <el-tag v-else-if="att.ocrStatus === 'completed'" size="small" type="success">已识别</el-tag>
+                  <el-tag v-else-if="att.ocrStatus === 'failed'" size="small" type="danger">识别失败</el-tag>
+                  <el-button text size="small" type="primary" @click="previewAttachment(att)">
+                    <el-icon><ZoomIn /></el-icon>
+                  </el-button>
+                </div>
+              </div>
+              <div v-else class="detail-empty">暂无发票附件</div>
+            </el-tab-pane>
+            <el-tab-pane label="行程单">
+              <div v-if="detailSupportAttachments(detailData.attachments || [], detailData.invoices || []).length > 0" class="detail-attachment-list">
+                <div v-for="att in detailSupportAttachments(detailData.attachments || [], detailData.invoices || [])" :key="att.id" class="detail-attachment-item">
+                  <span class="detail-attachment-name" :title="att.fileName">{{ att.fileName }}</span>
+                  <span class="detail-attachment-invoice">关联发票：{{ att.linkedInvoiceNo || '-' }}</span>
+                  <el-tag :type="att.linkedInvoiceId ? 'success' : 'info'" size="small" effect="plain">
+                    {{ att.linkedInvoiceId ? '已关联发票' : '未关联发票' }}
+                  </el-tag>
+                  <el-tag v-if="att.ocrStatus === 'pending'" size="small" type="info">待识别</el-tag>
+                  <el-tag v-else-if="att.ocrStatus === 'processing'" size="small" type="warning">识别中</el-tag>
+                  <el-tag v-else-if="att.ocrStatus === 'completed'" size="small" type="success">已识别</el-tag>
+                  <el-tag v-else-if="att.ocrStatus === 'failed'" size="small" type="danger">识别失败</el-tag>
+                  <el-button text size="small" type="primary" @click="previewAttachment(att)">
+                    <el-icon><ZoomIn /></el-icon>
+                  </el-button>
+                </div>
+              </div>
+              <div v-else class="detail-empty">暂无行程单</div>
+            </el-tab-pane>
+          </el-tabs>
         </div>
 
-        <div class="detail-section">
-          <div class="detail-section-title">审批日志</div>
+        <div class="form-section">
+          <div class="form-section-title">审批日志</div>
           <el-timeline v-if="detailData.approvalLogs && detailData.approvalLogs.length > 0" class="detail-timeline">
             <el-timeline-item
               v-for="log in detailData.approvalLogs"
@@ -588,12 +732,16 @@ import {
   deleteAttachment,
   deleteInvoice,
   uploadInvoiceSupportAttachment,
+  uploadSupportAttachment,
+  linkInvoiceSupportAttachment,
   deleteInvoiceSupportAttachment,
   saveExpenseItems,
+  regroupExpenseItems,
   exportElectronicInvoiceRegister,
   exportExpenseDetails,
   exportOaPackage
 } from "../api/reimbursement";
+import {getDictValuesByCode} from "../api/dict";
 
 interface TableItem {
   id: number;
@@ -648,6 +796,8 @@ const detailData = ref<DetailData | null>(null);
 const rejectComment = ref('');
 const rejectId = ref<number | null>(null);
 const fileList = ref<any[]>([]);
+const supportFileList = ref<any[]>([]);
+const uploadTab = ref('invoice');
 const uploadedAttachmentIds = ref<number[]>([]);
 const selectedRows = ref<TableItem[]>([]);
 
@@ -695,6 +845,9 @@ const expenseInvoiceDialogVisible = ref(false);
 const currentExpenseIndex = ref(-1);
 const selectedLinkedInvoices = ref<any[]>([]);
 const selectedAvailableInvoices = ref<any[]>([]);
+const supportLinkDialogVisible = ref(false);
+const currentSupportInvoice = ref<any | null>(null);
+const selectedSupportAttachment = ref<any | null>(null);
 const invoiceEditVisible = ref(false);
 const editingInvoiceIndex = ref(-1);
 const invoiceEditForm = reactive({
@@ -746,18 +899,35 @@ const logActionMap: Record<string, string> = {
   recall: '撤回申请'
 };
 
-const expenseTypeOptions = [
-  {label: '加油费', value: 'fuel'},
-  {label: '高速过路费', value: 'toll'},
+const defaultExpenseTypeOptions = [
+  {label: '油费金额', value: 'fuel'},
+  {label: '高速费', value: 'toll'},
   {label: '高铁/动车/火车费', value: 'rail'},
   {label: '地铁费', value: 'metro'},
   {label: '网约车费', value: 'ride_hailing'},
   {label: '顺风车费', value: 'carpool'},
-  {label: '货拉拉货运费', value: 'freight'},
+  {label: '货拉拉费', value: 'freight'},
   {label: '停车费', value: 'parking'},
   {label: '餐费', value: 'meal'},
+  {label: '机票/航空费', value: 'air_travel'},
+  {label: '住宿费', value: 'hotel'},
+  {label: '保险费', value: 'insurance'},
+  {label: '出租车费', value: 'taxi'},
+  {label: '公交/客运费', value: 'bus'},
+  {label: '租车费', value: 'rental_car'},
+  {label: '车辆维修保养', value: 'vehicle_maintenance'},
+  {label: '充电费', value: 'charging'},
+  {label: '快递/配送费', value: 'delivery'},
+  {label: '办公用品', value: 'office'},
+  {label: '通讯费', value: 'communication'},
+  {label: '会议/会务费', value: 'conference'},
+  {label: '培训费', value: 'training'},
+  {label: '专业服务费', value: 'service'},
+  {label: '招待费', value: 'entertainment'},
+  {label: '物料/低值易耗品', value: 'supplies'},
   {label: '其他', value: 'other'}
 ];
+const expenseTypeOptions = ref([...defaultExpenseTypeOptions]);
 
 function getStatusLabel(status: string) {
   return statusMap[status] || status;
@@ -776,7 +946,19 @@ function getLogActionLabel(action: string) {
 }
 
 function getExpenseTypeLabel(type: string) {
-  return expenseTypeOptions.find(item => item.value === type)?.label || type || '-';
+  return expenseTypeOptions.value.find(item => item.value === type)?.label || type || '-';
+}
+
+async function loadExpenseTypeDict() {
+  try {
+    const res = await getDictValuesByCode('reimbursement_expense_type');
+    const values = (res.data || [])
+      .map((item: any) => ({label: item.label, value: item.value}))
+      .filter((item: any) => item.label && item.value);
+    if (values.length > 0) expenseTypeOptions.value = values;
+  } catch (e) {
+    expenseTypeOptions.value = [...defaultExpenseTypeOptions];
+  }
 }
 
 function getLogType(action: string) {
@@ -802,28 +984,66 @@ function supportAttachmentIds(invoices: any[]) {
 }
 
 function invoiceAttachmentIds(attachments: any[], invoices: any[]) {
+  return (attachments || []).filter((a: any) => attachmentRole(a, invoices) !== 'support').map((a: any) => a.id);
+}
+
+function attachmentRole(attachment: any, invoices: any[] = []) {
+  if (attachment.attachmentRole) return attachment.attachmentRole;
   const supportIds = supportAttachmentIds(invoices);
-  return (attachments || []).filter((a: any) => !supportIds.has(a.id)).map((a: any) => a.id);
+  if (supportIds.has(attachment.id)) return 'support';
+  return 'invoice';
 }
 
 function mapInvoiceAttachmentFiles(attachments: any[], invoices: any[] = []) {
-  const supportIds = supportAttachmentIds(invoices);
   return (attachments || [])
-    .filter((a: any) => !supportIds.has(a.id))
-    .map((a: any) => ({
-      name: a.fileName,
-      url: '/admin3' + a.fileUrl,
-      id: a.id,
-      size: a.fileSize,
-      ocrStatus: a.ocrStatus,
-      ocrResult: a.ocrResult || '',
-      showOcrJson: false
-    }));
+    .filter((a: any) => attachmentRole(a, invoices) !== 'support')
+    .map(mapAttachmentFile);
+}
+
+function mapSupportAttachmentFiles(attachments: any[], invoices: any[] = []) {
+  return (attachments || [])
+    .filter((a: any) => attachmentRole(a, invoices) === 'support')
+    .map(mapAttachmentFile);
+}
+
+function mapAttachmentFile(a: any) {
+  return {
+    name: a.fileName,
+    url: '/admin3' + a.fileUrl,
+    id: a.id,
+    size: a.fileSize,
+    ocrStatus: a.ocrStatus,
+    ocrResult: a.ocrResult || '',
+    linkedInvoiceId: a.linkedInvoiceId || null,
+    linkedInvoiceNo: a.linkedInvoiceNo || '',
+    ocrInvoiceNo: extractOcrInvoiceNo(a.ocrResult),
+    attachmentRole: a.attachmentRole || null,
+    showOcrJson: false
+  };
+}
+
+function extractOcrInvoiceNo(ocrResult: string) {
+  if (!ocrResult) return '';
+  try {
+    const result = JSON.parse(ocrResult);
+    return result?.invoice_fields?.invoice_no || '';
+  } catch {
+    return '';
+  }
+}
+
+function syncAttachmentLists(attachments: any[] = [], invoices: any[] = []) {
+  fileList.value = mapInvoiceAttachmentFiles(attachments, invoices);
+  supportFileList.value = mapSupportAttachmentFiles(attachments, invoices);
+  uploadedAttachmentIds.value = invoiceAttachmentIds(attachments, invoices);
 }
 
 function detailInvoiceAttachments(attachments: any[], invoices: any[] = []) {
-  const supportIds = supportAttachmentIds(invoices);
-  return (attachments || []).filter((a: any) => !supportIds.has(a.id));
+  return (attachments || []).filter((a: any) => attachmentRole(a, invoices) !== 'support');
+}
+
+function detailSupportAttachments(attachments: any[], invoices: any[] = []) {
+  return (attachments || []).filter((a: any) => attachmentRole(a, invoices) === 'support');
 }
 
 function formatFileSize(bytes: number) {
@@ -917,6 +1137,7 @@ async function handleAdd() {
   invoiceList.value = [];
   expenseItemList.value = [];
   fileList.value = [];
+  supportFileList.value = [];
   uploadedAttachmentIds.value = [];
   dialogVisible.value = true;
   // 自动创建一个草稿报销单，这样上传附件时就有 reimbursementId
@@ -971,10 +1192,10 @@ async function handleEdit(row: TableItem) {
   form.sellerBankInfo = data.sellerBankInfo || '';
   form.remarks = data.remarks || '';
   fileList.value = [];
+  supportFileList.value = [];
   uploadedAttachmentIds.value = [];
   if (data.attachments) {
-    fileList.value = mapInvoiceAttachmentFiles(data.attachments, data.invoices || []);
-    uploadedAttachmentIds.value = invoiceAttachmentIds(data.attachments, data.invoices || []);
+    syncAttachmentLists(data.attachments, data.invoices || []);
   }
   invoiceList.value = data.invoices || [];
   expenseItemList.value = (data.expenseItems || []).map(normalizeExpenseItemForEdit);
@@ -982,40 +1203,44 @@ async function handleEdit(row: TableItem) {
   dialogVisible.value = true;
 }
 
-async function handleFileChange(uploadFile: any) {
+async function handleFileChange(uploadFile: any, uploadType: 'invoice' | 'support' = 'invoice') {
   const reimbursementId = editId.value;
   if (!reimbursementId) {
     ElMessage.warning('请先保存报销单再上传附件');
     return;
   }
   const fileName = uploadFile.raw?.name || uploadFile.name || '';
-  if (fileName && fileList.value.some((file: any) => file.name === fileName)) {
-    ElMessage.warning('该发票文件已上传，请勿重复上传');
+  const targetList = uploadType === 'support' ? supportFileList.value : fileList.value;
+  if (fileName && targetList.some((file: any) => file.name === fileName)) {
+    ElMessage.warning(uploadType === 'support' ? '该行程单文件已上传，请勿重复上传' : '该发票文件已上传，请勿重复上传');
     return;
   }
   try {
     console.log('Uploading file:', uploadFile.raw.name, 'reimbursementId:', reimbursementId);
-    const res = await uploadAttachment(uploadFile.raw, reimbursementId);
+    const res = uploadType === 'support'
+      ? await uploadSupportAttachment(reimbursementId, uploadFile.raw)
+      : await uploadAttachment(uploadFile.raw, reimbursementId);
     const att = res.data;
     console.log('Upload success, attachment:', att);
-    uploadedAttachmentIds.value.push(att.id);
-    // 更新 fileList 显示文件列表
-    fileList.value.push({
-      name: att.fileName,
-      url: '/admin3' + att.fileUrl,
-      id: att.id,
-      size: att.fileSize,
-      ocrStatus: att.ocrStatus || 'pending',
-      ocrResult: att.ocrResult || '',
-      showOcrJson: false
-    });
-    ElMessage.success('上传成功，正在识别中...');
+    if (res.data?.attachments) {
+      invoiceList.value = res.data.invoices || invoiceList.value;
+      expenseItemList.value = res.data.expenseItems ? res.data.expenseItems.map(normalizeExpenseItemForEdit) : expenseItemList.value;
+      syncAttachmentLists(res.data.attachments || [], res.data.invoices || []);
+    } else {
+      uploadedAttachmentIds.value.push(att.id);
+      targetList.push(mapAttachmentFile(att));
+    }
+    ElMessage.success(uploadType === 'support' ? '行程单上传成功，正在识别并尝试关联发票...' : '上传成功，正在识别中...');
     // 启动 OCR 轮询
     startOcrPolling();
   } catch (e: any) {
     console.error('Upload failed:', e);
     ElMessage.error('上传失败: ' + (e.message || ''));
   }
+}
+
+function handleUploadExceed() {
+  ElMessage.warning('一次最多选择 50 个文件，请分批上传');
 }
 
 /** OCR 轮询定时器 */
@@ -1039,20 +1264,10 @@ function startOcrPolling() {
       if (data.ocrRawJson) {
         form.ocrRawJson = data.ocrRawJson;
       }
-      if (data.description) {
-        form.description = data.description;
-      }
       invoiceList.value = data.invoices || invoiceList.value;
       expenseItemList.value = data.expenseItems ? data.expenseItems.map(normalizeExpenseItemForEdit) : expenseItemList.value;
+      syncAttachmentLists(attachments, data.invoices || []);
       syncReimbursementSummary();
-      // 更新 fileList 中的 OCR 状态
-      for (const att of attachments) {
-        const item = fileList.value.find(f => f.id === att.id);
-        if (item) {
-          item.ocrStatus = att.ocrStatus;
-          item.ocrResult = att.ocrResult || '';
-        }
-      }
       // 检查是否所有附件都已完成
       const pending = attachments.filter((a: any) => a.ocrStatus === 'pending' || a.ocrStatus === 'processing');
       if (pending.length === 0) {
@@ -1070,7 +1285,7 @@ function startOcrPolling() {
         if (failed.length > 0) {
           ElMessage.warning(`有 ${failed.length} 个附件识别失败，请查看详情`);
         } else {
-          ElMessage.success('发票识别完成，已自动填充字段');
+          await autoRegroupExpenseItems('发票识别完成，已自动归集费用明细');
         }
       }
     } catch (e) {
@@ -1157,22 +1372,6 @@ function handleOcrSuccess(att: any) {
     if (fields.buyerTaxId) form.buyerTaxId = fields.buyerTaxId;
     if (fields.sellerTaxId) form.sellerTaxId = fields.sellerTaxId;
     if (fields.invoiceType) form.invoiceType = fields.invoiceType;
-    // 更新说明（补全所有匹配到的字段）
-    const descParts: string[] = [];
-    if (fields.invoiceNo) descParts.push(`发票号码: ${fields.invoiceNo}`);
-    if (fields.invoiceCode) descParts.push(`发票代码: ${fields.invoiceCode}`);
-    if (fields.invoiceDate) descParts.push(`开票日期: ${fields.invoiceDate.substring(0, 10)}`);
-    if (fields.buyerName) descParts.push(`购买方: ${fields.buyerName}`);
-    if (fields.sellerName) descParts.push(`销售方: ${fields.sellerName}`);
-    if (fields.buyerTaxId) descParts.push(`购买方税号: ${fields.buyerTaxId}`);
-    if (fields.sellerTaxId) descParts.push(`销售方税号: ${fields.sellerTaxId}`);
-    if (fields.invoiceType) descParts.push(`发票类型: ${fields.invoiceType}`);
-    if (fields.amount) descParts.push(`金额: ¥${fields.amount}`);
-    if (ocrText) {
-      form.description = ocrText;
-    } else if (descParts.length > 0) {
-      form.description = descParts.join('\n');
-    }
     // 更新 OCR 原始 JSON（取最后一次有效识别的完整结果）
     form.ocrRawJson = att.ocrResult;
     // 更新 OCR 识别文本（可读的纯文本内容）
@@ -1247,15 +1446,11 @@ async function saveReimbursement(stayOpen = false) {
   try {
     if (editId.value) {
       await updateReimbursement(editId.value, data);
-      const expenseRes = await saveExpenseItems(editId.value, normalizeExpenseItems());
-      applyReimbursementDetailToEditor(expenseRes.data);
       ElMessage.success('保存成功');
     } else {
       const res = await createReimbursement(data);
       editId.value = res.data.id;
       isEdit.value = true;
-      const expenseRes = await saveExpenseItems(editId.value!, normalizeExpenseItems());
-      applyReimbursementDetailToEditor(expenseRes.data);
       ElMessage.success('创建成功');
     }
 
@@ -1268,6 +1463,8 @@ async function saveReimbursement(stayOpen = false) {
     if (uploadedAttachmentIds.value.length > 0) {
       await pollOcrResults();
     }
+    const expenseRes = await saveExpenseItems(editId.value!, normalizeExpenseItems());
+    applyReimbursementDetailToEditor(expenseRes.data);
 
     dialogVisible.value = stayOpen;
     loadData();
@@ -1290,20 +1487,10 @@ async function pollOcrResults() {
     if (data.ocrRawJson) {
       form.ocrRawJson = data.ocrRawJson;
     }
-    if (data.description) {
-      form.description = data.description;
-    }
     invoiceList.value = data.invoices || invoiceList.value;
     expenseItemList.value = data.expenseItems ? data.expenseItems.map(normalizeExpenseItemForEdit) : expenseItemList.value;
+    syncAttachmentLists(attachments, data.invoices || []);
     syncReimbursementSummary();
-    // 更新 fileList 中的 OCR 状态
-    for (const att of attachments) {
-      const item = fileList.value.find(f => f.id === att.id);
-      if (item) {
-        item.ocrStatus = att.ocrStatus;
-        item.ocrResult = att.ocrResult || '';
-      }
-    }
     const pending = attachments.filter((a: any) => a.ocrStatus === 'pending' || a.ocrStatus === 'processing');
     if (pending.length === 0) {
       // 所有附件 OCR 完成
@@ -1316,7 +1503,7 @@ async function pollOcrResults() {
       if (failed.length > 0) {
         ElMessage.warning(`有 ${failed.length} 个附件识别失败`);
       } else {
-        ElMessage.success('所有附件识别完成');
+        await autoRegroupExpenseItems('所有附件识别完成，已自动归集费用明细');
       }
       return;
     }
@@ -1329,6 +1516,13 @@ async function pollOcrResults() {
 function formatMoney(value: any): string {
   const num = Number(value || 0);
   return Number.isFinite(num) ? num.toFixed(2) : '0.00';
+}
+
+async function autoRegroupExpenseItems(successMessage: string) {
+  if (!editId.value) return;
+  const res = await regroupExpenseItems(editId.value);
+  applyReimbursementDetailToEditor(res.data);
+  ElMessage.success(successMessage);
 }
 
 function compactInvoiceNo(invoiceNo: string): string {
@@ -1391,6 +1585,21 @@ const availableInvoiceRows = computed(() => {
     .filter(invoice => !invoice.expenseItemId || (item?.id && invoice.expenseItemId === item.id) || currentIds.has(invoice.id) || !usedByOtherItems.has(invoice.id))
     .filter(invoice => !currentIds.has(invoice.id));
 });
+
+const supportLinkRows = computed(() => {
+  const invoiceId = currentSupportInvoice.value?.id;
+  return supportFileList.value.filter(file => !file.linkedInvoiceId || file.linkedInvoiceId === invoiceId);
+});
+
+const validSupportCount = computed(() => countValidSupportAttachments(invoiceList.value));
+
+const detailValidSupportCount = computed(() => countValidSupportAttachments(detailData.value?.invoices || []));
+
+function countValidSupportAttachments(invoices: any[] = []) {
+  return new Set((invoices || [])
+    .map((invoice: any) => invoice.supportAttachmentId)
+    .filter(Boolean)).size;
+}
 
 function invoicesByExpenseItem(invoices: any[], expenseItemId: number) {
   return invoices.filter(invoice => invoice.expenseItemId === expenseItemId);
@@ -1552,15 +1761,15 @@ function normalizeExpenseItems() {
     invoiceId: null,
     invoiceIds: item.invoiceIds || [],
     expenseDate: item.expenseDate || null,
-    startPlace: null,
-    endPlace: null,
+    startPlace: item.startPlace || null,
+    endPlace: item.endPlace || null,
     kilometers: item.kilometers === '' || item.kilometers == null ? null : Number(item.kilometers),
     expenseType: item.expenseType || 'other',
     amount: item.invoiceIds && item.invoiceIds.length > 0 ? Number(expenseInvoiceTotal(item)) : (item.amount === '' || item.amount == null ? 0 : Number(item.amount)),
     projectCostCategory: item.projectCostCategory || null,
     customerName: item.customerName || null,
-    remark: item.remark || null,
-    description: item.description || null,
+    remark: item.source === 'ocr' || (item.invoiceIds && item.invoiceIds.length > 0) ? null : (item.remark || null),
+    description: item.source === 'ocr' || (item.invoiceIds && item.invoiceIds.length > 0) ? null : (item.description || null),
     source: item.source || 'manual'
   }));
 }
@@ -1623,8 +1832,7 @@ async function removeInvoice(row: any, index: number) {
     if (row.id && editId.value) {
       const res = await deleteInvoice(editId.value, row.id);
       invoiceList.value = res.data.invoices || [];
-      fileList.value = mapInvoiceAttachmentFiles(res.data.attachments || [], res.data.invoices || []);
-      uploadedAttachmentIds.value = invoiceAttachmentIds(res.data.attachments || [], res.data.invoices || []);
+      syncAttachmentLists(res.data.attachments || [], res.data.invoices || []);
       expenseItemList.value = (res.data.expenseItems || []).map(normalizeExpenseItemForEdit);
       form.invoiceCount = res.data.invoiceCount || 0;
       form.amount = res.data.amount || form.amount;
@@ -1651,12 +1859,40 @@ async function handleInvoiceSupportFileChange(row: any, uploadFile: any) {
   try {
     const res = await uploadInvoiceSupportAttachment(editId.value, row.id, uploadFile.raw);
     invoiceList.value = res.data.invoices || invoiceList.value;
-    fileList.value = mapInvoiceAttachmentFiles(res.data.attachments || [], res.data.invoices || []);
-    uploadedAttachmentIds.value = invoiceAttachmentIds(res.data.attachments || [], res.data.invoices || []);
+    syncAttachmentLists(res.data.attachments || [], res.data.invoices || []);
     ElMessage.success('凭证文件上传成功，正在识别行程信息...');
     await waitInvoiceSupportOcr(row.id);
   } catch (e: any) {
     ElMessage.error('凭证文件上传失败: ' + (e.message || ''));
+  }
+}
+
+function openSupportLinkDialog(row: any) {
+  currentSupportInvoice.value = row;
+  selectedSupportAttachment.value = null;
+  supportLinkDialogVisible.value = true;
+}
+
+function handleSupportLinkSelection(row: any) {
+  selectedSupportAttachment.value = row || null;
+}
+
+async function confirmSupportLink() {
+  if (!editId.value || !currentSupportInvoice.value?.id || !selectedSupportAttachment.value?.id) return;
+  try {
+    const res = await linkInvoiceSupportAttachment(
+      editId.value,
+      currentSupportInvoice.value.id,
+      selectedSupportAttachment.value.id
+    );
+    invoiceList.value = res.data.invoices || invoiceList.value;
+    expenseItemList.value = res.data.expenseItems ? res.data.expenseItems.map(normalizeExpenseItemForEdit) : expenseItemList.value;
+    syncAttachmentLists(res.data.attachments || [], res.data.invoices || []);
+    syncReimbursementSummary();
+    supportLinkDialogVisible.value = false;
+    ElMessage.success('凭证已关联');
+  } catch (e: any) {
+    ElMessage.error('凭证关联失败: ' + (e.message || ''));
   }
 }
 
@@ -1673,8 +1909,7 @@ async function waitInvoiceSupportOcr(invoiceId: number) {
     const data = res.data;
     invoiceList.value = data.invoices || invoiceList.value;
     expenseItemList.value = data.expenseItems ? data.expenseItems.map(normalizeExpenseItemForEdit) : expenseItemList.value;
-    fileList.value = mapInvoiceAttachmentFiles(data.attachments || [], data.invoices || []);
-    uploadedAttachmentIds.value = invoiceAttachmentIds(data.attachments || [], data.invoices || []);
+    syncAttachmentLists(data.attachments || [], data.invoices || []);
     const invoice = (data.invoices || []).find((item: any) => item.id === invoiceId);
     const status = invoice?.supportAttachment?.ocrStatus;
     if (status === 'completed') {
@@ -1692,14 +1927,13 @@ async function waitInvoiceSupportOcr(invoiceId: number) {
 async function removeInvoiceSupportAttachment(row: any) {
   if (!editId.value || !row.id) return;
   try {
-    await ElMessageBox.confirm('确认删除该发票的凭证文件？', '提示', {type: 'warning'});
+    await ElMessageBox.confirm('确认解除该发票与凭证的关联？凭证文件不会删除。', '提示', {type: 'warning'});
     const res = await deleteInvoiceSupportAttachment(editId.value, row.id);
     invoiceList.value = res.data.invoices || invoiceList.value;
-    fileList.value = mapInvoiceAttachmentFiles(res.data.attachments || [], res.data.invoices || []);
-    uploadedAttachmentIds.value = invoiceAttachmentIds(res.data.attachments || [], res.data.invoices || []);
-    ElMessage.success('凭证文件已删除');
+    syncAttachmentLists(res.data.attachments || [], res.data.invoices || []);
+    ElMessage.success('凭证关联已解除');
   } catch (e) {
-    if (e !== 'cancel') ElMessage.error('凭证文件删除失败');
+    if (e !== 'cancel') ElMessage.error('凭证关联解除失败');
   }
 }
 
@@ -1788,12 +2022,17 @@ function previewAttachment(att: any) {
 
 async function handleDeleteAttachment(att: any) {
   try {
+    if (att.attachmentRole === 'support' && att.linkedInvoiceId) {
+      ElMessage.warning('该行程单已关联发票，请先在发票列表解除凭证关联');
+      return;
+    }
     await ElMessageBox.confirm('确认删除该附件？', '提示', {type: 'warning'});
     console.log('Deleting attachment:', att.id, att.name);
     await deleteAttachment(att.id);
     ElMessage.success('删除成功');
     // 从 fileList 中移除
     fileList.value = fileList.value.filter(f => f.id !== att.id);
+    supportFileList.value = supportFileList.value.filter(f => f.id !== att.id);
     uploadedAttachmentIds.value = uploadedAttachmentIds.value.filter(id => id !== att.id);
     // 如果详情对话框打开，刷新详情
     if (detailData.value) {
@@ -1808,6 +2047,7 @@ async function handleDeleteAttachment(att: any) {
   }
 }
 
+loadExpenseTypeDict();
 loadData();
 </script>
 
@@ -1853,6 +2093,32 @@ loadData();
   align-items: center;
   gap: 8px;
 }
+.support-file-header {
+  display: grid;
+  grid-template-columns: 28px minmax(260px, 1fr) 72px 300px 90px 84px 82px 32px 32px;
+  gap: 8px;
+  align-items: center;
+  min-width: 980px;
+}
+.support-file-header .file-size {
+  text-align: right;
+}
+.support-file-header .file-linked-invoice,
+.support-file-header .file-name {
+  min-width: 0;
+}
+.support-file-header .file-linked-invoice {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.support-file-header :deep(.el-tag),
+.support-file-header :deep(.el-button) {
+  justify-self: start;
+}
+.support-file-header :deep(.el-button) {
+  margin-left: 0;
+}
 .file-name {
   flex: 0 1 560px;
   min-width: 360px;
@@ -1866,6 +2132,10 @@ loadData();
   color: #999;
   font-size: 12px;
   white-space: nowrap;
+}
+.support-file-header .file-name {
+  min-width: 0;
+  max-width: none;
 }
 .file-ocr-popover {
   margin: 0;
@@ -1926,6 +2196,13 @@ loadData();
 .form-section-header .form-section-title {
   margin-bottom: 0;
 }
+.detail-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
 .edit-form :deep(.el-form-item) {
   margin-bottom: 6px;
 }
@@ -1960,6 +2237,7 @@ loadData();
 }
 .upload-content {
   width: 100%;
+  overflow-x: auto;
 }
 .detail-form :deep(.el-form-item) {
   margin-bottom: 6px;
@@ -1971,7 +2249,7 @@ loadData();
   width: 100%;
   min-height: 28px;
   box-sizing: border-box;
-  padding: 4px 11px;
+  padding: 3px 11px;
   color: #303133;
   line-height: 20px;
   background: #fff;
@@ -1988,27 +2266,54 @@ loadData();
   font-weight: 600;
 }
 .detail-attachment-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  padding-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
 }
 .detail-attachment-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 300px 96px 84px 32px;
   align-items: center;
   gap: 8px;
   min-width: 0;
-  padding: 8px 10px;
+  padding: 6px 10px;
   background: #fff;
   border: 1px solid #e4e7ed;
   border-radius: 4px;
 }
 .detail-attachment-name {
-  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 13px;
+}
+.detail-attachment-invoice {
+  min-width: 0;
+  overflow: hidden;
+  color: #606266;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.detail-attachment-tabs :deep(.el-tabs__header) {
+  margin-bottom: 8px;
+}
+.detail-attachment-tabs :deep(.el-button) {
+  margin-left: 0;
+}
+.file-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 22px;
+  flex: 0 0 24px;
+  color: #606266;
+  background: #f5f7fa;
+  border-radius: 4px;
+  font-size: 12px;
 }
 .detail-empty {
   padding: 12px 0;
@@ -2025,10 +2330,10 @@ loadData();
   vertical-align: middle;
 }
 .invoice-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
   align-items: center;
-  gap: 8px;
-  white-space: nowrap;
+  gap: 6px 8px;
 }
 .invoice-actions :deep(.el-button) {
   margin-left: 0;

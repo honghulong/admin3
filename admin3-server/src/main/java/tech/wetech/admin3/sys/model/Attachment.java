@@ -22,6 +22,9 @@ public class Attachment extends BaseEntity {
   @Column(nullable = false, length = 500)
   private String fileUrl;
 
+  @Column(length = 20)
+  private String attachmentRole;
+
   @Column(nullable = false)
   private Long uploadedBy;
 
@@ -79,6 +82,14 @@ public class Attachment extends BaseEntity {
 
   public void setFileUrl(String fileUrl) {
     this.fileUrl = fileUrl;
+  }
+
+  public String getAttachmentRole() {
+    return attachmentRole;
+  }
+
+  public void setAttachmentRole(String attachmentRole) {
+    this.attachmentRole = attachmentRole;
   }
 
   public Long getUploadedBy() {

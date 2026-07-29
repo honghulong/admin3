@@ -21,6 +21,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -76,6 +77,82 @@ class OcrServiceTest {
   }
 
   @Test
+  void extractTripPlacesReadsQunarCarTripTable() throws Exception {
+    Object places = extractTripPlaces("""
+      去哪儿旅行
+      用车行程单
+      TRIP TABLE
+      申请日期：2026-07-22
+      行程日期：2026-07-22至2026-07-22
+      行程总计：共1个行程，合计53.00元
+      序号
+      订单类型
+      城市
+      用车时间
+      起点
+      终点
+      金额
+      1
+      接机/站北京
+      2026-07-2211:30:00
+      首都国际机场T2
+      中华人民共和国最高人民检察院-东门
+      53.00
+      """);
+
+    assertThat(tripValue(places, "startPlace")).isEqualTo("首都国际机场T2");
+    assertThat(tripValue(places, "endPlace")).isEqualTo("中华人民共和国最高人民检察院-东门");
+  }
+
+  @Test
+  void extractTripPlacesReadsCtripPickupAndDropoffLabels() throws Exception {
+    Object places = extractTripPlaces("""
+      用车行程单
+      携程旅行
+      行程信息
+      航班号：
+      HU7815
+      上车点：
+      白云国际机场T3
+      下车点：
+      汇峰中心-D区
+      类型：
+      接机
+      费用明细
+      实际费用：
+      CNY182
+      """);
+
+    assertThat(tripValue(places, "startPlace")).isEqualTo("白云国际机场T3");
+    assertThat(tripValue(places, "endPlace")).isEqualTo("汇峰中心-D区");
+  }
+
+  @Test
+  void extractHuolalaTripPlacesUsesOnlyAddressColumnAfterFirstBullet() throws Exception {
+    JsonNode raw = new ObjectMapper().readTree("""
+      [
+        {"bbox":[490,465,558,465,558,487,492,487],"text":"智能保密"},
+        {"bbox":[575,464,732,464,732,488,575,488],"text":"●中华人民共和国最"},
+        {"bbox":[745,467,803,467,803,489,745,489],"text":"307.06"},
+        {"bbox":[830,466,863,466,863,490,830,490],"text":"6.9"},
+        {"bbox":[576,486,711,489,711,513,575,511],"text":"高人民检察院-东"},
+        {"bbox":[902,491,930,491,930,516,902,516],"text":"70"},
+        {"bbox":[574,511,604,511,604,538,574,538],"text":"门"},
+        {"bbox":[576,536,720,539,720,564,575,561],"text":"●泰合鲜·精品鲁菜"},
+        {"bbox":[576,560,665,563,664,592,575,588],"text":"(陶然亭店)"},
+        {"bbox":[571,324,617,324,617,351,571,351],"text":"地址"},
+        {"bbox":[824,314,862,314,862,337,824,337],"text":"里程"}
+      ]
+      """);
+
+    Object places = extractHuolalaTripPlacesFromOcrRaw(raw);
+
+    assertThat(tripValue(places, "startPlace")).isEqualTo("中华人民共和国最高人民检察院-东门");
+    assertThat(tripValue(places, "endPlace")).isEqualTo("泰合鲜·精品鲁菜(陶然亭店)");
+    assertThat((BigDecimal) tripComponent(places, "kilometers")).isEqualByComparingTo("6.9");
+  }
+
+  @Test
   void extractInvoiceFieldsFromTextUsesLowercaseTotalForNonTaxTollInvoice() throws Exception {
     String tollInvoiceText = """
       \u7535\u5b50\u53d1\u7968\uff08\u666e\u901a\u53d1\u7968\uff09
@@ -91,7 +168,8 @@ class OcrServiceTest {
     assertThat(fields)
       .containsEntry("total_amount", "40.00")
       .containsEntry("amount_before_tax", "40.00")
-      .containsEntry("tax_amount", "0.00");
+      .containsEntry("tax_amount", "0.00")
+      .containsEntry("tax_rate", "\u4e0d\u5f81\u7a0e");
   }
 
   @Test
@@ -136,7 +214,20 @@ class OcrServiceTest {
       .containsEntry("seller_tax_id", "914400007408467653")
       .containsEntry("total_amount", "40.00")
       .containsEntry("amount_before_tax", "40.00")
-      .containsEntry("tax_amount", "0.00");
+      .containsEntry("tax_amount", "0.00")
+      .containsEntry("tax_rate", "\u4e0d\u5f81\u7a0e");
+  }
+
+  @Test
+  void tollInvoiceExpenseNameMatchesExpenseTypeDictionary() throws Exception {
+    Method ocrNameMethod = OcrService.class.getDeclaredMethod("oaExpenseName", String.class);
+    ocrNameMethod.setAccessible(true);
+    assertThat(ocrNameMethod.invoke(ocrService, "toll")).isEqualTo("\u9ad8\u901f\u8d39");
+
+    ReimbursementService reimbursementService = new ReimbursementService(null, null, null, null, null, null, null, null);
+    Method reimbursementNameMethod = ReimbursementService.class.getDeclaredMethod("oaExpenseName", String.class);
+    reimbursementNameMethod.setAccessible(true);
+    assertThat(reimbursementNameMethod.invoke(reimbursementService, "toll")).isEqualTo("\u9ad8\u901f\u8d39");
   }
 
   @Test
@@ -293,13 +384,17 @@ class OcrServiceTest {
   @Test
   void recognizeInvoiceFileReadsMeituanDeliveryPdfFields() throws Exception {
     OcrService service = new OcrService(null, null, null, null, new ObjectMapper());
-    Path pdfPath = Path.of("docs", "test2", "20260727报销单", "20260727报销单",
+    Path pdfPath = Path.of("..", "docs", "test2", "20260727报销单", "20260727报销单",
       "上海三快智送科技有限公司_发票金额5.00元.pdf");
 
     Method method = OcrService.class.getDeclaredMethod("recognizeInvoiceFile", Path.class, String.class);
     method.setAccessible(true);
     String json = (String) method.invoke(service, pdfPath, pdfPath.getFileName().toString());
-    JsonNode fields = new ObjectMapper().readTree(json).get("invoice_fields");
+    JsonNode result = new ObjectMapper().readTree(json);
+    assertThat(result.get("ocr_text").asText())
+      .contains("¥4.72 ¥0.28")
+      .contains("¥5.00");
+    JsonNode fields = result.get("invoice_fields");
 
     assertThat(fields.get("invoice_no").asText()).isEqualTo("26317000002597895258");
     assertThat(fields.get("date").asText()).isEqualTo("2026年07月27日");
@@ -311,6 +406,56 @@ class OcrServiceTest {
     assertThat(fields.get("tax_amount").asText()).isEqualTo("0.28");
     assertThat(fields.get("total_amount").asText()).isEqualTo("5.00");
     assertThat(fields.get("issuer").asText()).isEqualTo("何娟");
+  }
+
+  @Test
+  void recognizeInvoiceFileReadsRideHailingPdfPartiesOnSameLine() throws Exception {
+    OcrService service = new OcrService(null, null, null, null, new ObjectMapper());
+    Path pdfPath = Path.of("..", "docs", "test2", "20260727报销单", "20260727报销单",
+      "用车电子发票 (1).pdf");
+
+    Method method = OcrService.class.getDeclaredMethod("recognizeInvoiceFile", Path.class, String.class);
+    method.setAccessible(true);
+    String json = (String) method.invoke(service, pdfPath, pdfPath.getFileName().toString());
+    JsonNode result = new ObjectMapper().readTree(json);
+    assertThat(result.get("ocr_text").asText())
+      .contains("广东维信智联科技有限公司 北京爱特博旅运服务有限责任公司")
+      .contains("91441900762909683X 9111010263378065XE");
+    JsonNode fields = result.get("invoice_fields");
+
+    assertThat(fields.get("invoice_no").asText()).isEqualTo("26112000003031372846");
+    assertThat(fields.get("buyer_name").asText()).isEqualTo("广东维信智联科技有限公司");
+    assertThat(fields.get("buyer_tax_id").asText()).isEqualTo("91441900762909683X");
+    assertThat(fields.get("seller_name").asText()).isEqualTo("北京爱特博旅运服务有限责任公司");
+    assertThat(fields.get("seller_tax_id").asText()).isEqualTo("9111010263378065XE");
+  }
+
+  @Test
+  void extractHuolalaTripPlacesFromOcrRawReadsAddressColumnAndKilometers() throws Exception {
+    String ocrRawJson = """
+      [
+        {"bbox":[571.0,324.0,617.0,324.0,617.0,351.0,571.0,351.0],"text":"地址"},
+        {"bbox":[824.0,314.0,862.0,314.0,862.0,337.0,824.0,337.0],"text":"里程"},
+        {"bbox":[825.0,338.0,872.0,338.0,872.0,363.0,825.0,363.0],"text":"[公里]"},
+        {"bbox":[575.0,464.0,732.0,464.0,732.0,488.0,575.0,488.0],"text":"●中华人民共和国最"},
+        {"bbox":[830.0,466.0,863.0,466.0,863.0,490.0,830.0,490.0],"text":"6.9"},
+        {"bbox":[576.0,486.0,711.0,489.0,711.0,513.0,575.0,511.0],"text":"高人民检察院-东"},
+        {"bbox":[574.0,511.0,604.0,511.0,604.0,538.0,574.0,538.0],"text":"门"},
+        {"bbox":[576.0,536.0,720.0,539.0,720.0,564.0,575.0,561.0],"text":"●泰合鲜·精品鲁菜"},
+        {"bbox":[576.0,560.0,665.0,563.0,664.0,592.0,575.0,588.0],"text":"(陶然亭店)"}
+      ]
+      """;
+
+    Method method = OcrService.class.getDeclaredMethod("extractHuolalaTripPlacesFromOcrRaw", JsonNode.class);
+    method.setAccessible(true);
+    Object places = method.invoke(ocrService, new ObjectMapper().readTree(ocrRawJson));
+
+    assertThat((String) places.getClass().getDeclaredMethod("startPlace").invoke(places))
+      .isEqualTo("中华人民共和国最高人民检察院-东门");
+    assertThat((String) places.getClass().getDeclaredMethod("endPlace").invoke(places))
+      .isEqualTo("泰合鲜·精品鲁菜(陶然亭店)");
+    assertThat((BigDecimal) places.getClass().getDeclaredMethod("kilometers").invoke(places))
+      .isEqualByComparingTo("6.9");
   }
 
   @Test
@@ -362,7 +507,7 @@ class OcrServiceTest {
   }
 
   @Test
-  void regroupExpenseItemsByInvoiceTripsMergesInvoicesWithSameVoucherTrip() {
+  void regroupExpenseItemsByInvoiceTripsKeepsTransportInvoicesSeparateEvenWithSameTrip() {
     InvoiceRepository invoiceRepository = mock(InvoiceRepository.class);
     ReimbursementExpenseItemRepository expenseItemRepository = mock(ReimbursementExpenseItemRepository.class);
     OcrService service = new OcrService(null, null, invoiceRepository, expenseItemRepository, null);
@@ -390,11 +535,14 @@ class OcrServiceTest {
     service.regroupExpenseItemsByInvoiceTrips(43L, 7L);
 
     assertThat(first.getExpenseItemId()).isEqualTo(81L);
-    assertThat(second.getExpenseItemId()).isEqualTo(81L);
-    assertThat(firstItem.getInvoiceId()).isNull();
-    assertThat(firstItem.getAmount()).isEqualByComparingTo("20.00");
-    assertThat(firstItem.getKilometers()).isEqualByComparingTo("23.00");
-    verify(expenseItemRepository).delete(secondItem);
+    assertThat(second.getExpenseItemId()).isEqualTo(82L);
+    assertThat(firstItem.getInvoiceId()).isEqualTo(1L);
+    assertThat(firstItem.getAmount()).isEqualByComparingTo("12.00");
+    assertThat(firstItem.getKilometers()).isEqualByComparingTo("18.40");
+    assertThat(secondItem.getInvoiceId()).isEqualTo(2L);
+    assertThat(secondItem.getAmount()).isEqualByComparingTo("8.00");
+    assertThat(secondItem.getKilometers()).isEqualByComparingTo("4.60");
+    verify(expenseItemRepository, never()).delete(secondItem);
   }
 
   @Test
@@ -472,15 +620,18 @@ class OcrServiceTest {
     service.regroupExpenseItemsByInvoiceTrips(43L, 7L);
 
     assertThat(didiA.getExpenseItemId()).isEqualTo(81L);
-    assertThat(didiB.getExpenseItemId()).isEqualTo(81L);
+    assertThat(didiB.getExpenseItemId()).isEqualTo(82L);
     assertThat(didiItemA.getExpenseType()).isEqualTo("ride_hailing");
-    assertThat(didiItemA.getAmount()).isEqualByComparingTo("33.60");
-    assertThat(didiItemA.getKilometers()).isEqualByComparingTo("36.80");
+    assertThat(didiItemA.getAmount()).isEqualByComparingTo("15.70");
+    assertThat(didiItemA.getKilometers()).isEqualByComparingTo("18.40");
+    assertThat(didiItemB.getExpenseType()).isEqualTo("ride_hailing");
+    assertThat(didiItemB.getAmount()).isEqualByComparingTo("17.90");
+    assertThat(didiItemB.getKilometers()).isEqualByComparingTo("18.40");
     assertThat(fuelA.getExpenseItemId()).isEqualTo(83L);
     assertThat(fuelB.getExpenseItemId()).isEqualTo(83L);
     assertThat(fuelItemA.getExpenseType()).isEqualTo("fuel");
     assertThat(fuelItemA.getAmount()).isEqualByComparingTo("213.47");
-    verify(expenseItemRepository).delete(didiItemB);
+    verify(expenseItemRepository, never()).delete(didiItemB);
     verify(expenseItemRepository).delete(fuelItemB);
   }
 
@@ -521,5 +672,28 @@ class OcrServiceTest {
     Method method = OcrService.class.getDeclaredMethod("classifyExpenseType", Invoice.class, String.class);
     method.setAccessible(true);
     return (String) method.invoke(ocrService, invoice, text);
+  }
+
+  private Object extractTripPlaces(String text) throws Exception {
+    Method method = OcrService.class.getDeclaredMethod("extractTripPlaces", String.class);
+    method.setAccessible(true);
+    return method.invoke(ocrService, text);
+  }
+
+  private Object extractHuolalaTripPlacesFromOcrRaw(JsonNode raw) throws Exception {
+    Method method = OcrService.class.getDeclaredMethod("extractHuolalaTripPlacesFromOcrRaw", JsonNode.class);
+    method.setAccessible(true);
+    return method.invoke(ocrService, raw);
+  }
+
+  private String tripValue(Object places, String name) throws Exception {
+    Object value = tripComponent(places, name);
+    return value == null ? null : value.toString();
+  }
+
+  private Object tripComponent(Object places, String name) throws Exception {
+    Method method = places.getClass().getDeclaredMethod(name);
+    method.setAccessible(true);
+    return method.invoke(places);
   }
 }

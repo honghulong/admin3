@@ -1,3 +1,31 @@
+## 2026-07-27/28 真实报销样本与回归测试关联
+
+本节记录 2026-07-27/28 发票与行程单调试涉及的真实样本、自动化测试方法和覆盖目标。测试源文件统一维护在 `admin3-server/src/test/java/tech/wetech/admin3/sys/service/OcrServiceTest.java`。
+
+| 样本文件 | 关联测试/验证点 | 期望结果 |
+|---|---|---|
+| `docs/test2/20260727报销单/20260727报销单/上海三快智送科技有限公司_发票金额5.00元.pdf` | `recognizeInvoiceFileReadsMeituanDeliveryPdfFields` | PDF 文本层应保留 `¥4.72 ¥0.28`、`¥5.00`；识别发票号 `26317000002597895258`、开票日期、购销方名称/税号、金额 `4.72`、税额 `0.28`、价税合计 `5.00`、开票人。 |
+| `docs/test2/20260727报销单/20260727报销单/用车电子发票 (1).pdf` | `recognizeInvoiceFileReadsRideHailingPdfPartiesOnSameLine` | 同一文本行里的购买方/销售方公司名称应拆分正确；识别发票号 `26112000003031372846`、购买方 `广东维信智联科技有限公司`、销售方 `北京爱特博旅运服务有限责任公司` 及双方税号。 |
+| `docs/test2/20260727报销单/20260727报销单/货拉拉行程报销单 (3).pdf` | `extractHuolalaTripPlacesFromOcrRawReadsAddressColumnAndKilometers` | 从 `ocr_raw` 表格定位地址列和里程列，提取起点 `中华人民共和国最高人民检察院-东门`、终点 `泰合鲜·精品鲁菜(陶然亭店)`、公里数 `6.9`。 |
+| 发票号 `26127000000365266621` 与对应货拉拉行程单 | 服务级行为验证 | 行程单可按发票号尽力自动关联；失败时通过发票列表 `关联凭证` 手工关联；关联后行程字段和费用明细公里数可同步。 |
+
+补充人工/界面回归点：
+
+- `上传发票` 与 `上传行程单` 为分开的 tab 和按钮，不做混传自动分类。
+- 上传发票结果列表显示关联发票号码。
+- 行程单列表显示关联发票号码；未关联显示 `-`。
+- 发票行内 `上传凭证`、`关联凭证`、`解除凭证` 只维护关系，不删除行程单文件。
+- 行程单 tab 可以删除未被使用的行程单；已被发票使用的行程单前后端都应阻止删除。
+- 费用明细 `说明/description` 不由 OCR 机填，仅允许用户手工维护。
+
+回归命令：
+
+```powershell
+.\mvnw.cmd -pl admin3-server -Dtest=OcrServiceTest test
+npm.cmd run build
+.\mvnw.cmd -pl admin3-server -am -DskipTests package
+```
+
 # ?? OCR ????????????
 
 ???????????/????????????

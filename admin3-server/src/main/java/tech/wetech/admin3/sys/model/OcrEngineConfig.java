@@ -35,6 +35,9 @@ public class OcrEngineConfig extends BaseEntity {
   @Column(columnDefinition = "TEXT")
   private String prompt;
 
+  @Column(nullable = false, length = 30)
+  private String parseStrategy = "BBOX_REGION";
+
   @Column(nullable = false)
   private Boolean enabled = true;
 
@@ -120,6 +123,14 @@ public class OcrEngineConfig extends BaseEntity {
 
   public void setPrompt(String prompt) {
     this.prompt = prompt;
+  }
+
+  public String getParseStrategy() {
+    return parseStrategy;
+  }
+
+  public void setParseStrategy(String parseStrategy) {
+    this.parseStrategy = parseStrategy;
   }
 
   public Boolean getEnabled() {

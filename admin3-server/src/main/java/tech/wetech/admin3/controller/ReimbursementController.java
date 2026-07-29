@@ -97,6 +97,12 @@ public class ReimbursementController {
   }
 
   @RequiresPermissions("reimbursement:update")
+  @PostMapping("/{id}:regroup-expense-items")
+  public ResponseEntity<ReimbursementDTO> regroupExpenseItems(@PathVariable Long id) {
+    return ResponseEntity.ok(reimbursementService.regroupOcrExpenseItems(id));
+  }
+
+  @RequiresPermissions("reimbursement:update")
   @DeleteMapping("/{id}/invoices/{invoiceId}")
   public ResponseEntity<ReimbursementDTO> deleteInvoice(@PathVariable Long id, @PathVariable Long invoiceId) {
     return ResponseEntity.ok(reimbursementService.deleteInvoice(id, invoiceId));
@@ -109,6 +115,23 @@ public class ReimbursementController {
     @PathVariable Long invoiceId,
     @RequestParam("file") MultipartFile file) {
     return ResponseEntity.ok(reimbursementService.uploadInvoiceSupportAttachment(id, invoiceId, file));
+  }
+
+  @RequiresPermissions("reimbursement:update")
+  @PostMapping("/{id}/support-attachments")
+  public ResponseEntity<ReimbursementDTO> uploadSupportAttachment(
+    @PathVariable Long id,
+    @RequestParam("file") MultipartFile file) {
+    return ResponseEntity.ok(reimbursementService.uploadSupportAttachment(id, file));
+  }
+
+  @RequiresPermissions("reimbursement:update")
+  @PutMapping("/{id}/invoices/{invoiceId}/support-attachment/{attachmentId}")
+  public ResponseEntity<ReimbursementDTO> linkInvoiceSupportAttachment(
+    @PathVariable Long id,
+    @PathVariable Long invoiceId,
+    @PathVariable Long attachmentId) {
+    return ResponseEntity.ok(reimbursementService.linkInvoiceSupportAttachment(id, invoiceId, attachmentId));
   }
 
   @RequiresPermissions("reimbursement:update")

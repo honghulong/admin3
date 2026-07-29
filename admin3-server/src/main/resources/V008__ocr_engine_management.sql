@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS ocr_engine_config (
   tenant_id VARCHAR(100) NULL,
   environment VARCHAR(50) NULL,
   prompt TEXT NULL,
+  parse_strategy VARCHAR(30) NOT NULL DEFAULT 'BBOX_REGION',
   enabled BIT(1) NOT NULL DEFAULT b'1',
   is_default BIT(1) NOT NULL DEFAULT b'0',
   fallback_enabled BIT(1) NOT NULL DEFAULT b'1',

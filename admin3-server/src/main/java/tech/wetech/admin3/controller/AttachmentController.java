@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +16,14 @@ import tech.wetech.admin3.common.SessionItemHolder;
 import tech.wetech.admin3.common.authz.RequiresPermissions;
 import tech.wetech.admin3.sys.model.Attachment;
 import tech.wetech.admin3.sys.repository.AttachmentRepository;
+import tech.wetech.admin3.sys.repository.InvoiceRepository;
 import tech.wetech.admin3.sys.service.OcrService;
 import tech.wetech.admin3.sys.service.dto.ReimbursementDTO;
 import tech.wetech.admin3.sys.service.dto.UserinfoDTO;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,11 +44,13 @@ public class AttachmentController {
   private static final Logger log = LoggerFactory.getLogger(AttachmentController.class);
 
   private final AttachmentRepository attachmentRepository;
+  private final InvoiceRepository invoiceRepository;
   private final OcrService ocrService;
   private final Path uploadDir = Paths.get("uploads/attachments");
 
-  public AttachmentController(AttachmentRepository attachmentRepository, OcrService ocrService) {
+  public AttachmentController(AttachmentRepository attachmentRepository, InvoiceRepository invoiceRepository, OcrService ocrService) {
     this.attachmentRepository = attachmentRepository;
+    this.invoiceRepository = invoiceRepository;
     this.ocrService = ocrService;
   }
 
@@ -88,6 +93,7 @@ public class AttachmentController {
       attachment.setFileSize(file.getSize());
       attachment.setFileType(contentType);
       attachment.setFileUrl("/attachments/" + storedName + "/download");
+      attachment.setAttachmentRole("invoice");
       attachment.setUploadedBy(userInfo.userId());
       attachment.setCreatedAt(LocalDateTime.now());
       attachment.setDeleted(false);
@@ -113,6 +119,9 @@ public class AttachmentController {
   public ResponseEntity<Void> deleteAttachment(@PathVariable Long id) {
     Attachment attachment = attachmentRepository.findById(id)
       .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    if (invoiceRepository.findBySupportAttachmentIdAndDeletedFalse(id).isPresent()) {
+      throw new BusinessException(PARAM_ERROR, "璇ヨ绋嬪崟宸茶鍙戠エ鍏宠仈锛岃鍏堣В闄ゅ叧绯诲啀鍒犻櫎");
+    }
     log.info("Deleting attachment: id={}, file={}, reimbursementId={}", id, attachment.getFileName(), attachment.getReimbursementId());
     // 删除物理文件
     attachment.setDeleted(true);
@@ -137,7 +146,10 @@ public class AttachmentController {
 
       return ResponseEntity.ok()
         .contentType(MediaType.parseMediaType(contentType))
-        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+        .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.inline()
+          .filename(fileName, StandardCharsets.UTF_8)
+          .build()
+          .toString())
         .body(resource);
     } catch (MalformedURLException e) {
       throw new BusinessException(RECORD_NOT_EXIST, "文件不存在");

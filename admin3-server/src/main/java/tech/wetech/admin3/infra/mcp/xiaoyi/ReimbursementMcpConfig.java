@@ -336,6 +336,7 @@ public class ReimbursementMcpConfig {
           attachment.setFileSize((long) imageBytes.length);
           attachment.setFileType("image/" + (ext.isEmpty() ? "png" : ext.substring(1)));
           attachment.setFileUrl("/attachments/" + storedName + "/download");
+          attachment.setAttachmentRole("invoice");
           attachment.setUploadedBy(0L);
           attachment.setCreatedAt(LocalDateTime.now());
           attachment.setOcrStatus("processing");

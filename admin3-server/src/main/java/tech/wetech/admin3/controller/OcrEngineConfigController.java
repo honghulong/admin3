@@ -95,6 +95,7 @@ public class OcrEngineConfigController {
     config.setTenantId(request.tenantId());
     config.setEnvironment(request.environment());
     config.setPrompt(request.prompt());
+    config.setParseStrategy(normalizeParseStrategy(request.parseStrategy()));
     config.setEnabled(enabled);
     config.setIsDefault(enabled);
     config.setFallbackEnabled(request.fallbackEnabled() == null || request.fallbackEnabled());
@@ -117,6 +118,11 @@ public class OcrEngineConfigController {
     }
   }
 
+  private String normalizeParseStrategy(String parseStrategy) {
+    if ("PDF_TEXT_REGEX".equalsIgnoreCase(parseStrategy)) return "PDF_TEXT_REGEX";
+    return "BBOX_REGION";
+  }
+
   public record OcrEngineConfigRequest(
     @NotBlank String name,
     @NotBlank String providerType,
@@ -127,6 +133,7 @@ public class OcrEngineConfigController {
     String tenantId,
     String environment,
     String prompt,
+    String parseStrategy,
     Boolean enabled,
     Boolean isDefault,
     Boolean fallbackEnabled
@@ -142,6 +149,7 @@ public class OcrEngineConfigController {
     String tenantId,
     String environment,
     String prompt,
+    String parseStrategy,
     Boolean enabled,
     Boolean isDefault,
     Boolean fallbackEnabled,
@@ -153,7 +161,7 @@ public class OcrEngineConfigController {
       return new OcrEngineConfigResponse(
         config.getId(), config.getName(), config.getProviderType(), config.getBaseUrl(),
         config.getModelName(), config.getProtocol(), config.getTenantId(), config.getEnvironment(),
-        config.getPrompt(), config.getEnabled(), config.getIsDefault(), config.getFallbackEnabled(),
+        config.getPrompt(), config.getParseStrategy(), config.getEnabled(), config.getIsDefault(), config.getFallbackEnabled(),
         config.getApiKeyCipherText() != null && !config.getApiKeyCipherText().isBlank(),
         config.getCreatedAt(), config.getUpdatedAt()
       );

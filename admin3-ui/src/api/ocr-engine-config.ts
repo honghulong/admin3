@@ -12,6 +12,7 @@ export interface OcrEngineConfig {
   tenantId?: string;
   environment?: string;
   prompt?: string;
+  parseStrategy?: string;
   enabled?: boolean;
   isDefault?: boolean;
   fallbackEnabled?: boolean;

@@ -44,6 +44,12 @@ public class OcrExecutionService {
     return !"INTERNAL".equalsIgnoreCase(selectedConfig().getProviderType());
   }
 
+  public boolean useBboxInvoiceParser() {
+    OcrEngineConfig config = selectedConfig();
+    return "INTERNAL".equalsIgnoreCase(config.getProviderType())
+      && !"PDF_TEXT_REGEX".equalsIgnoreCase(config.getParseStrategy());
+  }
+
   private OcrEngineConfig selectedConfig() {
     return configRepository.findByEnabledTrueOrderByIsDefaultDescUpdatedAtDesc().stream().findFirst()
       .orElseGet(this::internalConfig);
@@ -60,6 +66,7 @@ public class OcrExecutionService {
     OcrEngineConfig config = new OcrEngineConfig();
     config.setProviderType("INTERNAL");
     config.setBaseUrl("http://localhost:8765");
+    config.setParseStrategy("BBOX_REGION");
     config.setFallbackEnabled(false);
     return config;
   }

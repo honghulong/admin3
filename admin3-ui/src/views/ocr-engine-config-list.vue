@@ -14,6 +14,12 @@
           </template>
         </el-table-column>
         <el-table-column prop="protocol" label="协议" width="150"></el-table-column>
+        <el-table-column label="解析支路" width="150">
+          <template #default="{ row }">
+            <el-tag v-if="row.parseStrategy === 'PDF_TEXT_REGEX'" type="info">PDF文本正则</el-tag>
+            <el-tag v-else type="success">bbox增强</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="modelName" label="模型" min-width="140"></el-table-column>
         <el-table-column prop="baseUrl" label="Base URL" min-width="240" show-overflow-tooltip></el-table-column>
         <el-table-column prop="prompt" label="提示词" min-width="260" show-overflow-tooltip></el-table-column>
@@ -71,6 +77,12 @@
         </el-form-item>
         <el-form-item label="Base URL">
           <el-input v-model="form.baseUrl" placeholder="例如 http://localhost:8765 或 https://.../v1"/>
+        </el-form-item>
+        <el-form-item v-if="form.providerType === 'INTERNAL'" label="解析支路">
+          <el-radio-group v-model="form.parseStrategy">
+            <el-radio-button label="BBOX_REGION">bbox增强</el-radio-button>
+            <el-radio-button label="PDF_TEXT_REGEX">PDF文本正则</el-radio-button>
+          </el-radio-group>
         </el-form-item>
         <el-form-item label="模型">
           <el-input v-model="form.modelName" placeholder="例如 qwen3.5-ocr、kimi-k2.5"/>
@@ -136,6 +148,7 @@ class OcrEngineConfigImpl implements OcrEngineConfig {
   tenantId = '';
   environment = 'default';
   prompt = '';
+  parseStrategy = 'BBOX_REGION';
   enabled = true;
   isDefault = false;
   fallbackEnabled = true;
@@ -173,9 +186,11 @@ const handleProviderChange = () => {
     form.protocol = 'INTERNAL_HTTP';
     form.baseUrl = form.baseUrl || 'http://localhost:8765';
     form.modelName = '';
+    form.parseStrategy = form.parseStrategy || 'BBOX_REGION';
     return;
   }
   form.protocol = 'OPENAI_COMPATIBLE';
+  form.parseStrategy = 'BBOX_REGION';
 };
 
 const handleSubmit = () => {

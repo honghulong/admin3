@@ -59,7 +59,7 @@ public record ReimbursementDTO(
       r.getDescription(), r.getMatterDescription(), r.getOcrRawJson(), r.getStatus(), r.getApplicantId(), r.getApplicantName(),
       r.getApproverId(), r.getApproverName(), r.getApproveComment(), r.getApproveTime(),
       r.getCreatedBy(), r.getCreatedAt(), r.getUpdatedBy(), r.getUpdatedAt(),
-      attachments.stream().map(AttachmentDTO::new).toList(),
+      attachments.stream().map(attachment -> new AttachmentDTO(attachment, invoices)).toList(),
       approvalLogs.stream().map(ApprovalLogDTO::new).toList(),
       invoices.stream().map(invoice -> new InvoiceDTO(invoice, attachments)).toList(),
       expenseItems.stream().map(item -> new ExpenseItemDTO(item, invoices)).toList(),
@@ -90,12 +90,48 @@ public record ReimbursementDTO(
     Long uploadedBy,
     LocalDateTime createdAt,
     String ocrStatus,
-    String ocrResult
+    String ocrResult,
+    Long linkedInvoiceId,
+    String linkedInvoiceNo,
+    String attachmentRole
   ) {
     public AttachmentDTO(Attachment a) {
+      this(a, List.of());
+    }
+
+    public AttachmentDTO(Attachment a, List<Invoice> invoices) {
       this(a.getId(), a.getReimbursementId(), a.getFileName(), a.getFileSize(),
         a.getFileType(), a.getFileUrl(), a.getUploadedBy(), a.getCreatedAt(),
-        a.getOcrStatus(), a.getOcrResult());
+        a.getOcrStatus(), a.getOcrResult(),
+        linkedInvoiceId(a, invoices), linkedInvoiceNo(a, invoices), linkedRole(a, invoices));
+    }
+
+    private static Long linkedInvoiceId(Attachment attachment, List<Invoice> invoices) {
+      Invoice invoice = linkedInvoice(attachment, invoices);
+      return invoice == null ? null : invoice.getId();
+    }
+
+    private static String linkedInvoiceNo(Attachment attachment, List<Invoice> invoices) {
+      Invoice invoice = linkedInvoice(attachment, invoices);
+      return invoice == null ? null : invoice.getInvoiceNo();
+    }
+
+    private static String linkedRole(Attachment attachment, List<Invoice> invoices) {
+      if (attachment.getAttachmentRole() != null && !attachment.getAttachmentRole().isBlank()) {
+        return attachment.getAttachmentRole();
+      }
+      Invoice invoice = linkedInvoice(attachment, invoices);
+      if (invoice == null) return null;
+      if (attachment.getId().equals(invoice.getSupportAttachmentId())) return "support";
+      if (attachment.getId().equals(invoice.getAttachmentId())) return "invoice";
+      return null;
+    }
+
+    private static Invoice linkedInvoice(Attachment attachment, List<Invoice> invoices) {
+      return (invoices == null ? List.<Invoice>of() : invoices).stream()
+        .filter(invoice -> attachment.getId().equals(invoice.getAttachmentId()) || attachment.getId().equals(invoice.getSupportAttachmentId()))
+        .findFirst()
+        .orElse(null);
     }
   }
 

@@ -7,8 +7,8 @@
 | 文档名称 | OCR 发票识别与执行管理技术方案 |
 | 文档性质 | OCR 发票识别相关需求、设计、技术选型、接口、验证和结论的唯一主文档 |
 | 适用项目 | `admin3`，以及被 `admin3` 调用的 `D:\hongmengProjects\ocr-invoice-mcp` 本地 OCR 服务 |
-| 当前版本 | V1.0 |
-| 最新更新 | 2026-07-24 |
+| 当前版本 | V1.1 |
+| 最新更新 | 2026-07-29 |
 | 管理约定 | 除测试脚本、初始化 SQL 和代码内注释外，OCR 相关需求类、设计类、技术方案类、验证类文档统一维护在本文档中 |
 
 ## 2. 背景与目标
@@ -392,3 +392,195 @@ powershell -ExecutionPolicy Bypass -File .\start.ps1
 3. 管理端增加“测试连接/测试识别”按钮，使用合成图片或脱敏样本验证配置。
 4. 建立真实发票脱敏回归集，记录期望字段、Provider、耗时和可入库结论。
 5. 若后续 OpenAI-compatible Provider 继续增加，再评估是否引入 Spring AI 统一客户端能力。
+
+## 13. 2026-07-27/28 发票与行程单识别、凭证关联变更归并
+
+### 13.1 需求背景
+
+2026-07-27/28 连续调试中发现，真实报销材料存在三类高频问题：
+
+- 双层 PDF 的文本可直接复制，货币符号在业务服务中实际为 `¥/￥`，但命令行显示可能退化成 `?`；排查时必须以 PDF 文本层、服务 `ocr_text` 和单元测试断言为准，不以控制台显示作为乱码结论。
+- 发票 PDF 版式差异较大，购买方/销售方、金额/税额/价税合计、开票人可能跨行、同线或尾部错序，需要以真实样本补充回归规则。
+- 行程单格式种类多，自动从行程单关联发票只能尽力而为，必须提供用户手工关联、解除关系和安全删除的兜底流程。
+
+### 13.2 业务流程决策
+
+- 上传入口拆分为两个并列 tab：`上传发票` 与 `上传行程单`。两者按钮分开，暂不做发票/行程单混传自动分类。
+- 发票上传仍走原发票 OCR 支路；行程单上传走行程单 OCR 支路，附件标记为 `attachmentRole=support`。
+- 行程单自动关联逻辑：优先读取行程单 OCR 结果中的发票号码，在当前报销单下唯一匹配发票时，自动写入该发票的 `supportAttachmentId`。
+- 自动关联失败时，用户在发票列表点击 `关联凭证`，从未关联或当前发票已关联的行程单中手工选择。
+- 交通大类发票默认一票一费用明细，不按同日同类型自动合并，避免同一天多次交通出行时无法分别关联多个行程单；如用户确需合并，后续通过费用明细编辑/关联发票功能手工处理。
+- 当前交通大类编码为：`toll`、`rail`、`metro`、`ride_hailing`、`carpool`、`freight`、`air_travel`、`taxi`、`bus`、`rental_car`、`parking`；字典描述使用 `transport` 标记。
+- 发票行内 `上传凭证` 只新增行程单附件并改变当前发票的关联关系；不再删除旧行程单附件。
+- 发票行内 `解除凭证` 只解除发票与行程单凭证关系；不删除附件文件。
+- 行程单文件删除只允许在 `上传行程单` tab 中执行；已被任一发票使用的行程单前端提示先解除关系，后端同样拒绝删除。
+- 行程单上传列表采用固定列对齐展示，空关联发票也保留列位，避免文件大小、关联状态、识别状态和操作按钮随内容长短错位。
+- 删除发票时只删除发票自身附件，不再连带删除行程单凭证文件。
+- 费用明细的 `说明/description` 放弃 OCR 机填，仅保留用户手工填写；系统仍可自动维护日期、费用类型、金额、公里数、起点、终点等结构化字段。
+
+### 13.3 实现归并
+
+| 范围 | 文件 | 说明 |
+|---|---|---|
+| 发票/行程单 OCR | `admin3-server/src/main/java/tech/wetech/admin3/sys/service/OcrService.java` | 补充 PDF 文本金额顺序、购销方同线提取、开票人候选过滤、货拉拉行程单 `ocr_raw` 表格列提取、行程单按发票号自动关联和已完成 OCR 结果复用。 |
+| 报销服务 | `admin3-server/src/main/java/tech/wetech/admin3/sys/service/ReimbursementService.java` | 新增行程单上传、已有行程单关联发票；调整凭证上传/解除为关系操作；删除发票时不删除行程单附件；交通大类费用明细保存时不自动合并。 |
+| 费用类型字典 | `admin3-server/src/main/resources/V009__reimbursement_expense_type_dict.sql`、`V010__reimbursement_transport_expense_type_tags.sql` | 维护报销费用类型和 `transport` 交通大类标记，供后续管理化扩展。 |
+| 附件模型 | `admin3-server/src/main/java/tech/wetech/admin3/sys/model/Attachment.java` | 新增 `attachmentRole`，区分 `invoice` 与 `support`，避免未关联行程单在刷新后被误归入发票附件列表。 |
+| 附件接口 | `admin3-server/src/main/java/tech/wetech/admin3/controller/AttachmentController.java` | 普通附件上传标记 `invoice`；删除附件前校验是否被发票作为行程单凭证使用。 |
+| 报销接口 | `admin3-server/src/main/java/tech/wetech/admin3/controller/ReimbursementController.java` | 新增报销单级行程单上传接口和已有行程单关联发票接口。 |
+| DTO | `admin3-server/src/main/java/tech/wetech/admin3/sys/service/dto/ReimbursementDTO.java` | 附件 DTO 增加 `linkedInvoiceId`、`linkedInvoiceNo`、`attachmentRole`，供前端列表展示和删除保护。 |
+| 前端页面 | `admin3-ui/src/views/reimbursement-list.vue` | 上传区域改 tab；发票附件列表显示发票号码；行程单列表显示关联发票并支持安全删除，且按固定列对齐文件名、大小、关联发票、状态和操作按钮；发票行新增 `关联凭证` 和 `解除凭证`。 |
+| 前端 API | `admin3-ui/src/api/reimbursement.ts` | 增加行程单上传、已有行程单关联发票 API。 |
+
+### 13.4 接口补充
+
+| 方法 | 路径 | 用途 |
+|---|---|---|
+| POST | `/reimbursements/{id}/support-attachments` | 上传行程单附件，进入行程单 OCR 支路并尝试自动关联发票。 |
+| PUT | `/reimbursements/{id}/invoices/{invoiceId}/support-attachment/{attachmentId}` | 将已有行程单附件关联到指定发票。 |
+| POST | `/reimbursements/{id}/invoices/{invoiceId}/support-attachment` | 行内上传新行程单并关联到当前发票；只改变关系，不删除旧凭证文件。 |
+| DELETE | `/reimbursements/{id}/invoices/{invoiceId}/support-attachment` | 解除发票与行程单凭证关系；不删除附件文件。 |
+| DELETE | `/attachments/{id}` | 删除附件；若附件正被发票作为行程单凭证使用，则拒绝删除。 |
+
+### 13.5 本轮真实样本回归
+
+| 样本 | 问题 | 当前结论 |
+|---|---|---|
+| `docs/test2/20260727报销单/20260727报销单/上海三快智送科技有限公司_发票金额5.00元.pdf` | PDF 文本层货币符号、金额/税额/价税合计、购销方、开票人错位 | 服务侧确认 `¥4.72 ¥0.28` 和 `¥5.00` 可读；发票号、日期、购销方税号、金额、税额、价税合计、开票人均纳入单测断言。 |
+| `docs/test2/20260727报销单/20260727报销单/用车电子发票 (1).pdf` | 购买方和销售方公司名称同一行，旧规则只能取一家公司 | 增加同线多公司名提取，购买方/销售方及税号纳入单测断言。 |
+| `docs/test2/20260727报销单/20260727报销单/货拉拉行程报销单 (3).pdf` | 行程单 OCR 文本无法直接识别起终点和公里数 | 通过 `ocr_raw` 表格列定位提取地址列与里程列，支持起点、终点、公里数同步费用明细。 |
+| 发票号 `26127000000365266621` 对应货拉拉发票 | 已上传行程单未能关联发票和累计公里数 | 支持行程单按发票号自动关联；人工 `关联凭证` 作为兜底。 |
+| 同日多张网约车/交通发票 | 旧逻辑按同日同类型归成一条费用明细，导致无法分别关联多张行程单 | `OcrServiceTest.regroupExpenseItemsByInvoiceTripsKeepsTransportInvoicesSeparateEvenWithSameTrip` 覆盖：交通大类保持一票一明细；油费等非交通费用仍可同日合并。 |
+
+### 13.6 验证记录
+
+2026-07-28 已执行并通过：
+
+```powershell
+.\mvnw.cmd -pl admin3-server -Dtest=OcrServiceTest test
+npm.cmd run build
+.\mvnw.cmd -pl admin3-server -am -DskipTests package
+```
+
+2026-07-28 行程单列表列对齐调整已执行并通过：
+
+```powershell
+npm.cmd run build
+.\mvnw.cmd -pl admin3-server -am -DskipTests package
+```
+
+服务重启后通过 `http://localhost:9099/admin3` 返回 `HTTP 302` 验证入口可用。
+
+## 14. 2026-07-29 发票解析方案变更
+
+### 14.1 变更性质
+
+本节记录的是 OCR 发票解析方案的正式变更，不按“在原方案上升级”处理。
+
+变更前的主判断是：双层 PDF 优先读取 PDF 文本层，再通过固定正则和样本适配抽取字段；本地 OCR 和外部大模型作为补充识别能力。
+
+变更后的主判断是：真实双层 PDF 虽然存在文本层，但文本层在进入 Java/PDFBox 后经常因字数、换行、打印位置、隐藏文本层顺序等原因形成非票面顺序结构。继续以固定正则作为主方案，会导致每增加一批真实样本就追加多种特例规则，长期不可控。因此，发票上传的默认解析方案改为以本地 OCR 返回的 `ocr_raw.bbox` 为基础，按票面空间区域恢复结构化字段；PDF 文本层正则保留为兼容支路和补字段来源。
+
+### 14.2 核心结论
+
+- 双层 PDF 的“可复制文本”不等于“可稳定结构化文本”。文本层读出来乱序时，问题不在 OCR，而在 PDF 文本层本身的编码顺序、绘制顺序和换行结构。
+- 固定正则适合处理少量稳定版式，不适合作为真实用户多来源发票的唯一主路。
+- 本地 OCR 服务返回的 `ocr_raw.bbox` 本质上仍来自 OCR 识别，但它额外提供每个文本块在票面上的坐标。系统可以利用坐标按购买方区、销售方区、金额区、表格区、开票人区恢复票面结构。
+- bbox 分块不是万能方案。它仍受图片清晰度、OCR 分块质量、票面高度差异影响；但它比只看线性文本更接近人眼看票面的方式，适合作为本地 OCR 模式下的默认主路。
+- 行程单格式差异更大，当前不纳入发票 bbox 方案。行程单仍走独立的行程单 OCR 支路，重点提取发票号码、起点、终点、里程等辅助字段，并提供人工关联兜底。
+
+### 14.3 新解析支路
+
+OCR 执行管理配置新增 `parseStrategy`，用于本地 OCR 服务模式下选择发票解析支路。
+
+| 支路 | 配置值 | 定位 | 当前默认 |
+|---|---|---|---|
+| bbox 区域增强 | `BBOX_REGION` | 调用本地 OCR 后读取 `ocr_raw.bbox`，按票面空间区域抽取字段，再用 PDF 文本层结果补缺和校准 | 是 |
+| PDF 文本正则 | `PDF_TEXT_REGEX` | 沿用双层 PDF 文本层 + 正则适配方式 | 否 |
+
+说明：
+
+- 该配置主要影响 `上传发票` 流程。
+- `上传行程单` 不直接使用发票 bbox 区域解析支路；它继续走 `recognizeInvoiceSupportAttachment` 对应的行程单 OCR 逻辑。
+- 行程单能否自动关联发票，仍间接受发票解析结果影响：如果发票没有生成、发票号码错误，行程单按号码自动匹配就会失败。
+
+### 14.4 bbox 区域解析策略
+
+当前 bbox 方案不使用绝对高度硬编码作为唯一依据，而采用“锚点 + 相对区域 + 文本兜底”的组合：
+
+- 通过 `发票号码`、`开票日期`、`购买方信息`、`销售方信息`、`项目名称`、`合计`、`价税合计（小写）`、`开票人` 等文本锚点定位票面区域。
+- 购买方和销售方字段优先按票面左右区域、税号出现顺序、公司名称候选综合判断。
+- 金额区优先使用 `合计` 与 `价税合计（小写）` 附近的金额块；当票面高度不同导致绝对坐标变化时，改用锚点相对位置和表格金额列兜底。
+- `issuer` 等尾部字段使用 `开票人` 锚点附近候选，并结合 PDF 文本层结果校准，避免取到公司名、合计等误值。
+- 当 bbox 字段缺失时，合并 PDF 文本层正则结果；当 PDF 文本层中的开票人更可信时，用它覆盖 bbox 候选。
+
+### 14.5 本轮样本结论
+
+本轮重点复测样本来自：
+
+`D:\hongmengProjects\admin3\docs\test2\20260727报销单\20260727报销单`
+
+关注的例外结构包括：
+
+| 样本类型 | 样本 | 结构特点 | 结论 |
+|---|---|---|---|
+| 滴滴电子发票 | `滴滴电子发票 (19).pdf`、`滴滴电子发票 (20).pdf`、`用车电子发票 (1).pdf` | 发票主体外多一块行程区，版面比普通发票更复杂 | bbox 主路可按发票主体锚点抽取核心发票字段，行程信息不混入发票字段；行程明细仍由行程单/补充凭证链路处理。 |
+| 保险电子普通发票 | `订单1128149704378709-电子普通发票-保险(1).pdf`、`订单1128149704378709-电子普通发票-保险(2).pdf` | 结构接近普通发票，但票面高度和文本块位置与普通样本不同 | 不能依赖固定高度坐标；改用锚点和相对区域后，可覆盖金额、税额、开票人等原先易漏字段。 |
+| 普通数电/VAT 发票 | 餐饮、酒店、货拉拉、三快智送等样本 | 标准票面为主，局部存在同线公司名、货币符号、尾部字段错序 | bbox 主路和 PDF 文本兜底结合后，字段稳定性优于单纯固定正则。 |
+
+行程单文件已从发票字段回归 Excel 中剔除，避免把“发票解析成功率”和“行程单补充凭证解析成功率”混为一类。
+
+### 14.6 落库问题补充
+
+2026-07-29 在“新建报销单99”上传 `订单1128149704378709-电子普通发票-保险(1).pdf` 时，日志显示附件 OCR 已完成，但发票表未生成记录。
+
+根因不是字段解析失败，而是 OCR 原始 JSON 中包含 MySQL 当前字符集不接受的 4 字节字符，写入 `invoice.ocr_raw_json` 时触发：
+
+```text
+Incorrect string value: '\xF0\x9F\x99\x8C"}...' for column 'ocr_raw_json'
+```
+
+处理决策：
+
+- OCR 原始 JSON 写入 `attachment.ocr_result`、`reimbursement.ocr_raw_json`、`invoice.ocr_raw_json` 前统一执行 `stripSupplementaryChars`。
+- 清洗只移除数据库当前字符集无法保存的补充平面字符，不改变发票号码、金额、税额、购买方、销售方等业务字段。
+- 历史上已经处于“附件已识别但发票未落库”的记录不会自动补建发票，需要重新上传或后续提供重试入口。
+
+### 14.7 实现归并
+
+| 范围 | 文件 | 说明 |
+|---|---|---|
+| 发票 OCR 主流程 | `admin3-server/src/main/java/tech/wetech/admin3/sys/service/OcrService.java` | 本地 OCR 模式下支持 `BBOX_REGION`，读取 `ocr_raw.bbox` 抽取发票核心字段；PDF 文本层作为兼容支路和字段补充；OCR JSON 入库前清洗 4 字节字符。 |
+| OCR 配置执行 | `admin3-server/src/main/java/tech/wetech/admin3/sys/service/ocr/OcrExecutionService.java` | 根据当前启用配置判断是否使用 bbox 发票解析支路。 |
+| OCR 配置模型 | `admin3-server/src/main/java/tech/wetech/admin3/sys/model/OcrEngineConfig.java` | 新增 `parseStrategy`，默认 `BBOX_REGION`。 |
+| OCR 配置接口 | `admin3-server/src/main/java/tech/wetech/admin3/controller/OcrEngineConfigController.java` | 请求/响应包含 `parseStrategy`。 |
+| 初始化 SQL | `admin3-server/src/main/resources/V008__ocr_engine_management.sql`、`V011__ocr_engine_parse_strategy.sql` | 初始化和补丁脚本维护 `parse_strategy` 字段。 |
+| 管理端页面 | `admin3-ui/src/views/ocr-engine-config-list.vue` | 在 OCR 执行管理中提供“解析支路”选择，默认 bbox 增强。 |
+| 管理端 API | `admin3-ui/src/api/ocr-engine-config.ts` | 类型定义和提交参数包含 `parseStrategy`。 |
+| 诊断代码 | `admin3-server/src/test/java/tech/wetech/admin3/sys/service/OcrComparisonDiagnosticTest.java` | 输出 PDF 文本层、OCR invoice_fields、bbox 区域解析等对比结果，供样本复测和 Excel 排查。 |
+
+### 14.8 验证记录
+
+2026-07-29 已执行并通过：
+
+```powershell
+.\mvnw.cmd -pl admin3-server "-Dtest=OcrComparisonDiagnosticTest" test
+.\mvnw.cmd -pl admin3-server "-Dtest=OcrServiceTest,OpenAiCompatibleOcrProviderTest" test
+npm.cmd run build
+.\mvnw.cmd -pl admin3-server package -DskipTests
+powershell -ExecutionPolicy Bypass -File .\start.ps1
+```
+
+验证结论：
+
+- OCR 相关单元测试通过。
+- 前端构建通过。
+- 后端已重新打包并启动。
+- `http://127.0.0.1:9099/admin3/` 返回 `HTTP 200`。
+
+### 14.9 当前方案边界
+
+- bbox 分块解析仍依赖本地 OCR 返回的 `ocr_raw.bbox`。若 OCR 服务未返回 bbox，系统只能退回普通 OCR 文本和 PDF 文本正则能力。
+- 对全新未知票面高度或第三种结构，当前方案通过锚点相对定位降低风险，但仍需要真实样本回归确认。
+- 不建议继续无限追加固定正则适配所有文本层乱序情况；后续新增样本应优先检查 bbox 块结构、锚点定位是否稳定，再决定是否补规则。
+- 长期方案可考虑将 MySQL 字段和连接统一迁移为 `utf8mb4`，从根上允许保存完整 OCR 原始 JSON；当前先采用字符清洗，改动范围最小。
