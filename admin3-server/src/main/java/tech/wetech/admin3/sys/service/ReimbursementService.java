@@ -777,7 +777,7 @@ public class ReimbursementService {
       item.setProjectCostCategory(req.projectCostCategory());
       item.setCustomerName(req.customerName());
       item.setRemark(isOcrSource(req.source()) || hasLinkedInvoices(req) ? null : req.remark());
-      item.setDescription(isOcrSource(req.source()) || hasLinkedInvoices(req) ? null : req.description());
+      item.setDescription(req.description());
       item.setSource(req.source() == null || req.source().isBlank() ? "manual" : req.source());
       item.setSortOrder(index++);
       item.setCreatedBy(userId);
@@ -1016,7 +1016,7 @@ public class ReimbursementService {
       firstNonBlank(left.projectCostCategory(), right.projectCostCategory()),
       firstNonBlank(left.customerName(), right.customerName()),
       "ocr".equalsIgnoreCase(firstNonBlank(left.source(), right.source())) ? null : firstNonBlank(left.remark(), right.remark()),
-      "ocr".equalsIgnoreCase(firstNonBlank(left.source(), right.source())) ? null : firstNonBlank(left.description(), right.description()),
+      firstNonBlank(left.description(), right.description()),
       firstNonBlank(left.source(), right.source())
     );
   }

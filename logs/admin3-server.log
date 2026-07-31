@@ -529,3 +529,604 @@ Caused by: java.sql.SQLException: Incorrect string value: '\xF0\x9F\x99\x8C"}...
 2026-07-29T14:09:10.521+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=用车行程单.pdf
 2026-07-29T14:09:10.526+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=携程用车行程单.pdf
 2026-07-29T14:09:26.608+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Support attachment 452 updated trip places for invoice 344: 中华人民共和国最高人民检察院-东柜门 -> 泰合鲜·精品鲁菜(陶然亭店)
+2026-07-29T15:06:34.313+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-1] t.w.a.controller.AttachmentController    : Attachment uploaded: id=453, file=zmfp2026071213263031547573500003.pdf, size=57157, reimbursementId=79, stored=9d4fd259-bb22-4c5c-8333-6c342e918ad5.pdf
+2026-07-29T15:06:34.315+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-1] t.w.a.controller.AttachmentController    : OCR triggered for attachment 453
+2026-07-29T15:06:34.330+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 453, file: uploads\attachments\9d4fd259-bb22-4c5c-8333-6c342e918ad5.pdf
+2026-07-29T15:06:34.336+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-2] t.w.a.controller.AttachmentController    : Attachment uploaded: id=454, file=zmfp2026071213265320352171700005.pdf, size=56947, reimbursementId=79, stored=017b5584-d7da-41ba-981f-ed51e135e12d.pdf
+2026-07-29T15:06:34.336+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-2] t.w.a.controller.AttachmentController    : OCR triggered for attachment 454
+2026-07-29T15:06:34.343+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-8] t.w.a.controller.AttachmentController    : Attachment uploaded: id=455, file=digital_26117000000999324130.pdf, size=99350, reimbursementId=79, stored=4e5dbb4d-317f-45da-b356-3ba5409eb06c.pdf
+2026-07-29T15:06:34.344+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-8] t.w.a.controller.AttachmentController    : OCR triggered for attachment 455
+2026-07-29T15:06:34.367+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 454, file: uploads\attachments\017b5584-d7da-41ba-981f-ed51e135e12d.pdf
+2026-07-29T15:06:34.368+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : Attachment uploaded: id=456, file=货拉拉电子发票 (3).pdf, size=136851, reimbursementId=79, stored=b207b3ab-f5f8-4536-91ae-27eeb0c5888f.pdf
+2026-07-29T15:06:34.368+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 455, file: uploads\attachments\4e5dbb4d-317f-45da-b356-3ba5409eb06c.pdf
+2026-07-29T15:06:34.369+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : OCR triggered for attachment 456
+2026-07-29T15:06:34.372+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:06:34.374+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-6] t.w.a.controller.AttachmentController    : Attachment uploaded: id=458, file=货拉拉电子发票 (2).pdf, size=137282, reimbursementId=79, stored=dc250bf1-71aa-43af-82a8-2556e3dcb0f5.pdf
+2026-07-29T15:06:34.374+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-6] t.w.a.controller.AttachmentController    : OCR triggered for attachment 458
+2026-07-29T15:06:34.377+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 456, file: uploads\attachments\b207b3ab-f5f8-4536-91ae-27eeb0c5888f.pdf
+2026-07-29T15:06:34.381+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : Attachment uploaded: id=459, file=zmfp2026062618132800077238600001 (1).pdf, size=57337, reimbursementId=79, stored=8c817dbb-bfd1-4490-a026-a8acfbcfde7e.pdf
+2026-07-29T15:06:34.381+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-4] t.w.a.controller.AttachmentController    : Attachment uploaded: id=457, file=货拉拉电子发票 (1).pdf, size=138067, reimbursementId=79, stored=ffb0f0cb-9807-48bd-9681-b938ba1443c9.pdf
+2026-07-29T15:06:34.382+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-4] t.w.a.controller.AttachmentController    : OCR triggered for attachment 457
+2026-07-29T15:06:34.382+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : OCR triggered for attachment 459
+2026-07-29T15:06:34.427+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 458, file: uploads\attachments\dc250bf1-71aa-43af-82a8-2556e3dcb0f5.pdf
+2026-07-29T15:06:34.577+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:06:34.596+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 457, file: uploads\attachments\ffb0f0cb-9807-48bd-9681-b938ba1443c9.pdf
+2026-07-29T15:06:34.597+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 459, file: uploads\attachments\8c817dbb-bfd1-4490-a026-a8acfbcfde7e.pdf
+2026-07-29T15:06:34.614+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : Attachment uploaded: id=461, file=zmfp2026070909194726162999800001.pdf, size=56699, reimbursementId=79, stored=7353bd93-db93-44d2-8fb0-4f31c9bde1ba.pdf
+2026-07-29T15:06:34.614+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : Attachment uploaded: id=460, file=26442000007273956556_广东维信智联科技有限公司.pdf, size=56964, reimbursementId=79, stored=4401b3a3-a3b6-4182-9961-7ca23847a761.pdf
+2026-07-29T15:06:34.621+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : OCR triggered for attachment 460
+2026-07-29T15:06:34.618+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:06:34.620+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : OCR triggered for attachment 461
+2026-07-29T15:06:34.630+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-9] t.w.a.controller.AttachmentController    : Attachment uploaded: id=462, file=zmfp2026062618132800077238600001.pdf, size=57337, reimbursementId=79, stored=e614b6dc-ca1b-4977-a083-a26d729fe994.pdf
+2026-07-29T15:06:34.633+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-9] t.w.a.controller.AttachmentController    : OCR triggered for attachment 462
+2026-07-29T15:06:34.705+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:06:34.724+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 460, file: uploads\attachments\4401b3a3-a3b6-4182-9961-7ca23847a761.pdf
+2026-07-29T15:06:34.743+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 462, file: uploads\attachments\e614b6dc-ca1b-4977-a083-a26d729fe994.pdf
+2026-07-29T15:06:34.744+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 461, file: uploads\attachments\7353bd93-db93-44d2-8fb0-4f31c9bde1ba.pdf
+2026-07-29T15:06:34.751+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:06:34.943+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:06:34.993+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:06:35.011+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:06:35.041+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:06:35.256+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=zmfp2026071213263031547573500003.png
+2026-07-29T15:06:35.411+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:06:35.414+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:06:35.451+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=zmfp2026071213265320352171700005.png
+2026-07-29T15:06:35.451+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=货拉拉电子发票 (3).png
+2026-07-29T15:06:35.480+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:06:35.517+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=货拉拉电子发票 (2).png
+2026-07-29T15:06:35.594+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=货拉拉电子发票 (1).png
+2026-07-29T15:06:35.676+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=zmfp2026062618132800077238600001 (1).png
+2026-07-29T15:06:35.684+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=digital_26117000000999324130.png
+2026-07-29T15:06:35.795+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=zmfp2026070909194726162999800001.png
+2026-07-29T15:06:35.818+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=26442000007273956556_广东维信智联科技有限公司.png
+2026-07-29T15:06:35.829+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=zmfp2026062618132800077238600001.png
+2026-07-29T15:06:44.303+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 456, result length: 5670
+2026-07-29T15:06:44.481+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 79 updated from OCR attachment 456, invoiceNo=26127000000351354076, amount=164.59
+2026-07-29T15:06:50.909+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 453, result length: 5204
+2026-07-29T15:06:51.109+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 79 updated from OCR attachment 453, invoiceNo=26442000007907200231, amount=183.35
+2026-07-29T15:06:57.235+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 454, result length: 5173
+2026-07-29T15:06:57.454+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 79 updated from OCR attachment 454, invoiceNo=26442000007907223466, amount=30.12
+2026-07-29T15:07:03.315+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 458, result length: 5745
+2026-07-29T15:07:03.550+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 79 updated from OCR attachment 458, invoiceNo=26127000000312800304, amount=241.98
+2026-07-29T15:07:09.822+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 455, result length: 5425
+2026-07-29T15:07:10.036+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 79 updated from OCR attachment 455, invoiceNo=26117000000999324130, amount=172.90
+2026-07-29T15:07:18.140+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 457, result length: 5959
+2026-07-29T15:07:18.416+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 79 updated from OCR attachment 457, invoiceNo=26127000000343620892, amount=729.37
+2026-07-29T15:07:24.433+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 459, result length: 5113
+2026-07-29T15:07:24.933+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 79 updated from OCR attachment 459, invoiceNo=26442000007226037076, amount=335.66
+2026-07-29T15:07:30.453+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 460, result length: 4394
+2026-07-29T15:07:30.814+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 79 updated from OCR attachment 460, invoiceNo=26442000007273956556, amount=148.00
+2026-07-29T15:07:37.890+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 461, result length: 5289
+2026-07-29T15:07:38.401+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 79 updated from OCR attachment 461, invoiceNo=26442000007779083686, amount=188.90
+2026-07-29T15:07:45.954+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 462, result length: 5113
+2026-07-29T15:07:46.063+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR attachment 462 matched duplicate invoice 363, skipped new invoice creation
+2026-07-29T15:10:59.958+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : Attachment uploaded: id=463, file=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.pdf, size=64779, reimbursementId=80, stored=f7da2c37-b195-4491-abcd-3ceb17081156.pdf
+2026-07-29T15:10:59.958+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : OCR triggered for attachment 463
+2026-07-29T15:10:59.967+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 463, file: uploads\attachments\f7da2c37-b195-4491-abcd-3ceb17081156.pdf
+2026-07-29T15:10:59.989+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-6] t.w.a.controller.AttachmentController    : Attachment uploaded: id=464, file=订单1128149704378709-电子普通发票(1).pdf, size=60977, reimbursementId=80, stored=0bc9b455-b73f-4229-a22b-59bfe4df9036.pdf
+2026-07-29T15:10:59.990+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-6] t.w.a.controller.AttachmentController    : OCR triggered for attachment 464
+2026-07-29T15:10:59.994+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-2] t.w.a.controller.AttachmentController    : Attachment uploaded: id=465, file=订单1128149704378709-电子普通发票(2).pdf, size=60566, reimbursementId=80, stored=871322c7-a6e5-42af-8485-a12f01a06b8c.pdf
+2026-07-29T15:10:59.994+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-2] t.w.a.controller.AttachmentController    : OCR triggered for attachment 465
+2026-07-29T15:11:00.002+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 464, file: uploads\attachments\0bc9b455-b73f-4229-a22b-59bfe4df9036.pdf
+2026-07-29T15:11:00.029+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 465, file: uploads\attachments\871322c7-a6e5-42af-8485-a12f01a06b8c.pdf
+2026-07-29T15:11:00.034+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : Attachment uploaded: id=466, file=dzfp_26112000003078497746_20260727105946王府井酒店2晚.pdf, size=141663, reimbursementId=80, stored=b6bc2a1a-7b82-4a83-86a5-67454fceb184.pdf
+2026-07-29T15:11:00.041+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : Attachment uploaded: id=467, file=北京京寻餐饮有限公司_发票金额174.50元.pdf, size=145799, reimbursementId=80, stored=3bcf6fa8-f226-4beb-9153-c9acba367f26.pdf
+2026-07-29T15:11:00.042+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : OCR triggered for attachment 466
+2026-07-29T15:11:00.043+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : OCR triggered for attachment 467
+2026-07-29T15:11:00.059+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 466, file: uploads\attachments\b6bc2a1a-7b82-4a83-86a5-67454fceb184.pdf
+2026-07-29T15:11:00.060+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 467, file: uploads\attachments\3bcf6fa8-f226-4beb-9153-c9acba367f26.pdf
+2026-07-29T15:11:00.082+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-9] t.w.a.controller.AttachmentController    : Attachment uploaded: id=468, file=ESAE178467060404888838y1n94wADiy3v3高速票.pdf, size=173507, reimbursementId=80, stored=bec3e850-a746-4613-9c4d-5cf5a82e31d7.pdf
+2026-07-29T15:11:00.114+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-9] t.w.a.controller.AttachmentController    : OCR triggered for attachment 468
+2026-07-29T15:11:00.259+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-4] t.w.a.controller.AttachmentController    : Attachment uploaded: id=469, file=货拉拉电子发票 (4).pdf, size=137352, reimbursementId=80, stored=a5b72752-235f-488e-97db-e6fe9521dcb5.pdf
+2026-07-29T15:11:00.261+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-4] t.w.a.controller.AttachmentController    : OCR triggered for attachment 469
+2026-07-29T15:11:00.261+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 468, file: uploads\attachments\bec3e850-a746-4613-9c4d-5cf5a82e31d7.pdf
+2026-07-29T15:11:00.280+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-8] t.w.a.controller.AttachmentController    : Attachment uploaded: id=470, file=订单1128149704378709-电子普通发票-保险(1).pdf, size=203997, reimbursementId=80, stored=f1845c5a-02a5-4176-9ea7-0d13f39b1164.pdf
+2026-07-29T15:11:00.294+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-8] t.w.a.controller.AttachmentController    : OCR triggered for attachment 470
+2026-07-29T15:11:00.302+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-1] t.w.a.controller.AttachmentController    : Attachment uploaded: id=473, file=订单1128149704378709-电子普通发票-保险(2).pdf, size=203999, reimbursementId=80, stored=769db12e-fc67-4db5-86eb-1456e4ea9e53.pdf
+2026-07-29T15:11:00.303+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : Attachment uploaded: id=471, file=用车电子发票 (1).pdf, size=59760, reimbursementId=80, stored=1a645f6d-614a-4b9f-8a56-f6b37d4ed6ea.pdf
+2026-07-29T15:11:00.303+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : OCR triggered for attachment 471
+2026-07-29T15:11:00.303+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : Attachment uploaded: id=472, file=上海三快智送科技有限公司_发票金额5.00元.pdf, size=110364, reimbursementId=80, stored=f0b1dad6-e942-467f-8898-aeabda7844cf.pdf
+2026-07-29T15:11:00.303+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-1] t.w.a.controller.AttachmentController    : OCR triggered for attachment 473
+2026-07-29T15:11:00.303+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : OCR triggered for attachment 472
+2026-07-29T15:11:00.341+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-6] t.w.a.controller.AttachmentController    : Attachment uploaded: id=474, file=用车电子发票.pdf, size=59760, reimbursementId=80, stored=c9e06c46-2319-4e07-8466-a00d6791c540.pdf
+2026-07-29T15:11:00.358+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-6] t.w.a.controller.AttachmentController    : OCR triggered for attachment 474
+2026-07-29T15:11:00.393+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 469, file: uploads\attachments\a5b72752-235f-488e-97db-e6fe9521dcb5.pdf
+2026-07-29T15:11:00.460+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 473, file: uploads\attachments\769db12e-fc67-4db5-86eb-1456e4ea9e53.pdf
+2026-07-29T15:11:00.460+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 472, file: uploads\attachments\f0b1dad6-e942-467f-8898-aeabda7844cf.pdf
+2026-07-29T15:11:00.475+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 471, file: uploads\attachments\1a645f6d-614a-4b9f-8a56-f6b37d4ed6ea.pdf
+2026-07-29T15:11:00.475+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 470, file: uploads\attachments\f1845c5a-02a5-4176-9ea7-0d13f39b1164.pdf
+2026-07-29T15:11:00.553+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 474, file: uploads\attachments\c9e06c46-2319-4e07-8466-a00d6791c540.pdf
+2026-07-29T15:11:00.608+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.png
+2026-07-29T15:11:00.693+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:11:00.707+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:11:00.739+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票(1).png
+2026-07-29T15:11:00.758+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票(2).png
+2026-07-29T15:11:00.854+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:11:00.860+08:00  WARN 30512 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:11:00.909+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=dzfp_26112000003078497746_20260727105946王府井酒店2晚.png
+2026-07-29T15:11:00.923+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=北京京寻餐饮有限公司_发票金额174.50元.png
+2026-07-29T15:11:00.958+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=ESAE178467060404888838y1n94wADiy3v3高速票.png
+2026-07-29T15:11:00.998+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=货拉拉电子发票 (4).png
+2026-07-29T15:11:01.005+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=上海三快智送科技有限公司_发票金额5.00元.png
+2026-07-29T15:11:01.022+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票-保险(2).png
+2026-07-29T15:11:01.047+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票-保险(1).png
+2026-07-29T15:11:01.060+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=用车电子发票.png
+2026-07-29T15:11:01.060+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=用车电子发票 (1).png
+2026-07-29T15:11:07.887+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 464, result length: 4507
+2026-07-29T15:11:08.008+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 80 updated from OCR attachment 464, invoiceNo=26317000002664059212, amount=1980.00
+2026-07-29T15:11:13.431+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 465, result length: 4584
+2026-07-29T15:11:13.670+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 80 updated from OCR attachment 465, invoiceNo=26317000002664059211, amount=278.00
+2026-07-29T15:11:19.218+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 466, result length: 4593
+2026-07-29T15:11:19.382+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 80 updated from OCR attachment 466, invoiceNo=26112000003078497746, amount=804.00
+2026-07-29T15:11:25.218+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 463, result length: 5204
+2026-07-29T15:11:25.557+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 80 updated from OCR attachment 463, invoiceNo=26127000000363374667, amount=1984.00
+2026-07-29T15:11:30.611+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 467, result length: 4273
+2026-07-29T15:11:30.827+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 80 updated from OCR attachment 467, invoiceNo=26112000003059680516, amount=174.50
+2026-07-29T15:11:36.991+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 468, result length: 4867
+2026-07-29T15:11:37.270+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 80 updated from OCR attachment 468, invoiceNo=26447000001447993351, amount=40.00
+2026-07-29T15:11:43.396+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 469, result length: 5750
+2026-07-29T15:11:43.699+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 80 updated from OCR attachment 469, invoiceNo=26127000000365266621, amount=307.06
+2026-07-29T15:11:48.950+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 472, result length: 4393
+2026-07-29T15:11:49.348+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 80 updated from OCR attachment 472, invoiceNo=26317000002597895258, amount=5.00
+2026-07-29T15:11:54.927+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 473, result length: 5125
+2026-07-29T15:11:55.565+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 80 updated from OCR attachment 473, invoiceNo=26317000002662000660, amount=29.00
+2026-07-29T15:12:01.127+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 474, result length: 4792
+2026-07-29T15:12:01.768+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 80 updated from OCR attachment 474, invoiceNo=26112000003031372846, amount=53.00
+2026-07-29T15:12:07.526+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 471, result length: 4792
+2026-07-29T15:12:07.604+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR attachment 471 matched duplicate invoice 375, skipped new invoice creation
+2026-07-29T15:12:13.218+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 470, result length: 5094
+2026-07-29T15:12:13.759+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 80 updated from OCR attachment 470, invoiceNo=26317000002633379048, amount=29.00
+2026-07-29T15:24:03.814+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting support attachment OCR for attachment 475, file: uploads\attachments\ddbe8a8a-b2ba-40f0-a7b8-2653c3b97293.pdf
+2026-07-29T15:24:03.821+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting support attachment OCR for attachment 476, file: uploads\attachments\a3188fc8-f3b6-4d7f-bf9f-6b6dbc45c0a2.pdf
+2026-07-29T15:24:03.827+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=携程用车行程单.pdf
+2026-07-29T15:24:03.839+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting support attachment OCR for attachment 477, file: uploads\attachments\25733d6b-6fce-4d23-bc3f-c5030321a43c.pdf
+2026-07-29T15:24:03.840+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=用车行程单.pdf
+2026-07-29T15:24:03.866+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=货拉拉行程报销单 (3).pdf
+2026-07-29T15:24:20.413+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Support attachment 477 updated trip places for invoice 372: 中华人民共和国最高人民检察院-东柜门 -> 泰合鲜·精品鲁菜(陶然亭店)
+2026-07-29T15:26:08.712+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-4] t.w.a.controller.AttachmentController    : Attachment uploaded: id=478, file=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00 (2).pdf, size=64779, reimbursementId=80, stored=5baa215e-213c-4fd8-bf01-c05a929b9659.pdf
+2026-07-29T15:26:08.713+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-4] t.w.a.controller.AttachmentController    : OCR triggered for attachment 478
+2026-07-29T15:26:08.719+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 478, file: uploads\attachments\5baa215e-213c-4fd8-bf01-c05a929b9659.pdf
+2026-07-29T15:26:08.721+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-1] t.w.a.controller.AttachmentController    : Attachment uploaded: id=479, file=dzfp_26112000003078497746_20260727105946王府井酒店2晚 (2).pdf, size=141663, reimbursementId=80, stored=a95826fe-4cd8-4e42-93bc-6b1e6b97bb65.pdf
+2026-07-29T15:26:08.721+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-1] t.w.a.controller.AttachmentController    : OCR triggered for attachment 479
+2026-07-29T15:26:08.728+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 479, file: uploads\attachments\a95826fe-4cd8-4e42-93bc-6b1e6b97bb65.pdf
+2026-07-29T15:26:08.731+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : Attachment uploaded: id=480, file=订单1128149704378709-电子普通发票-保险(3).pdf, size=203997, reimbursementId=80, stored=8e2324b0-b38c-46cc-a06c-6913cae1b65c.pdf
+2026-07-29T15:26:08.732+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : OCR triggered for attachment 480
+2026-07-29T15:26:08.738+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 480, file: uploads\attachments\8e2324b0-b38c-46cc-a06c-6913cae1b65c.pdf
+2026-07-29T15:26:08.946+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00 (2).png
+2026-07-29T15:26:08.979+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=dzfp_26112000003078497746_20260727105946王府井酒店2晚 (2).png
+2026-07-29T15:26:08.983+08:00  INFO 30512 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票-保险(3).png
+2026-07-29T15:26:16.081+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 478, result length: 5204
+2026-07-29T15:26:16.160+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR attachment 478 matched duplicate invoice 369, skipped new invoice creation
+2026-07-29T15:26:22.128+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 479, result length: 4593
+2026-07-29T15:26:22.205+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR attachment 479 matched duplicate invoice 368, skipped new invoice creation
+2026-07-29T15:26:27.819+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 480, result length: 5094
+2026-07-29T15:26:27.883+08:00  INFO 30512 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR attachment 480 matched duplicate invoice 376, skipped new invoice creation
+2026-07-29T15:32:31.312+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-7] t.wetech.admin3.sys.service.OcrService   : Support attachment 475 updated trip places for invoice 367: 白云国际机场T3 -> 汇峰中心-D区
+2026-07-29T15:33:14.550+08:00  INFO 30512 --- [admin3] [http-nio-9099-exec-3] t.wetech.admin3.sys.service.OcrService   : Support attachment 476 updated trip places for invoice 369: 首都国际机场T2 -> 中华人民共和国最高人民检察院-东门
+2026-07-29T15:53:05.807+08:00  INFO 23896 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 23896 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-07-29T15:53:05.808+08:00  INFO 23896 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-07-29T15:53:07.094+08:00  INFO 23896 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-29T15:53:07.345+08:00  INFO 23896 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 244 ms. Found 20 JPA repository interfaces.
+2026-07-29T15:53:10.362+08:00  INFO 23896 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-07-29T15:53:10.388+08:00  INFO 23896 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-29T15:53:10.389+08:00  INFO 23896 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-07-29T15:53:10.457+08:00  INFO 23896 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-07-29T15:53:10.458+08:00  INFO 23896 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4553 ms
+2026-07-29T15:53:11.090+08:00  INFO 23896 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-29T15:53:11.243+08:00  INFO 23896 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-07-29T15:53:11.313+08:00  INFO 23896 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-07-29T15:53:11.724+08:00  INFO 23896 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-29T15:53:11.772+08:00  INFO 23896 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-29T15:53:12.422+08:00  INFO 23896 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1f4dd016
+2026-07-29T15:53:12.426+08:00  INFO 23896 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-29T15:53:12.504+08:00  WARN 23896 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-07-29T15:53:16.007+08:00  INFO 23896 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-29T15:53:16.289+08:00  INFO 23896 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-29T15:53:17.976+08:00  INFO 23896 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-29T15:53:21.251+08:00  WARN 23896 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-29T15:53:22.363+08:00  INFO 23896 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-07-29T15:53:22.402+08:00  INFO 23896 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 17.159 seconds (process running for 17.832)
+2026-07-29T15:53:29.077+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-29T15:53:29.079+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-29T15:53:29.081+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-07-29T15:58:01.601+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-1] t.w.a.controller.AttachmentController    : Attachment uploaded: id=483, file=滴滴电子发票 (19).pdf, size=74758, reimbursementId=81, stored=58f21d1a-8904-433e-8c3d-2a75398c615a.pdf
+2026-07-29T15:58:01.606+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : Attachment uploaded: id=481, file=dzfp_26112000003078497746_20260727105946王府井酒店2晚.pdf, size=141663, reimbursementId=81, stored=118671cb-5c1a-4203-95f2-4e915add2042.pdf
+2026-07-29T15:58:01.606+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-2] t.w.a.controller.AttachmentController    : Attachment uploaded: id=484, file=北京京寻餐饮有限公司_发票金额174.50元.pdf, size=145799, reimbursementId=81, stored=3065a7c0-5d71-4872-a4dc-db3f029c5581.pdf
+2026-07-29T15:58:01.608+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-6] t.w.a.controller.AttachmentController    : Attachment uploaded: id=482, file=滴滴电子发票 (20).pdf, size=74753, reimbursementId=81, stored=04b31d9f-d61f-4f1d-ab7e-0de3e737bb0d.pdf
+2026-07-29T15:58:01.608+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : Attachment uploaded: id=486, file=ESAE178467060404888838y1n94wADiy3v3高速票.pdf, size=173507, reimbursementId=81, stored=2338e1c8-2ea3-4ef1-99f5-2353db9c8c02.pdf
+2026-07-29T15:58:01.608+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : Attachment uploaded: id=485, file=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.pdf, size=64779, reimbursementId=81, stored=d9f76a10-5602-466a-8d6b-6a996fd6d889.pdf
+2026-07-29T15:58:01.608+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-6] t.w.a.controller.AttachmentController    : OCR triggered for attachment 482
+2026-07-29T15:58:01.608+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-2] t.w.a.controller.AttachmentController    : OCR triggered for attachment 484
+2026-07-29T15:58:01.608+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : OCR triggered for attachment 486
+2026-07-29T15:58:01.608+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : OCR triggered for attachment 481
+2026-07-29T15:58:01.608+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : OCR triggered for attachment 485
+2026-07-29T15:58:01.624+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-1] t.w.a.controller.AttachmentController    : OCR triggered for attachment 483
+2026-07-29T15:58:01.740+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 486, file: uploads\attachments\2338e1c8-2ea3-4ef1-99f5-2353db9c8c02.pdf
+2026-07-29T15:58:01.740+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 483, file: uploads\attachments\58f21d1a-8904-433e-8c3d-2a75398c615a.pdf
+2026-07-29T15:58:01.740+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 485, file: uploads\attachments\d9f76a10-5602-466a-8d6b-6a996fd6d889.pdf
+2026-07-29T15:58:01.741+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 482, file: uploads\attachments\04b31d9f-d61f-4f1d-ab7e-0de3e737bb0d.pdf
+2026-07-29T15:58:01.741+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 484, file: uploads\attachments\3065a7c0-5d71-4872-a4dc-db3f029c5581.pdf
+2026-07-29T15:58:01.741+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 481, file: uploads\attachments\118671cb-5c1a-4203-95f2-4e915add2042.pdf
+2026-07-29T15:58:01.744+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : Attachment uploaded: id=487, file=订单1128149704378709-电子普通发票-保险(2).pdf, size=203999, reimbursementId=81, stored=19cc6dbf-19d2-4960-a9e0-91d45d4dab41.pdf
+2026-07-29T15:58:01.776+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : OCR triggered for attachment 487
+2026-07-29T15:58:01.758+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-6] t.w.a.controller.AttachmentController    : Attachment uploaded: id=488, file=货拉拉电子发票 (4).pdf, size=137352, reimbursementId=81, stored=2d76a80a-bf8d-4f60-b4b3-f8d40db84c9d.pdf
+2026-07-29T15:58:01.758+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : Attachment uploaded: id=490, file=订单1128149704378709-电子普通发票-保险(1).pdf, size=203997, reimbursementId=81, stored=dfb16f48-3851-404b-92dc-3a3b6c5151b9.pdf
+2026-07-29T15:58:01.759+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-2] t.w.a.controller.AttachmentController    : Attachment uploaded: id=489, file=订单1128149704378709-电子普通发票(2).pdf, size=60566, reimbursementId=81, stored=56a7aea4-abfa-4c14-819f-3ea82e4bf6fa.pdf
+2026-07-29T15:58:01.773+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : Attachment uploaded: id=492, file=订单1128149704378709-电子普通发票(1).pdf, size=60977, reimbursementId=81, stored=61383279-68a1-4cb8-b8bc-60066a539cce.pdf
+2026-07-29T15:58:01.872+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : OCR triggered for attachment 492
+2026-07-29T15:58:01.774+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : Attachment uploaded: id=491, file=用车电子发票 (1).pdf, size=59760, reimbursementId=81, stored=106e0022-1171-4fc7-b4a7-edda589d5bbb.pdf
+2026-07-29T15:58:01.865+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-6] t.w.a.controller.AttachmentController    : OCR triggered for attachment 488
+2026-07-29T15:58:01.867+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : OCR triggered for attachment 490
+2026-07-29T15:58:01.870+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-2] t.w.a.controller.AttachmentController    : OCR triggered for attachment 489
+2026-07-29T15:58:01.888+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : OCR triggered for attachment 491
+2026-07-29T15:58:01.978+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 490, file: uploads\attachments\dfb16f48-3851-404b-92dc-3a3b6c5151b9.pdf
+2026-07-29T15:58:01.979+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 487, file: uploads\attachments\19cc6dbf-19d2-4960-a9e0-91d45d4dab41.pdf
+2026-07-29T15:58:01.979+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 488, file: uploads\attachments\2d76a80a-bf8d-4f60-b4b3-f8d40db84c9d.pdf
+2026-07-29T15:58:01.989+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : Attachment uploaded: id=493, file=上海三快智送科技有限公司_发票金额5.00元.pdf, size=110364, reimbursementId=81, stored=1afe2921-5dbe-4542-b34b-e835ddf788ff.pdf
+2026-07-29T15:58:01.985+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 492, file: uploads\attachments\61383279-68a1-4cb8-b8bc-60066a539cce.pdf
+2026-07-29T15:58:01.990+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 489, file: uploads\attachments\56a7aea4-abfa-4c14-819f-3ea82e4bf6fa.pdf
+2026-07-29T15:58:01.991+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : OCR triggered for attachment 493
+2026-07-29T15:58:01.998+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 491, file: uploads\attachments\106e0022-1171-4fc7-b4a7-edda589d5bbb.pdf
+2026-07-29T15:58:02.027+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 493, file: uploads\attachments\1afe2921-5dbe-4542-b34b-e835ddf788ff.pdf
+2026-07-29T15:58:02.039+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : Attachment uploaded: id=494, file=用车电子发票.pdf, size=59760, reimbursementId=81, stored=8ef60587-5b67-415a-940c-9ffa86267538.pdf
+2026-07-29T15:58:02.055+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : OCR triggered for attachment 494
+2026-07-29T15:58:02.131+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 494, file: uploads\attachments\8ef60587-5b67-415a-940c-9ffa86267538.pdf
+2026-07-29T15:58:04.837+08:00  WARN 23896 --- [admin3] [] org.apache.fontbox.ttf.CmapSubtable      : Format 14 cmap table is not supported and will be ignored
+2026-07-29T15:58:04.969+08:00  WARN 23896 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:58:04.970+08:00  WARN 23896 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:58:06.306+08:00  WARN 23896 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:58:06.319+08:00  WARN 23896 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T15:58:07.828+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=货拉拉电子发票 (4).png
+2026-07-29T15:58:07.829+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=滴滴电子发票 (19).png
+2026-07-29T15:58:07.829+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=上海三快智送科技有限公司_发票金额5.00元.png
+2026-07-29T15:58:07.829+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=滴滴电子发票 (20).png
+2026-07-29T15:58:07.830+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=ESAE178467060404888838y1n94wADiy3v3高速票.png
+2026-07-29T15:58:07.834+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.png
+2026-07-29T15:58:07.834+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票(1).png
+2026-07-29T15:58:07.834+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票-保险(1).png
+2026-07-29T15:58:07.847+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票(2).png
+2026-07-29T15:58:07.851+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票-保险(2).png
+2026-07-29T15:58:07.878+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=dzfp_26112000003078497746_20260727105946王府井酒店2晚.png
+2026-07-29T15:58:07.886+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=用车电子发票.png
+2026-07-29T15:58:07.886+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=用车电子发票 (1).png
+2026-07-29T15:58:07.903+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=北京京寻餐饮有限公司_发票金额174.50元.png
+2026-07-29T15:58:15.976+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 492, result length: 4507
+2026-07-29T15:58:16.274+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 492, invoiceNo=26317000002664059212, amount=1980.00
+2026-07-29T15:58:22.609+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 491, result length: 4792
+2026-07-29T15:58:22.844+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 491, invoiceNo=26112000003031372846, amount=53.00
+2026-07-29T15:58:28.405+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 481, result length: 4593
+2026-07-29T15:58:28.668+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 481, invoiceNo=26112000003078497746, amount=804.00
+2026-07-29T15:58:35.026+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 490, result length: 5094
+2026-07-29T15:58:35.388+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 490, invoiceNo=26317000002633379048, amount=29.00
+2026-07-29T15:58:41.872+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 485, result length: 5204
+2026-07-29T15:58:42.162+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 485, invoiceNo=26127000000363374667, amount=1984.00
+2026-07-29T15:58:49.281+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 483, result length: 6193
+2026-07-29T15:58:49.663+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 483, invoiceNo=26117000000531132508, amount=17.90
+2026-07-29T15:58:55.607+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 489, result length: 4584
+2026-07-29T15:58:56.149+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 489, invoiceNo=26317000002664059211, amount=278.00
+2026-07-29T15:59:01.413+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 484, result length: 4273
+2026-07-29T15:59:01.968+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 484, invoiceNo=26112000003059680516, amount=174.50
+2026-07-29T15:59:09.214+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 482, result length: 6138
+2026-07-29T15:59:09.888+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 482, invoiceNo=26117000000530671207, amount=15.70
+2026-07-29T15:59:14.770+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 493, result length: 4393
+2026-07-29T15:59:15.481+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 493, invoiceNo=26317000002597895258, amount=5.00
+2026-07-29T15:59:21.191+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 487, result length: 5141
+2026-07-29T15:59:21.867+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 487, invoiceNo=26317000002662000660, amount=29.00
+2026-07-29T15:59:27.826+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 486, result length: 4867
+2026-07-29T15:59:28.381+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 486, invoiceNo=26447000001447993351, amount=40.00
+2026-07-29T15:59:34.331+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 488, result length: 5750
+2026-07-29T15:59:34.838+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 81 updated from OCR attachment 488, invoiceNo=26127000000365266621, amount=307.06
+2026-07-29T15:59:40.722+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 494, result length: 4792
+2026-07-29T15:59:40.831+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR attachment 494 matched duplicate invoice 378, skipped new invoice creation
+2026-07-29T16:00:35.390+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting support attachment OCR for attachment 496, file: uploads\attachments\8695acc0-e493-440c-bad5-d2c913c13714.pdf
+2026-07-29T16:00:35.386+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting support attachment OCR for attachment 497, file: uploads\attachments\e4dacf7a-076d-480e-a0fe-c666d71fb12a.pdf
+2026-07-29T16:00:35.391+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting support attachment OCR for attachment 498, file: uploads\attachments\400d8db9-75da-4d58-88b1-df6d4494825f.pdf
+2026-07-29T16:00:35.395+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting support attachment OCR for attachment 499, file: uploads\attachments\ee9fb4fb-551b-4a55-905e-9f6f9638be74.pdf
+2026-07-29T16:00:35.397+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting support attachment OCR for attachment 495, file: uploads\attachments\5c606d07-728b-4e8c-98c7-c49516d04a47.pdf
+2026-07-29T16:00:35.423+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=滴滴顺风车行程单 (1).pdf
+2026-07-29T16:00:35.424+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=携程用车行程单.pdf
+2026-07-29T16:00:35.425+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=用车行程单.pdf
+2026-07-29T16:00:35.423+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=滴滴顺风车行程单.pdf
+2026-07-29T16:00:35.440+08:00  INFO 23896 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=货拉拉行程报销单 (3).pdf
+2026-07-29T16:01:03.427+08:00  INFO 23896 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Support attachment 495 updated trip places for invoice 389: 中华人民共和国最高人民检察院-东柜门 -> 泰合鲜·精品鲁菜(陶然亭店)
+2026-07-29T16:02:10.471+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-2] t.wetech.admin3.sys.service.OcrService   : Support attachment 496 updated trip places for invoice 377: 湘味居(花园大道店) -> 汇峰中心D区
+2026-07-29T16:02:24.556+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-7] t.wetech.admin3.sys.service.OcrService   : Support attachment 497 updated trip places for invoice 378: 首都国际机场T2 -> 中华人民共和国最高人民检察院-东门
+2026-07-29T16:02:30.851+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-5] t.wetech.admin3.sys.service.OcrService   : Support attachment 498 updated trip places for invoice 379: 白云国际机场T3 -> 汇峰中心-D区
+2026-07-29T16:02:34.822+08:00  INFO 23896 --- [admin3] [http-nio-9099-exec-10] t.wetech.admin3.sys.service.OcrService   : Support attachment 499 updated trip places for invoice 380: 湘味居(花园大道店) -> 汇峰中心D区
+2026-07-29T16:15:22.839+08:00  INFO 31840 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 31840 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-07-29T16:15:22.842+08:00  INFO 31840 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-07-29T16:15:24.223+08:00  INFO 31840 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-29T16:15:24.441+08:00  INFO 31840 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 208 ms. Found 20 JPA repository interfaces.
+2026-07-29T16:15:25.424+08:00  INFO 31840 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-07-29T16:15:25.437+08:00  INFO 31840 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-29T16:15:25.437+08:00  INFO 31840 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-07-29T16:15:25.484+08:00  INFO 31840 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-07-29T16:15:25.484+08:00  INFO 31840 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2549 ms
+2026-07-29T16:15:25.759+08:00  INFO 31840 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-29T16:15:25.844+08:00  INFO 31840 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-07-29T16:15:25.894+08:00  INFO 31840 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-07-29T16:15:26.133+08:00  INFO 31840 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-29T16:15:26.169+08:00  INFO 31840 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-29T16:15:26.571+08:00  INFO 31840 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1c2cdc67
+2026-07-29T16:15:26.574+08:00  INFO 31840 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-29T16:15:26.620+08:00  WARN 31840 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-07-29T16:15:28.324+08:00  INFO 31840 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-29T16:15:28.483+08:00  INFO 31840 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-29T16:15:29.084+08:00  INFO 31840 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-29T16:15:31.041+08:00  WARN 31840 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-29T16:15:31.682+08:00  INFO 31840 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-07-29T16:15:31.711+08:00  INFO 31840 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 9.41 seconds (process running for 10.072)
+2026-07-29T16:16:35.366+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-29T16:16:35.370+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-29T16:16:35.370+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-07-29T16:21:17.995+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : Attachment uploaded: id=505, file=滴滴电子发票 (19).pdf, size=74758, reimbursementId=82, stored=c26a3cc7-749f-4683-8aca-b1896d1a62b4.pdf
+2026-07-29T16:21:18.003+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : OCR triggered for attachment 505
+2026-07-29T16:21:18.003+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-2] t.w.a.controller.AttachmentController    : Attachment uploaded: id=502, file=dzfp_26112000003078497746_20260727105946王府井酒店2晚.pdf, size=141663, reimbursementId=82, stored=f84851e3-c253-4456-93fb-aae77388f04f.pdf
+2026-07-29T16:21:18.003+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-4] t.w.a.controller.AttachmentController    : Attachment uploaded: id=500, file=滴滴电子发票 (20).pdf, size=74753, reimbursementId=82, stored=bcab3f61-e151-4145-a5cf-bc116a9f2aef.pdf
+2026-07-29T16:21:18.003+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-1] t.w.a.controller.AttachmentController    : Attachment uploaded: id=503, file=ESAE178467060404888838y1n94wADiy3v3高速票.pdf, size=173507, reimbursementId=82, stored=8741c730-eab3-4b0a-8d5f-5f45163d44bc.pdf
+2026-07-29T16:21:18.003+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : Attachment uploaded: id=501, file=北京京寻餐饮有限公司_发票金额174.50元.pdf, size=145799, reimbursementId=82, stored=35b17b6b-df41-4559-8991-e142b8a28893.pdf
+2026-07-29T16:21:18.003+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : Attachment uploaded: id=504, file=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.pdf, size=64779, reimbursementId=82, stored=23e30639-12bc-4ec8-9562-d4f414bd10e4.pdf
+2026-07-29T16:21:18.007+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-2] t.w.a.controller.AttachmentController    : OCR triggered for attachment 502
+2026-07-29T16:21:18.017+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : OCR triggered for attachment 504
+2026-07-29T16:21:18.012+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-4] t.w.a.controller.AttachmentController    : OCR triggered for attachment 500
+2026-07-29T16:21:18.014+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-1] t.w.a.controller.AttachmentController    : OCR triggered for attachment 503
+2026-07-29T16:21:18.016+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : OCR triggered for attachment 501
+2026-07-29T16:21:18.121+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : Attachment uploaded: id=506, file=订单1128149704378709-电子普通发票(1).pdf, size=60977, reimbursementId=82, stored=8198ebd3-2a23-4833-a2e6-16e76d694f1c.pdf
+2026-07-29T16:21:18.124+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : OCR triggered for attachment 506
+2026-07-29T16:21:18.125+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 501, file: uploads\attachments\35b17b6b-df41-4559-8991-e142b8a28893.pdf
+2026-07-29T16:21:18.125+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 503, file: uploads\attachments\8741c730-eab3-4b0a-8d5f-5f45163d44bc.pdf
+2026-07-29T16:21:18.127+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 502, file: uploads\attachments\f84851e3-c253-4456-93fb-aae77388f04f.pdf
+2026-07-29T16:21:18.129+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 505, file: uploads\attachments\c26a3cc7-749f-4683-8aca-b1896d1a62b4.pdf
+2026-07-29T16:21:18.129+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 500, file: uploads\attachments\bcab3f61-e151-4145-a5cf-bc116a9f2aef.pdf
+2026-07-29T16:21:18.130+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 504, file: uploads\attachments\23e30639-12bc-4ec8-9562-d4f414bd10e4.pdf
+2026-07-29T16:21:18.141+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : Attachment uploaded: id=508, file=上海三快智送科技有限公司_发票金额5.00元.pdf, size=110364, reimbursementId=82, stored=fced2827-33c3-41bb-9e02-d5bde4cb7346.pdf
+2026-07-29T16:21:18.180+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : OCR triggered for attachment 508
+2026-07-29T16:21:18.141+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-1] t.w.a.controller.AttachmentController    : Attachment uploaded: id=507, file=订单1128149704378709-电子普通发票-保险(1).pdf, size=203997, reimbursementId=82, stored=dc9309f1-9194-422f-850d-a3ca3b9760dc.pdf
+2026-07-29T16:21:18.146+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-4] t.w.a.controller.AttachmentController    : Attachment uploaded: id=509, file=订单1128149704378709-电子普通发票(2).pdf, size=60566, reimbursementId=82, stored=63cf4694-156f-4919-bd21-be271ba6cc61.pdf
+2026-07-29T16:21:18.163+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-2] t.w.a.controller.AttachmentController    : Attachment uploaded: id=510, file=订单1128149704378709-电子普通发票-保险(2).pdf, size=203999, reimbursementId=82, stored=78c390b2-1a03-4125-86dd-7be96501df12.pdf
+2026-07-29T16:21:18.170+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : Attachment uploaded: id=511, file=货拉拉电子发票 (4).pdf, size=137352, reimbursementId=82, stored=ce69a5fd-801f-4382-91bd-8fe70980f0f8.pdf
+2026-07-29T16:21:18.189+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : OCR triggered for attachment 511
+2026-07-29T16:21:18.188+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-1] t.w.a.controller.AttachmentController    : OCR triggered for attachment 507
+2026-07-29T16:21:18.188+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-4] t.w.a.controller.AttachmentController    : OCR triggered for attachment 509
+2026-07-29T16:21:18.188+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-2] t.w.a.controller.AttachmentController    : OCR triggered for attachment 510
+2026-07-29T16:21:18.197+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 506, file: uploads\attachments\8198ebd3-2a23-4833-a2e6-16e76d694f1c.pdf
+2026-07-29T16:21:18.239+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : Attachment uploaded: id=512, file=用车电子发票 (1).pdf, size=59760, reimbursementId=82, stored=b649a5d1-ea36-4fe8-a58e-ca0d7c4d8155.pdf
+2026-07-29T16:21:18.256+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-10] t.w.a.controller.AttachmentController    : OCR triggered for attachment 512
+2026-07-29T16:21:18.273+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 511, file: uploads\attachments\ce69a5fd-801f-4382-91bd-8fe70980f0f8.pdf
+2026-07-29T16:21:18.273+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 507, file: uploads\attachments\dc9309f1-9194-422f-850d-a3ca3b9760dc.pdf
+2026-07-29T16:21:18.278+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 510, file: uploads\attachments\78c390b2-1a03-4125-86dd-7be96501df12.pdf
+2026-07-29T16:21:18.293+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 508, file: uploads\attachments\fced2827-33c3-41bb-9e02-d5bde4cb7346.pdf
+2026-07-29T16:21:18.301+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 509, file: uploads\attachments\63cf4694-156f-4919-bd21-be271ba6cc61.pdf
+2026-07-29T16:21:18.342+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : Attachment uploaded: id=513, file=用车电子发票.pdf, size=59760, reimbursementId=82, stored=ed9952a1-5b0c-496d-a9b0-c127fad1da7e.pdf
+2026-07-29T16:21:18.355+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 512, file: uploads\attachments\b649a5d1-ea36-4fe8-a58e-ca0d7c4d8155.pdf
+2026-07-29T16:21:18.360+08:00  INFO 31840 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : OCR triggered for attachment 513
+2026-07-29T16:21:18.506+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 513, file: uploads\attachments\ed9952a1-5b0c-496d-a9b0-c127fad1da7e.pdf
+2026-07-29T16:21:20.452+08:00  WARN 31840 --- [admin3] [] org.apache.fontbox.ttf.CmapSubtable      : Format 14 cmap table is not supported and will be ignored
+2026-07-29T16:21:20.674+08:00  WARN 31840 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T16:21:20.674+08:00  WARN 31840 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T16:21:22.481+08:00  WARN 31840 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T16:21:22.501+08:00  WARN 31840 --- [admin3] [] o.a.pdfbox.pdmodel.font.PDCIDFontType0   : Using fallback NotoSerifSC-ExtraLight for CID-keyed font STSong-Light
+2026-07-29T16:21:24.557+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=ESAE178467060404888838y1n94wADiy3v3高速票.png
+2026-07-29T16:21:24.573+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票(1).png
+2026-07-29T16:21:24.603+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=滴滴电子发票 (19).png
+2026-07-29T16:21:24.604+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=货拉拉电子发票 (4).png
+2026-07-29T16:21:24.634+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票(2).png
+2026-07-29T16:21:24.636+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票-保险(1).png
+2026-07-29T16:21:24.648+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=订单1128149704378709-电子普通发票-保险(2).png
+2026-07-29T16:21:24.598+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=滴滴电子发票 (20).png
+2026-07-29T16:21:24.726+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.png
+2026-07-29T16:21:24.863+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=上海三快智送科技有限公司_发票金额5.00元.png
+2026-07-29T16:21:24.863+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=用车电子发票 (1).png
+2026-07-29T16:21:24.867+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=用车电子发票.png
+2026-07-29T16:21:24.890+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=北京京寻餐饮有限公司_发票金额174.50元.png
+2026-07-29T16:21:24.891+08:00  INFO 31840 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=dzfp_26112000003078497746_20260727105946王府井酒店2晚.png
+2026-07-29T16:21:33.753+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 500, result length: 6138
+2026-07-29T16:21:34.148+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 500, invoiceNo=26117000000530671207, amount=15.70
+2026-07-29T16:21:40.080+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 506, result length: 4507
+2026-07-29T16:21:40.319+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 506, invoiceNo=26317000002664059212, amount=1980.00
+2026-07-29T16:21:46.544+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 510, result length: 5141
+2026-07-29T16:21:46.897+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 510, invoiceNo=26317000002662000660, amount=29.00
+2026-07-29T16:21:53.418+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 513, result length: 4792
+2026-07-29T16:21:53.732+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 513, invoiceNo=26112000003031372846, amount=53.00
+2026-07-29T16:21:59.409+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 502, result length: 4593
+2026-07-29T16:21:59.743+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 502, invoiceNo=26112000003078497746, amount=804.00
+2026-07-29T16:22:05.755+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 507, result length: 5094
+2026-07-29T16:22:06.169+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 507, invoiceNo=26317000002633379048, amount=29.00
+2026-07-29T16:22:12.650+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 511, result length: 5750
+2026-07-29T16:22:13.074+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 511, invoiceNo=26127000000365266621, amount=307.06
+2026-07-29T16:22:18.582+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 501, result length: 4273
+2026-07-29T16:22:19.000+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 501, invoiceNo=26112000003059680516, amount=174.50
+2026-07-29T16:22:26.006+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 512, result length: 4792
+2026-07-29T16:22:26.134+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR attachment 512 matched duplicate invoice 393, skipped new invoice creation
+2026-07-29T16:22:33.162+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 505, result length: 6193
+2026-07-29T16:22:33.712+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 505, invoiceNo=26117000000531132508, amount=17.90
+2026-07-29T16:22:38.840+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 508, result length: 4393
+2026-07-29T16:22:39.408+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 508, invoiceNo=26317000002597895258, amount=5.00
+2026-07-29T16:22:45.423+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 504, result length: 5204
+2026-07-29T16:22:45.925+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 504, invoiceNo=26127000000363374667, amount=1984.00
+2026-07-29T16:22:52.409+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 509, result length: 4584
+2026-07-29T16:22:52.892+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 509, invoiceNo=26317000002664059211, amount=278.00
+2026-07-29T16:22:59.320+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 503, result length: 4867
+2026-07-29T16:22:59.904+08:00  INFO 31840 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 82 updated from OCR attachment 503, invoiceNo=26447000001447993351, amount=40.00
+2026-07-29T16:41:31.663+08:00  INFO 26324 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 26324 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-07-29T16:41:31.665+08:00  INFO 26324 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-07-29T16:41:32.940+08:00  INFO 26324 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-29T16:41:33.162+08:00  INFO 26324 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 214 ms. Found 20 JPA repository interfaces.
+2026-07-29T16:41:34.144+08:00  INFO 26324 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-07-29T16:41:34.165+08:00  INFO 26324 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-29T16:41:34.165+08:00  INFO 26324 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-07-29T16:41:34.229+08:00  INFO 26324 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-07-29T16:41:34.230+08:00  INFO 26324 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2480 ms
+2026-07-29T16:41:34.519+08:00  INFO 26324 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-29T16:41:34.650+08:00  INFO 26324 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-07-29T16:41:34.704+08:00  INFO 26324 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-07-29T16:41:34.971+08:00  INFO 26324 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-29T16:41:35.004+08:00  INFO 26324 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-29T16:41:35.444+08:00  INFO 26324 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1c2cdc67
+2026-07-29T16:41:35.447+08:00  INFO 26324 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-29T16:41:35.511+08:00  WARN 26324 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-07-29T16:41:37.495+08:00  INFO 26324 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-29T16:41:37.675+08:00  INFO 26324 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-29T16:41:38.374+08:00  INFO 26324 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-29T16:41:40.294+08:00  WARN 26324 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-29T16:41:40.861+08:00  INFO 26324 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-07-29T16:41:40.875+08:00  INFO 26324 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 9.726 seconds (process running for 10.294)
+2026-07-29T16:41:52.645+08:00  INFO 26324 --- [admin3] [http-nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-29T16:41:52.645+08:00  INFO 26324 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-29T16:41:52.648+08:00  INFO 26324 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2026-07-29T16:43:12.158+08:00  INFO 26324 --- [admin3] [http-nio-9099-exec-8] t.w.a.controller.AttachmentController    : Attachment uploaded: id=514, file=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.pdf, size=64779, reimbursementId=83, stored=380bfe55-9860-402e-ad85-6aa15b34ff2e.pdf
+2026-07-29T16:43:12.164+08:00  INFO 26324 --- [admin3] [http-nio-9099-exec-8] t.w.a.controller.AttachmentController    : OCR triggered for attachment 514
+2026-07-29T16:43:12.178+08:00  INFO 26324 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 514, file: uploads\attachments\380bfe55-9860-402e-ad85-6aa15b34ff2e.pdf
+2026-07-29T16:43:13.366+08:00  INFO 26324 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.png
+2026-07-29T16:43:21.694+08:00  INFO 26324 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 514, result length: 5204
+2026-07-29T16:43:21.889+08:00  INFO 26324 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 83 updated from OCR attachment 514, invoiceNo=26127000000363374667, amount=1984.00
+2026-07-29T16:52:40.889+08:00  INFO 32224 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 32224 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-07-29T16:52:40.891+08:00  INFO 32224 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-07-29T16:52:42.181+08:00  INFO 32224 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-29T16:52:42.398+08:00  INFO 32224 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 209 ms. Found 20 JPA repository interfaces.
+2026-07-29T16:52:43.391+08:00  INFO 32224 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-07-29T16:52:43.409+08:00  INFO 32224 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-29T16:52:43.411+08:00  INFO 32224 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-07-29T16:52:43.470+08:00  INFO 32224 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-07-29T16:52:43.472+08:00  INFO 32224 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2495 ms
+2026-07-29T16:52:43.722+08:00  INFO 32224 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-29T16:52:43.816+08:00  INFO 32224 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-07-29T16:52:43.857+08:00  INFO 32224 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-07-29T16:52:44.132+08:00  INFO 32224 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-29T16:52:44.172+08:00  INFO 32224 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-29T16:52:44.613+08:00  INFO 32224 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@fa11fda
+2026-07-29T16:52:44.616+08:00  INFO 32224 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-29T16:52:44.679+08:00  WARN 32224 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-07-29T16:52:46.594+08:00  INFO 32224 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-29T16:52:46.755+08:00  INFO 32224 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-29T16:52:47.497+08:00  INFO 32224 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-29T16:52:49.491+08:00  WARN 32224 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-29T16:52:50.072+08:00  INFO 32224 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-07-29T16:52:50.093+08:00  INFO 32224 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 9.727 seconds (process running for 10.327)
+2026-07-29T16:53:04.146+08:00  INFO 32224 --- [admin3] [http-nio-9099-exec-2] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-29T16:53:04.146+08:00  INFO 32224 --- [admin3] [http-nio-9099-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-29T16:53:04.149+08:00  INFO 32224 --- [admin3] [http-nio-9099-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-07-29T16:58:49.153+08:00  INFO 32224 --- [admin3] [http-nio-9099-exec-8] t.w.a.controller.AttachmentController    : Attachment uploaded: id=515, file=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.pdf, size=64779, reimbursementId=83, stored=0016cd55-cd2c-443b-a00b-bad3af498964.pdf
+2026-07-29T16:58:49.160+08:00  INFO 32224 --- [admin3] [http-nio-9099-exec-8] t.w.a.controller.AttachmentController    : OCR triggered for attachment 515
+2026-07-29T16:58:49.173+08:00  INFO 32224 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 515, file: uploads\attachments\0016cd55-cd2c-443b-a00b-bad3af498964.pdf
+2026-07-29T16:58:50.725+08:00  INFO 32224 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.png
+2026-07-29T16:58:58.378+08:00  INFO 32224 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 515, result length: 5204
+2026-07-29T16:58:58.604+08:00  INFO 32224 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 83 updated from OCR attachment 515, invoiceNo=26127000000363374667, amount=1984.00
+2026-07-29T17:09:25.346+08:00  INFO 31196 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 31196 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-07-29T17:09:25.348+08:00  INFO 31196 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-07-29T17:09:26.744+08:00  INFO 31196 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-29T17:09:26.990+08:00  INFO 31196 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 234 ms. Found 20 JPA repository interfaces.
+2026-07-29T17:09:29.705+08:00  INFO 31196 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-07-29T17:09:29.768+08:00  INFO 31196 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-29T17:09:29.768+08:00  INFO 31196 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-07-29T17:09:29.890+08:00  INFO 31196 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-07-29T17:09:29.890+08:00  INFO 31196 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4434 ms
+2026-07-29T17:09:30.558+08:00  INFO 31196 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-29T17:09:30.692+08:00  INFO 31196 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-07-29T17:09:30.755+08:00  INFO 31196 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-07-29T17:09:31.192+08:00  INFO 31196 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-29T17:09:31.250+08:00  INFO 31196 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-29T17:09:31.938+08:00  INFO 31196 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1f4dd016
+2026-07-29T17:09:31.942+08:00  INFO 31196 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-29T17:09:32.020+08:00  WARN 31196 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-07-29T17:09:35.445+08:00  INFO 31196 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-29T17:09:35.702+08:00  INFO 31196 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-29T17:09:37.257+08:00  INFO 31196 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-29T17:09:40.564+08:00  WARN 31196 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-29T17:09:41.845+08:00  INFO 31196 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-07-29T17:09:41.884+08:00  INFO 31196 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 17.121 seconds (process running for 17.804)
+2026-07-29T17:10:10.162+08:00  INFO 31196 --- [admin3] [http-nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-29T17:10:10.163+08:00  INFO 31196 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-29T17:10:10.164+08:00  INFO 31196 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-07-29T17:10:51.684+08:00  INFO 31196 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : Attachment uploaded: id=516, file=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.pdf, size=64779, reimbursementId=84, stored=04b4466c-439b-4a14-a19c-9f8e684bdd96.pdf
+2026-07-29T17:10:51.689+08:00  INFO 31196 --- [admin3] [http-nio-9099-exec-7] t.w.a.controller.AttachmentController    : OCR triggered for attachment 516
+2026-07-29T17:10:51.707+08:00  INFO 31196 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 516, file: uploads\attachments\04b4466c-439b-4a14-a19c-9f8e684bdd96.pdf
+2026-07-29T17:10:51.758+08:00  INFO 31196 --- [admin3] [http-nio-9099-exec-8] t.w.a.controller.AttachmentController    : Attachment uploaded: id=517, file=dzfp_26112000003078497746_20260727105946王府井酒店2晚.pdf, size=141663, reimbursementId=84, stored=5b324bc6-24be-41df-811c-d357b6c22be3.pdf
+2026-07-29T17:10:51.759+08:00  INFO 31196 --- [admin3] [http-nio-9099-exec-8] t.w.a.controller.AttachmentController    : OCR triggered for attachment 517
+2026-07-29T17:10:51.770+08:00  INFO 31196 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 517, file: uploads\attachments\5b324bc6-24be-41df-811c-d357b6c22be3.pdf
+2026-07-29T17:10:51.817+08:00  INFO 31196 --- [admin3] [http-nio-9099-exec-9] t.w.a.controller.AttachmentController    : Attachment uploaded: id=518, file=ESAE178467060404888838y1n94wADiy3v3高速票.pdf, size=173507, reimbursementId=84, stored=0f0e661f-dc3a-48d2-bc97-e915904f263c.pdf
+2026-07-29T17:10:51.818+08:00  INFO 31196 --- [admin3] [http-nio-9099-exec-9] t.w.a.controller.AttachmentController    : OCR triggered for attachment 518
+2026-07-29T17:10:51.831+08:00  INFO 31196 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 518, file: uploads\attachments\0f0e661f-dc3a-48d2-bc97-e915904f263c.pdf
+2026-07-29T17:10:52.865+08:00  INFO 31196 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=ESAE178467060404888838y1n94wADiy3v3高速票.png
+2026-07-29T17:10:52.870+08:00  INFO 31196 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.png
+2026-07-29T17:10:52.907+08:00  INFO 31196 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=dzfp_26112000003078497746_20260727105946王府井酒店2晚.png
+2026-07-29T17:11:01.280+08:00  INFO 31196 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 518, result length: 4959
+2026-07-29T17:11:01.536+08:00  INFO 31196 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 84 updated from OCR attachment 518, invoiceNo=26447000001447993351, amount=40.00
+2026-07-29T17:11:08.971+08:00  INFO 31196 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 516, result length: 5267
+2026-07-29T17:11:09.235+08:00  INFO 31196 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 84 updated from OCR attachment 516, invoiceNo=26127000000363374667, amount=1984.00
+2026-07-29T17:11:15.234+08:00  INFO 31196 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 517, result length: 4593
+2026-07-29T17:11:15.460+08:00  INFO 31196 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 84 updated from OCR attachment 517, invoiceNo=26112000003078497746, amount=804.00
+2026-07-29T17:18:50.497+08:00  INFO 33932 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 33932 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-07-29T17:18:50.499+08:00  INFO 33932 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-07-29T17:18:51.801+08:00  INFO 33932 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-29T17:18:52.020+08:00  INFO 33932 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 210 ms. Found 20 JPA repository interfaces.
+2026-07-29T17:18:53.211+08:00  INFO 33932 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-07-29T17:18:53.233+08:00  INFO 33932 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-29T17:18:53.234+08:00  INFO 33932 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-07-29T17:18:53.294+08:00  INFO 33932 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-07-29T17:18:53.294+08:00  INFO 33932 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2689 ms
+2026-07-29T17:18:53.576+08:00  INFO 33932 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-29T17:18:53.749+08:00  INFO 33932 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-07-29T17:18:53.812+08:00  INFO 33932 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-07-29T17:18:54.120+08:00  INFO 33932 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-29T17:18:54.155+08:00  INFO 33932 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-29T17:18:54.651+08:00  INFO 33932 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@21d8da75
+2026-07-29T17:18:54.654+08:00  INFO 33932 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-29T17:18:54.720+08:00  WARN 33932 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-07-29T17:18:56.977+08:00  INFO 33932 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-29T17:18:57.244+08:00  INFO 33932 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-29T17:18:57.918+08:00  INFO 33932 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-29T17:19:00.430+08:00  WARN 33932 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-29T17:19:01.104+08:00  INFO 33932 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-07-29T17:19:01.138+08:00  INFO 33932 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 11.268 seconds (process running for 12.01)
+2026-07-29T17:19:15.596+08:00  INFO 33932 --- [admin3] [http-nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-29T17:19:15.596+08:00  INFO 33932 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-29T17:19:15.598+08:00  INFO 33932 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-07-29T17:19:16.169+08:00  INFO 33932 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : Attachment uploaded: id=519, file=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.pdf, size=64779, reimbursementId=85, stored=2bdfcbb5-9efd-4336-970a-49309f09b22e.pdf
+2026-07-29T17:19:16.173+08:00  INFO 33932 --- [admin3] [http-nio-9099-exec-3] t.w.a.controller.AttachmentController    : OCR triggered for attachment 519
+2026-07-29T17:19:16.187+08:00  INFO 33932 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 519, file: uploads\attachments\2bdfcbb5-9efd-4336-970a-49309f09b22e.pdf
+2026-07-29T17:19:16.231+08:00  INFO 33932 --- [admin3] [http-nio-9099-exec-4] t.w.a.controller.AttachmentController    : Attachment uploaded: id=520, file=dzfp_26112000003078497746_20260727105946王府井酒店2晚.pdf, size=141663, reimbursementId=85, stored=be4721e4-3795-47ef-8a70-0535b7f49a69.pdf
+2026-07-29T17:19:16.232+08:00  INFO 33932 --- [admin3] [http-nio-9099-exec-4] t.w.a.controller.AttachmentController    : OCR triggered for attachment 520
+2026-07-29T17:19:16.244+08:00  INFO 33932 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 520, file: uploads\attachments\be4721e4-3795-47ef-8a70-0535b7f49a69.pdf
+2026-07-29T17:19:16.280+08:00  INFO 33932 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : Attachment uploaded: id=521, file=ESAE178467060404888838y1n94wADiy3v3高速票.pdf, size=173507, reimbursementId=85, stored=52decb93-7cc9-46d4-a039-526d0b67afb2.pdf
+2026-07-29T17:19:16.281+08:00  INFO 33932 --- [admin3] [http-nio-9099-exec-5] t.w.a.controller.AttachmentController    : OCR triggered for attachment 521
+2026-07-29T17:19:16.291+08:00  INFO 33932 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting OCR for attachment 521, file: uploads\attachments\52decb93-7cc9-46d4-a039-526d0b67afb2.pdf
+2026-07-29T17:19:17.102+08:00  INFO 33932 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=ESAE178467060404888838y1n94wADiy3v3高速票.png
+2026-07-29T17:19:17.105+08:00  INFO 33932 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=2026-07-22 广州-北京-204534158513-机票电子发票-1984.00.png
+2026-07-29T17:19:17.135+08:00  INFO 33932 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=dzfp_26112000003078497746_20260727105946王府井酒店2晚.png
+2026-07-29T17:19:24.104+08:00  INFO 33932 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 520, result length: 4625
+2026-07-29T17:19:24.303+08:00  INFO 33932 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 85 updated from OCR attachment 520, invoiceNo=26112000003078497746, amount=804.00
+2026-07-29T17:19:30.649+08:00  INFO 33932 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 519, result length: 5267
+2026-07-29T17:19:30.914+08:00  INFO 33932 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 85 updated from OCR attachment 519, invoiceNo=26127000000363374667, amount=1984.00
+2026-07-29T17:19:38.279+08:00  INFO 33932 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : OCR completed for attachment 521, result length: 4962
+2026-07-29T17:19:38.565+08:00  INFO 33932 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Reimbursement 85 updated from OCR attachment 521, invoiceNo=26447000001447993351, amount=40.00
+2026-07-29T17:27:39.382+08:00  INFO 31388 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 31388 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-07-29T17:27:39.386+08:00  INFO 31388 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-07-29T17:27:40.889+08:00  INFO 31388 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-29T17:27:41.340+08:00  INFO 31388 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 441 ms. Found 20 JPA repository interfaces.
+2026-07-29T17:27:44.828+08:00  INFO 31388 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-07-29T17:27:44.858+08:00  INFO 31388 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-29T17:27:44.859+08:00  INFO 31388 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-07-29T17:27:44.937+08:00  INFO 31388 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-07-29T17:27:44.937+08:00  INFO 31388 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 5438 ms
+2026-07-29T17:27:45.438+08:00  INFO 31388 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-29T17:27:45.513+08:00  INFO 31388 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-07-29T17:27:45.549+08:00  INFO 31388 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-07-29T17:27:45.752+08:00  INFO 31388 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-29T17:27:45.775+08:00  INFO 31388 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-29T17:27:46.137+08:00  INFO 31388 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4627dfda
+2026-07-29T17:27:46.139+08:00  INFO 31388 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-29T17:27:46.186+08:00  WARN 31388 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-07-29T17:27:47.809+08:00  INFO 31388 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-29T17:27:47.963+08:00  INFO 31388 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-29T17:27:48.568+08:00  INFO 31388 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-29T17:27:50.241+08:00  WARN 31388 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-07-29T17:27:50.719+08:00  INFO 31388 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-07-29T17:27:50.747+08:00  INFO 31388 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 12.009 seconds (process running for 12.687)
+2026-07-29T17:27:54.728+08:00  INFO 31388 --- [admin3] [http-nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-29T17:27:54.728+08:00  INFO 31388 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-29T17:27:54.729+08:00  INFO 31388 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-07-29T17:33:24.255+08:00  INFO 31388 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Starting support attachment OCR for attachment 522, file: uploads\attachments\e228ddc5-e381-480a-9504-96f8b173fb3e.pdf
+2026-07-29T17:33:24.277+08:00  INFO 31388 --- [admin3] [] t.w.a.s.service.ocr.OcrExecutionService  : OCR routed to provider=INTERNAL, configId=1, name=Internal OCR, filename=滴滴顺风车行程单.pdf
+2026-07-29T17:33:31.203+08:00  INFO 31388 --- [admin3] [] t.wetech.admin3.sys.service.OcrService   : Support attachment 522 updated trip places for invoice 408: 湘味居(花园大道店) -> 汇峰中心D区

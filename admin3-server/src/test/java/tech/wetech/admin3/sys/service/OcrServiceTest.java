@@ -173,6 +173,94 @@ class OcrServiceTest {
   }
 
   @Test
+  void extractInvoiceFieldsFromOcrRawDoesNotTreatFooterIssuerAsEmptyRemarks() throws Exception {
+    JsonNode root = new ObjectMapper().readTree("""
+      {
+        "ocr_raw": [
+          {"bbox":[70,840,302,842,302,873,69,871],"text":"\u4ef7\u7a0e\u5408\u8ba1\uff08\u5927\u5199\uff09"},
+          {"bbox":[6,927,47,927,47,1014,6,1014],"text":"\u5907\u6ce8"},
+          {"bbox":[121,1097,221,1097,221,1132,121,1132],"text":"\u5f00\u7968\u4eba\uff1a"},
+          {"bbox":[230,1096,317,1096,317,1131,230,1131],"text":"\u4e8e\u79cb\u7ea2"}
+        ]
+      }
+      """);
+
+    Map<String, String> fields = ocrService.extractInvoiceFieldsFromOcrRaw(root, "\u6ef4\u6ef4\u7535\u5b50\u53d1\u7968 (19).pdf");
+
+    assertThat(fields).containsEntry("issuer", "\u4e8e\u79cb\u7ea2");
+    assertThat(fields).doesNotContainKey("remarks");
+  }
+
+  @Test
+  void extractRemarksFromTextReadsContentBeforeVerticalRemarksLabel() throws Exception {
+    String text = """
+      \u4ef7\u7a0e\u5408\u8ba1\uff08\u5927\u5199)
+      \u58f9\u4edf\u7396\u4f70\u634c\u62fe\u8086\u5706\u6574
+      \uff08\u5c0f\u5199\uff09\u00a51984.00
+      2026-07-2207:50-10:55\u5e7f\u5dde\u767d\u4e91\u56fd\u9645\u673a\u573a-\u5317\u4eac\u9996\u90fd\u56fd\u9645\u673a\u573aHU7802\u9ec4\u6d69/\u8bb8\u67f3\u98de
+      \u5907
+      \u6ce8
+      \u5f00\u7968\u4eba\uff1a\u5468\u6676
+      """;
+
+    assertThat(extractRemarksFromText(text))
+      .isEqualTo("2026-07-2207:50-10:55\u5e7f\u5dde\u767d\u4e91\u56fd\u9645\u673a\u573a-\u5317\u4eac\u9996\u90fd\u56fd\u9645\u673a\u573aHU7802\u9ec4\u6d69/\u8bb8\u67f3\u98de");
+  }
+
+  @Test
+  void extractInvoiceFieldsFromOcrRawReadsVerticalRemarksArea() throws Exception {
+    JsonNode root = new ObjectMapper().readTree("""
+      {
+        "ocr_raw": [
+          {"bbox":[1141,824,1335,824,1335,856,1141,856],"text":"\uff08\u5c0f\u5199\uff09\u00a540.00"},
+          {"bbox":[49,854,1647,879,1647,914,49,888],"text":"\u884c\u7a0b\u4fe1\u606f\uff1a\u5165\u53e3\uff1a\u5e7f\u6df1\u9ad8\u901f-\u5e7f\u4e1c\u4e1c\u839e\u7ad9\u5e7f\u6df1\uff0c\u65f6\u95f4\uff1a2026-07-2204:59:00\uff1b\u51fa\u53e3\uff1a\u673a\u573a\u4e8c\u9ad8-\u5e7f\u4e1c\u673a\u573aT3\u7ad9"},
+          {"bbox":[7,899,39,899,39,935,7,935],"text":"\u5907"},
+          {"bbox":[6,947,43,947,43,983,6,983],"text":"\u6ce8"}
+        ]
+      }
+      """);
+
+    Map<String, String> fields = ocrService.extractInvoiceFieldsFromOcrRaw(root, "toll.pdf");
+
+    assertThat(fields.get("remarks")).contains("\u884c\u7a0b\u4fe1\u606f\uff1a\u5165\u53e3");
+  }
+
+  @Test
+  void extractInvoiceFieldsFromOcrRawJoinsSameLineVerticalRemarksBoxes() throws Exception {
+    JsonNode root = new ObjectMapper().readTree("""
+      {
+        "ocr_raw": [
+          {"bbox":[1143,816,1354,813,1354,848,1144,851],"text":"\uff08\u5c0f\u5199\uff09\u00a5804.00"},
+          {"bbox":[53,860,304,860,304,887,53,884],"text":"7\u670822\u65e5\u81f37\u670824\u65e52\u665a"},
+          {"bbox":[339,860,477,860,477,888,339,888],"text":"\u8bb8\u67f3\u98de\u9ec4\u6d69"},
+          {"bbox":[6,894,40,894,40,936,6,936],"text":"\u5907"},
+          {"bbox":[6,940,42,940,42,978,6,978],"text":"\u6ce8"}
+        ]
+      }
+      """);
+
+    Map<String, String> fields = ocrService.extractInvoiceFieldsFromOcrRaw(root, "hotel.pdf");
+
+    assertThat(fields).containsEntry("remarks", "7\u670822\u65e5\u81f37\u670824\u65e52\u665a \u8bb8\u67f3\u98de\u9ec4\u6d69");
+  }
+
+  @Test
+  void extractInvoiceFieldsFromOcrRawKeepsEmptyVerticalRemarksEmpty() throws Exception {
+    JsonNode root = new ObjectMapper().readTree("""
+      {
+        "ocr_raw": [
+          {"bbox":[1143,816,1354,813,1354,848,1144,851],"text":"\uff08\u5c0f\u5199\uff09\u00a5804.00"},
+          {"bbox":[6,894,40,894,40,936,6,936],"text":"\u5907"},
+          {"bbox":[6,940,42,940,42,978,6,978],"text":"\u6ce8"}
+        ]
+      }
+      """);
+
+    Map<String, String> fields = ocrService.extractInvoiceFieldsFromOcrRaw(root, "empty-hotel.pdf");
+
+    assertThat(fields).doesNotContainKey("remarks");
+  }
+  @Test
   void extractInvoiceFieldsFromPdfBoxTextReadsTollInvoiceLayout() throws Exception {
     String tollInvoiceText = """
       \u7535\u5b50\u53d1\u7968\uff08\u666e\u901a\u53d1\u7968\uff09
@@ -678,6 +766,12 @@ class OcrServiceTest {
     Method method = OcrService.class.getDeclaredMethod("extractTripPlaces", String.class);
     method.setAccessible(true);
     return method.invoke(ocrService, text);
+  }
+
+  private String extractRemarksFromText(String text) throws Exception {
+    Method method = OcrService.class.getDeclaredMethod("extractRemarksFromText", String.class);
+    method.setAccessible(true);
+    return (String) method.invoke(ocrService, text);
   }
 
   private Object extractHuolalaTripPlacesFromOcrRaw(JsonNode raw) throws Exception {

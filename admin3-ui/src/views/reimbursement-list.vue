@@ -142,7 +142,7 @@
               <template #default="{ row }">¥{{ expenseInvoiceTotal(row) }}</template>
             </el-table-column>
             <el-table-column label="说明" min-width="220" show-overflow-tooltip>
-              <template #default="{ row }"><el-input v-model="row.remark" placeholder="可选"></el-input></template>
+              <template #default="{ row }"><el-input v-model="row.description" placeholder="可选"></el-input></template>
             </el-table-column>
             <el-table-column label="操作" min-width="170" fixed="right">
               <template #default="{ $index }">
@@ -250,8 +250,8 @@
                     <span class="file-name" :title="file.name">{{ file.name }}</span>
                     <span class="file-size">{{ formatFileSize(file.size) }}</span>
                     <span class="file-linked-invoice">发票号码：{{ file.linkedInvoiceNo || file.ocrInvoiceNo || '-' }}</span>
-                    <el-tag :type="file.linkedInvoiceId ? 'success' : 'info'" size="small" effect="plain">
-                      {{ file.linkedInvoiceId ? '已关联发票' : '未关联发票' }}
+                    <el-tag :type="file.linkedInvoiceId ? 'success' : file.associationReason ? 'warning' : 'info'" size="small" effect="plain">
+                      {{ file.linkedInvoiceId ? '已关联发票' : (file.associationReason || '未关联发票') }}
                     </el-tag>
                     <el-tag
                       :type="file.ocrStatus === 'completed' ? 'success' : file.ocrStatus === 'failed' ? 'danger' : file.ocrStatus === 'processing' ? 'warning' : 'info'"
@@ -303,8 +303,8 @@
                     <span class="file-name" :title="file.name">{{ file.name }}</span>
                     <span class="file-size">{{ formatFileSize(file.size) }}</span>
                     <span class="file-linked-invoice">关联发票：{{ file.linkedInvoiceNo || '-' }}</span>
-                    <el-tag :type="file.linkedInvoiceId ? 'success' : 'info'" size="small" effect="plain">
-                      {{ file.linkedInvoiceId ? '已关联发票' : '未关联发票' }}
+                    <el-tag :type="file.linkedInvoiceId ? 'success' : file.associationReason ? 'warning' : 'info'" size="small" effect="plain">
+                      {{ file.linkedInvoiceId ? '已关联发票' : (file.associationReason || '未关联发票') }}
                     </el-tag>
                     <el-tag
                       :type="file.ocrStatus === 'completed' ? 'success' : file.ocrStatus === 'failed' ? 'danger' : file.ocrStatus === 'processing' ? 'warning' : 'info'"
@@ -396,12 +396,32 @@
           <el-table-column label="当前关联发票" min-width="220" show-overflow-tooltip>
             <template #default="{ row }">{{ row.linkedInvoiceNo || '-' }}</template>
           </el-table-column>
+          <el-table-column label="识别文本" width="110" align="center">
+            <template #default="{ row }">
+              <el-popover v-if="row.ocrResult" placement="top" :width="560" trigger="hover">
+                <template #reference>
+                  <el-button text size="small" type="primary">查看文本</el-button>
+                </template>
+                <pre class="file-ocr-popover">{{ extractOcrTextForDisplay(row.ocrResult) }}</pre>
+              </el-popover>
+              <span v-else>-</span>
+            </template>
+          </el-table-column>
           <el-table-column label="大小" width="100">
             <template #default="{ row }">{{ formatFileSize(row.size) }}</template>
           </el-table-column>
           <el-table-column label="操作" width="100" align="center">
             <template #default="{ row }">
-              <el-button text size="small" type="primary" @click.stop="previewImage(row)">查看</el-button>
+              <el-popover placement="left" :width="1100" trigger="hover">
+                <template #reference>
+                  <el-button text size="small" type="primary" @click.stop>预览</el-button>
+                </template>
+                <div class="support-preview-popover">
+                  <iframe v-if="isPdfFile(row)" :src="pdfPreviewUrl(row.url)" class="support-preview-frame"></iframe>
+                  <img v-else :src="row.url" class="support-preview-image" />
+                </div>
+              </el-popover>
+              <el-button text size="small" type="primary" @click.stop="previewImage(row)">打开</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -586,7 +606,7 @@
             <el-table-column prop="invoiceTotalAmount" label="发票合计" width="110" align="right">
               <template #default="{ row }">¥{{ formatMoney(row.invoiceTotalAmount) }}</template>
             </el-table-column>
-            <el-table-column prop="remark" label="说明" min-width="240" show-overflow-tooltip></el-table-column>
+            <el-table-column prop="description" label="说明" min-width="240" show-overflow-tooltip></el-table-column>
           </el-table>
           <div v-else class="detail-empty">暂无费用明细</div>
         </div>
@@ -1016,6 +1036,7 @@ function mapAttachmentFile(a: any) {
     ocrResult: a.ocrResult || '',
     linkedInvoiceId: a.linkedInvoiceId || null,
     linkedInvoiceNo: a.linkedInvoiceNo || '',
+    associationReason: a.associationReason || '',
     ocrInvoiceNo: extractOcrInvoiceNo(a.ocrResult),
     attachmentRole: a.attachmentRole || null,
     showOcrJson: false
@@ -1029,6 +1050,24 @@ function extractOcrInvoiceNo(ocrResult: string) {
     return result?.invoice_fields?.invoice_no || '';
   } catch {
     return '';
+  }
+}
+
+function extractOcrTextForDisplay(ocrResult: string) {
+  if (!ocrResult) return '';
+  try {
+    const result = JSON.parse(ocrResult);
+    if (result.content && result.content[0]?.text) {
+      try {
+        const inner = JSON.parse(result.content[0].text);
+        return inner.ocr_text || result.content[0].text || formatOcrJson(ocrResult);
+      } catch {
+        return result.content[0].text || formatOcrJson(ocrResult);
+      }
+    }
+    return result.ocr_text || formatOcrJson(ocrResult);
+  } catch {
+    return ocrResult;
   }
 }
 
@@ -1253,7 +1292,7 @@ function startOcrPolling() {
   // 清除旧定时器
   if (ocrPollingTimer) clearInterval(ocrPollingTimer);
   let attempts = 0;
-  const maxAttempts = 30;
+  const maxAttempts = 900;
   ocrPollingTimer = setInterval(async () => {
     attempts++;
     try {
@@ -1294,7 +1333,7 @@ function startOcrPolling() {
     if (attempts >= maxAttempts) {
       clearInterval(ocrPollingTimer);
       ocrPollingTimer = null;
-      ElMessage.warning('OCR 识别超时，请稍后刷新查看');
+      ElMessage.info('仍有文件在后台识别，关闭窗口或稍后刷新都可以继续查看结果');
     }
   }, 2000);
 }
@@ -1459,9 +1498,12 @@ async function saveReimbursement(stayOpen = false) {
       clearInterval(ocrPollingTimer);
       ocrPollingTimer = null;
     }
-    // 如果有附件正在 OCR，同步轮询等待结果
-    if (uploadedAttachmentIds.value.length > 0) {
-      await pollOcrResults();
+    const pendingOcrCount = [...fileList.value, ...supportFileList.value]
+      .filter((file: any) => file.ocrStatus === 'pending' || file.ocrStatus === 'processing')
+      .length;
+    if (pendingOcrCount > 0) {
+      ElMessage.warning(`${pendingOcrCount} 个文件仍在 OCR，系统会继续后台识别，可先进入下一步，稍后刷新查看结果`);
+      startOcrPolling();
     }
     const expenseRes = await saveExpenseItems(editId.value!, normalizeExpenseItems());
     applyReimbursementDetailToEditor(expenseRes.data);
@@ -1478,7 +1520,7 @@ async function saveReimbursement(stayOpen = false) {
 async function pollOcrResults() {
   const id = editId.value;
   if (!id) return;
-  const maxAttempts = 30; // 最多等 60 秒
+  const maxAttempts = 900; // 最多跟踪 30 分钟，批量 OCR 仍由后台异步执行
   for (let i = 0; i < maxAttempts; i++) {
     const res = await getReimbursementDetail(id);
     const data = res.data;
@@ -1511,7 +1553,7 @@ async function pollOcrResults() {
     // 等待 2 秒
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
-  ElMessage.warning('OCR 识别超时，请稍后查看详情');
+  ElMessage.info('仍有文件在后台识别，请稍后查看详情');
 }
 function formatMoney(value: any): string {
   const num = Number(value || 0);
@@ -1769,7 +1811,7 @@ function normalizeExpenseItems() {
     projectCostCategory: item.projectCostCategory || null,
     customerName: item.customerName || null,
     remark: item.source === 'ocr' || (item.invoiceIds && item.invoiceIds.length > 0) ? null : (item.remark || null),
-    description: item.source === 'ocr' || (item.invoiceIds && item.invoiceIds.length > 0) ? null : (item.description || null),
+    description: item.description || null,
     source: item.source || 'manual'
   }));
 }
@@ -2014,6 +2056,17 @@ function previewImage(file: any) {
   if (url) window.open(url, '_blank');
 }
 
+function isPdfFile(file: any) {
+  const name = String(file?.name || file?.fileName || file?.url || '').toLowerCase();
+  return name.endsWith('.pdf') || String(file?.fileType || '').toLowerCase().includes('pdf');
+}
+
+function pdfPreviewUrl(url: string) {
+  if (!url) return '';
+  const separator = url.includes('#') ? '&' : '#';
+  return `${url}${separator}toolbar=0&navpanes=0&scrollbar=1&view=FitH`;
+}
+
 /** 预览图片（详情弹窗） */
 function previewAttachment(att: any) {
   const url = '/admin3' + att.fileUrl;
@@ -2149,6 +2202,21 @@ loadData();
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-all;
+}
+.support-preview-popover {
+  width: min(1068px, 92vw);
+  height: 86vh;
+  overflow: hidden;
+  background: #f5f7fa;
+  border: 1px solid #e4e7ed;
+}
+.support-preview-frame,
+.support-preview-image {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: contain;
+  background: #fff;
 }
 .file-ocr-error {
   margin-top: 4px;

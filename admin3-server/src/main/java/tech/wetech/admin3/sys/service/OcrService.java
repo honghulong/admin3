@@ -284,6 +284,7 @@ public class OcrService {
         if (isEmpty(taxRate)) taxRate = regexExtract(ocrText, "(\\d+(?:\\.\\d+)?%)");
         if (isEmpty(issuer)) issuer = regexExtract(ocrText, "开票人[：:]\\s*([^\\r\\n]+)");
         if (isEmpty(invoiceType) && ocrText.contains("普通发票")) invoiceType = "普通发票";
+        if (isEmpty(remarks)) remarks = extractRemarksFromText(ocrText);
       }
 
       if (isEmpty(date)) date = extractDateFromText(attachment.getFileName());
@@ -328,6 +329,7 @@ public class OcrService {
           updateInvoiceSummary(r);
           r.setUpdatedAt(LocalDateTime.now());
           reimbursementRepository.save(r);
+          syncExpenseItemDescriptionsFromInvoiceRemarks(reimbursementId, attachment.getUploadedBy());
           log.info("OCR attachment {} matched duplicate invoice {}, skipped new invoice creation", attachment.getId(), savedDuplicate.getId());
           return;
         }
@@ -351,6 +353,7 @@ public class OcrService {
         invoiceRepository.save(savedInvoice);
       }
       regroupExpenseItemsByInvoiceTrips(reimbursementId, attachment.getUploadedBy());
+      syncExpenseItemDescriptionsFromInvoiceRemarks(reimbursementId, attachment.getUploadedBy());
 
       if (!isEmpty(invoiceNo) && isEmpty(r.getInvoiceNo())) r.setInvoiceNo(invoiceNo);
       if (!isEmpty(invoiceCode) && isEmpty(r.getInvoiceCode())) r.setInvoiceCode(invoiceCode);
@@ -578,6 +581,7 @@ public class OcrService {
     item.setExpenseType(expenseType);
     item.setOaExpenseName(oaExpenseName(expenseType));
     item.setRemark(null);
+    item.setDescription(mergeInvoiceRemarks(item.getDescription(), List.of(invoice)));
     item.setSource("ocr");
     item.setUpdatedBy(attachment.getUploadedBy());
     item.setUpdatedAt(now);
@@ -623,6 +627,7 @@ public class OcrService {
       target.setAmount(total);
       target.setKilometers(kilometers);
       target.setRemark(null);
+      target.setDescription(mergeInvoiceRemarks(target.getDescription(), group));
       target.setSource("ocr");
       target.setUpdatedBy(userId);
       target.setUpdatedAt(now);
@@ -681,6 +686,7 @@ public class OcrService {
     item.setOaExpenseName(oaExpenseName(item.getExpenseType()));
     item.setAmount(invoice.getTotalAmount() == null ? BigDecimal.ZERO : invoice.getTotalAmount());
     item.setRemark(null);
+    item.setDescription(mergeInvoiceRemarks(item.getDescription(), List.of(invoice)));
     item.setSource("ocr");
     item.setUpdatedBy(userId);
     item.setUpdatedAt(now);
@@ -696,6 +702,24 @@ public class OcrService {
       .filter(item -> "ocr".equals(item.getSource()))
       .filter(item -> item.getId() != null && !boundIds.contains(item.getId()))
       .forEach(expenseItemRepository::delete);
+  }
+
+  private void syncExpenseItemDescriptionsFromInvoiceRemarks(Long reimbursementId, Long userId) {
+    List<Invoice> invoices = invoiceRepository.findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(reimbursementId);
+    Map<Long, List<Invoice>> byExpenseItem = invoices.stream()
+      .filter(invoice -> invoice.getExpenseItemId() != null)
+      .collect(java.util.stream.Collectors.groupingBy(Invoice::getExpenseItemId, LinkedHashMap::new, java.util.stream.Collectors.toList()));
+    LocalDateTime now = LocalDateTime.now();
+    for (Map.Entry<Long, List<Invoice>> entry : byExpenseItem.entrySet()) {
+      ReimbursementExpenseItem item = expenseItemRepository.findById(entry.getKey()).orElse(null);
+      if (item == null) continue;
+      String merged = mergeInvoiceRemarks(item.getDescription(), entry.getValue());
+      if (isEmpty(merged) || merged.equals(item.getDescription())) continue;
+      item.setDescription(merged);
+      item.setUpdatedBy(userId);
+      item.setUpdatedAt(now);
+      expenseItemRepository.save(item);
+    }
   }
 
   private void updateInvoiceExpenseItemTrip(Invoice invoice, TripPlaces places, Long userId) {
@@ -744,6 +768,24 @@ public class OcrService {
   }
 
   private record ExpenseGroupKey(String mode, String date, String first, String second) {}
+
+  private String mergeInvoiceRemarks(String current, List<Invoice> invoices) {
+    LinkedHashMap<String, String> lines = new LinkedHashMap<>();
+    if (!isEmpty(current)) {
+      for (String line : current.replace("\r", "\n").split("\\n+")) {
+        String cleaned = cleanRemarks(line);
+        if (!isEmpty(cleaned)) lines.put(cleaned, cleaned);
+      }
+    }
+    for (Invoice invoice : invoices) {
+      if (invoice == null || isEmpty(invoice.getRemarks())) continue;
+      for (String line : invoice.getRemarks().replace("\r", "\n").split("\\n+")) {
+        String cleaned = cleanRemarks(line);
+        if (!isEmpty(cleaned)) lines.put(cleaned, cleaned);
+      }
+    }
+    return lines.isEmpty() ? null : String.join("\n", lines.values());
+  }
 
   private Invoice findDuplicateInvoice(Long reimbursementId, String invoiceNo, String invoiceCode,
                                        LocalDateTime invoiceDate, String totalAmount, Long attachmentId) {
@@ -1357,6 +1399,7 @@ public class OcrService {
     fillPartyFieldsFromBbox(fields, boxes);
     fillAmountFieldsFromBbox(fields, boxes);
     putIfNotEmpty(fields, "issuer", extractIssuerFromBbox(boxes));
+    putIfNotEmpty(fields, "remarks", extractRemarksFromBbox(boxes));
     normalizeStructuredFields(fields, filename);
     return fields;
   }
@@ -1425,13 +1468,13 @@ public class OcrService {
   private List<BboxWord> tableLineAmountBoxes(List<BboxWord> boxes) {
     double headerY = boxes.stream()
       .filter(box -> box.text().contains("项目名称"))
-      .mapToDouble(BboxWord::cy)
+      .mapToDouble(box -> box.cy() - 35)
       .findFirst()
       .orElse(0);
     if (headerY == 0) return List.of();
     double bottomY = boxes.stream()
       .filter(box -> box.text().contains("合计") || "计".equals(box.text()))
-      .mapToDouble(BboxWord::cy)
+      .mapToDouble(box -> box.cy() - 35)
       .filter(y -> y > headerY)
       .findFirst()
       .orElse(headerY + 260);
@@ -1467,6 +1510,140 @@ public class OcrService {
       box -> Math.abs(box.cy() - label.get().cy()) < 55 || (box.cy() > label.get().cy() && box.cy() - label.get().cy() < 90),
       320);
     return cleanPersonName(near);
+  }
+
+  private String extractRemarksFromBbox(List<BboxWord> boxes) {
+    Optional<BboxWord> remarksLabel = boxes.stream()
+      .filter(box -> box.text().contains("备注"))
+      .min(Comparator.comparingDouble(BboxWord::cy));
+    if (remarksLabel.isEmpty()) return extractVerticalRemarksFromBbox(boxes);
+    double labelY = remarksLabel.get().cy();
+    double lowerBound = boxes.stream()
+      .filter(box -> box.cy() > labelY)
+      .filter(box -> box.text().contains("价税合计") || box.text().contains("开票人"))
+      .mapToDouble(box -> box.cy() - 35)
+      .min()
+      .orElse(labelY + 160);
+    if (lowerBound >= labelY + 155) {
+      lowerBound = boxes.stream()
+        .filter(box -> box.cy() > labelY)
+        .filter(box -> box.cx() < 420)
+        .filter(box -> box.text().contains(":") || box.text().contains("\uff1a"))
+        .mapToDouble(box -> box.cy() - 35)
+        .min()
+        .orElse(lowerBound);
+    }
+    double remarksLowerBound = lowerBound;
+    String value = boxes.stream()
+      .filter(box -> box.cy() >= labelY - 25 && box.cy() < remarksLowerBound)
+      .filter(box -> box.cx() > remarksLabel.get().cx() - 20)
+      .sorted(Comparator.comparingDouble(BboxWord::cy).thenComparingDouble(BboxWord::cx))
+      .map(BboxWord::text)
+      .filter(text -> !isEmpty(text))
+      .filter(text -> !text.replaceAll("\\s+", "").equals("备注"))
+      .filter(text -> !text.contains("价税合计"))
+      .filter(text -> !text.contains("开票人"))
+      .reduce("", (left, right) -> left.isBlank() ? right : left + "\n" + right);
+    value = cleanRemarks(value);
+    return isEmpty(value) ? extractVerticalRemarksFromBbox(boxes) : value;
+  }
+
+  private String extractVerticalRemarksFromBbox(List<BboxWord> boxes) {
+    Optional<BboxWord> bei = boxes.stream()
+      .filter(box -> "\u5907".equals(box.text().trim()))
+      .filter(box -> box.cx() < 120)
+      .min(Comparator.comparingDouble(BboxWord::cy));
+    if (bei.isEmpty()) return "";
+    Optional<BboxWord> zhu = boxes.stream()
+      .filter(box -> "\u6ce8".equals(box.text().trim()))
+      .filter(box -> Math.abs(box.cx() - bei.get().cx()) < 80)
+      .filter(box -> box.cy() > bei.get().cy())
+      .min(Comparator.comparingDouble(BboxWord::cy));
+    if (zhu.isEmpty()) return "";
+    double top = boxes.stream()
+      .filter(box -> box.text().contains("\u5c0f\u5199"))
+      .mapToDouble(BboxWord::cy)
+      .filter(y -> y < bei.get().cy())
+      .max()
+      .orElse(bei.get().cy() - 80);
+    double bottom = zhu.get().cy() + 25;
+    List<BboxWord> remarkBoxes = boxes.stream()
+      .filter(box -> box.cx() > bei.get().cx() + 35)
+      .filter(box -> box.cy() > top)
+      .filter(box -> box.cy() < bottom)
+      .filter(box -> !box.text().contains("\u5c0f\u5199"))
+      .filter(box -> !box.text().contains("\u5f00\u7968\u4eba"))
+      .sorted(Comparator.comparingDouble(BboxWord::cy).thenComparingDouble(BboxWord::cx))
+      .toList();
+    return cleanRemarks(joinBboxLines(remarkBoxes));
+  }
+
+  private String joinBboxLines(List<BboxWord> boxes) {
+    StringBuilder result = new StringBuilder();
+    double currentY = Double.NaN;
+    StringBuilder line = new StringBuilder();
+    for (BboxWord box : boxes) {
+      if (isEmpty(box.text())) continue;
+      if (Double.isNaN(currentY) || Math.abs(box.cy() - currentY) <= 22) {
+        if (line.length() > 0) line.append(" ");
+        line.append(box.text().trim());
+        currentY = Double.isNaN(currentY) ? box.cy() : (currentY + box.cy()) / 2;
+      } else {
+        if (result.length() > 0) result.append("\n");
+        result.append(line);
+        line.setLength(0);
+        line.append(box.text().trim());
+        currentY = box.cy();
+      }
+    }
+    if (line.length() > 0) {
+      if (result.length() > 0) result.append("\n");
+      result.append(line);
+    }
+    return result.toString();
+  }
+
+
+  private String cleanRemarks(String text) {
+    if (isEmpty(text)) return "";
+    String value = text.replace("\r", "\n")
+      .replaceAll("(?m)^\\s*备注[：:]?\\s*", "")
+      .replaceAll("[ \\t]+", " ")
+      .replaceAll("\\n{3,}", "\n\n")
+      .trim();
+    if (value.length() > 500) value = value.substring(0, 500).trim();
+    return value;
+  }
+
+  private String extractRemarksFromText(String text) {
+    if (isEmpty(text) || (!text.contains("\u5907\u6ce8") && !text.contains("\u5907\n\u6ce8"))) return "";
+    String normalized = text.replace("\r", "\n");
+    Matcher matcher = Pattern.compile("(?:\\u5907\\s*\\u6ce8)[\\uff1a:]?\\s*([\\s\\S]{0,500}?)(?:\\u4ef7\\u7a0e\\u5408\\u8ba1|\\u5f00\\u7968\\u4eba|$)")
+      .matcher(normalized);
+    String value = matcher.find() ? matcher.group(1) : "";
+    if (isEmpty(value)) value = extractRemarksBeforeVerticalLabel(normalized);
+    value = value.replaceAll("(?m)^\\s*(\\u5408\\u8ba1|\\u9879\\u76ee\\u540d\\u79f0|\\u89c4\\u683c\\u578b\\u53f7|\\u5355\\u4f4d|\\u6570\\u91cf|\\u5355\\u4ef7|\\u91d1\\u989d|\\u7a0e\\u7387|\\u7a0e\\u989d)\\s*$", "");
+    return cleanRemarks(value);
+  }
+
+  private String extractRemarksBeforeVerticalLabel(String text) {
+    Matcher label = Pattern.compile("(?m)^\\s*\\u5907\\s*\\n\\s*\\u6ce8\\s*$").matcher(text);
+    if (!label.find()) return "";
+    String beforeLabel = text.substring(0, label.start()).trim();
+    Matcher afterTotal = Pattern.compile("(?:\\u5c0f\\u5199[\\uff09)]?\\s*[\\u00a5]?\\d+(?:\\.\\d{1,2})?)\\s*([\\s\\S]{0,500})$")
+      .matcher(beforeLabel);
+    String value = afterTotal.find() ? afterTotal.group(1) : lastNonBlankLine(beforeLabel);
+    return value == null ? "" : value.trim();
+  }
+
+  private String lastNonBlankLine(String text) {
+    if (isEmpty(text)) return "";
+    String[] lines = text.split("\\n");
+    for (int i = lines.length - 1; i >= 0; i--) {
+      String line = lines[i].trim();
+      if (!line.isEmpty()) return line;
+    }
+    return "";
   }
 
   private String nearestText(List<BboxWord> boxes, BboxWord anchor, java.util.function.Predicate<BboxWord> predicate, double maxDistance) {

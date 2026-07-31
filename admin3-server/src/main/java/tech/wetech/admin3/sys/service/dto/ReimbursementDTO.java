@@ -93,7 +93,8 @@ public record ReimbursementDTO(
     String ocrResult,
     Long linkedInvoiceId,
     String linkedInvoiceNo,
-    String attachmentRole
+    String attachmentRole,
+    String associationReason
   ) {
     public AttachmentDTO(Attachment a) {
       this(a, List.of());
@@ -103,7 +104,8 @@ public record ReimbursementDTO(
       this(a.getId(), a.getReimbursementId(), a.getFileName(), a.getFileSize(),
         a.getFileType(), a.getFileUrl(), a.getUploadedBy(), a.getCreatedAt(),
         a.getOcrStatus(), a.getOcrResult(),
-        linkedInvoiceId(a, invoices), linkedInvoiceNo(a, invoices), linkedRole(a, invoices));
+        linkedInvoiceId(a, invoices), linkedInvoiceNo(a, invoices), linkedRole(a, invoices),
+        associationReason(a, invoices));
     }
 
     private static Long linkedInvoiceId(Attachment attachment, List<Invoice> invoices) {
@@ -132,6 +134,31 @@ public record ReimbursementDTO(
         .filter(invoice -> attachment.getId().equals(invoice.getAttachmentId()) || attachment.getId().equals(invoice.getSupportAttachmentId()))
         .findFirst()
         .orElse(null);
+    }
+
+    private static String associationReason(Attachment attachment, List<Invoice> invoices) {
+      if (linkedInvoice(attachment, invoices) != null) return "";
+      if (!"invoice".equals(linkedRole(attachment, invoices))) return "";
+      String invoiceNo = extractInvoiceNo(attachment.getOcrResult());
+      if (invoiceNo == null || invoiceNo.isBlank()) return "";
+      return (invoices == null ? List.<Invoice>of() : invoices).stream()
+        .filter(invoice -> invoiceNo.equals(invoice.getInvoiceNo()))
+        .findFirst()
+        .map(invoice -> "重复发票号：" + invoiceNo)
+        .orElse("");
+    }
+
+    private static String extractInvoiceNo(String ocrResult) {
+      if (ocrResult == null || ocrResult.isBlank()) return "";
+      java.util.regex.Matcher fieldMatcher = java.util.regex.Pattern
+        .compile("\"invoice_no\"\\s*:\\s*\"(\\d{8,30})\"")
+        .matcher(ocrResult);
+      if (fieldMatcher.find()) return fieldMatcher.group(1);
+      java.util.regex.Matcher textMatcher = java.util.regex.Pattern
+        .compile("发票号码[：:\\s]*(\\d{8,30})|(?<!\\d)(\\d{20})(?!\\d)")
+        .matcher(ocrResult);
+      if (!textMatcher.find()) return "";
+      return textMatcher.group(1) != null ? textMatcher.group(1) : textMatcher.group(2);
     }
   }
 
