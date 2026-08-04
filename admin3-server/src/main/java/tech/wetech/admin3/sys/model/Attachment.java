@@ -10,6 +10,9 @@ public class Attachment extends BaseEntity {
   @Column(nullable = true)
   private Long reimbursementId;
 
+  @Column(nullable = true)
+  private Long incomingDocumentId;
+
   @Column(nullable = false, length = 255)
   private String fileName;
 
@@ -50,6 +53,14 @@ public class Attachment extends BaseEntity {
 
   public void setReimbursementId(Long reimbursementId) {
     this.reimbursementId = reimbursementId;
+  }
+
+  public Long getIncomingDocumentId() {
+    return incomingDocumentId;
+  }
+
+  public void setIncomingDocumentId(Long incomingDocumentId) {
+    this.incomingDocumentId = incomingDocumentId;
   }
 
   public String getFileName() {

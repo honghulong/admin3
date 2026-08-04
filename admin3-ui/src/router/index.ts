@@ -67,6 +67,14 @@ const routes: RouteRecordRaw[] = [
         component: () => import(/* webpackChunkName: "dashboard" */ '../views/reimbursement-list.vue'),
       },
       {
+        path: '/incoming-documents',
+        name: 'incoming-documents',
+        meta: {
+          title: '来文登记',
+        },
+        component: () => import(/* webpackChunkName: "dashboard" */ '../views/incoming-document-list.vue'),
+      },
+      {
         path: '/dict',
         name: 'dict',
         meta: {

@@ -11,7 +11,11 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
 
   List<Attachment> findByReimbursementIdAndDeletedFalseOrderByCreatedAtAsc(Long reimbursementId);
 
+  List<Attachment> findByIncomingDocumentIdAndDeletedFalseOrderByCreatedAtAsc(Long incomingDocumentId);
+
   void deleteByReimbursementId(Long reimbursementId);
+
+  void deleteByIncomingDocumentId(Long incomingDocumentId);
 
   long countByReimbursementId(Long reimbursementId);
 
