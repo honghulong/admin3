@@ -105,7 +105,7 @@
     <el-dialog title="字段连线映射" v-model="mappingVisible" width="1180px" class="mapping-dialog" @opened="drawLines">
       <div ref="mappingCanvas" class="mapping-canvas">
         <svg class="mapping-lines">
-          <line v-for="line in renderedLines" :key="line.targetField + line.sourceField" :x1="line.x1" :y1="line.y1" :x2="line.x2" :y2="line.y2"></line>
+          <line v-for="line in renderedLines" :key="line.targetField + line.sourceField" :class="{selected: selectedMapping?.targetField === line.targetField && selectedMapping?.sourceField === line.sourceField}" :x1="line.x1" :y1="line.y1" :x2="line.x2" :y2="line.y2" @click="selectExistingMapping(line.targetField, line.sourceField)"></line>
         </svg>
         <div class="mapping-panel target-panel">
           <div class="mapping-title">来文资料字段</div>
@@ -115,18 +115,18 @@
         </div>
         <div class="mapping-panel source-panel">
           <div class="mapping-title">OCR返回字段</div>
-          <button v-for="field in latestOcrFields" :key="field.field" :ref="setSourceRef(field.field)" type="button" class="field-node source-node" :class="{mapped: isSourceMapped(field.field)}" @click="selectSource(field.field)">
-            <span class="field-code">{{ field.field }}</span>
-            <span class="field-content">
+          <div v-for="field in latestOcrFields" :key="field.field" class="ocr-row" :class="{mapped: isSourceMapped(field.field), selected: selectedMapping?.sourceField === field.field}">
+            <button :ref="setSourceRef(field.field)" type="button" class="ocr-anchor" @click="selectSource(field.field)">{{ field.field }}</button>
+            <span class="ocr-content" @click="selectExistingSourceMapping(field.field)">
               <strong>{{ field.text }}</strong>
               <small v-if="field.meta">{{ field.meta }}</small>
             </span>
-          </button>
+          </div>
         </div>
       </div>
       <template #footer>
         <el-button @click="resetMapping">重置连线</el-button>
-        <el-button @click="removeSelectedMapping" :disabled="!selectedTarget">取消当前连线</el-button>
+        <el-button @click="removeSelectedMapping" :disabled="!selectedTarget && !selectedMapping">取消当前连线</el-button>
         <el-button type="primary" @click="saveMapping">保存</el-button>
       </template>
     </el-dialog>
@@ -163,6 +163,7 @@ const attachmentList = ref<any[]>([]);
 const scanList = ref<any[]>([]);
 const mappings = ref<Array<{targetField: string; sourceField: string}>>([]);
 const selectedTarget = ref('');
+const selectedMapping = ref<{targetField: string; sourceField: string} | null>(null);
 const mappingCanvas = ref<HTMLElement>();
 const targetRefs = new Map<string, HTMLElement>();
 const sourceRefs = new Map<string, HTMLElement>();
@@ -319,6 +320,7 @@ async function openMappingDialog() {
 }
 
 function selectTarget(field: string) {
+  selectedMapping.value = mappings.value.find(item => item.targetField === field) || null;
   selectedTarget.value = selectedTarget.value === field ? '' : field;
 }
 
@@ -329,8 +331,20 @@ function selectSource(field: string) {
   }
   mappings.value = mappings.value.filter(item => item.targetField !== selectedTarget.value && item.sourceField !== field);
   mappings.value.push({targetField: selectedTarget.value, sourceField: field});
+  selectedMapping.value = {targetField: selectedTarget.value, sourceField: field};
   selectedTarget.value = '';
   drawLines();
+}
+
+function selectExistingSourceMapping(field: string) {
+  const mapping = mappings.value.find(item => item.sourceField === field);
+  selectedMapping.value = mapping || null;
+  selectedTarget.value = mapping?.targetField || '';
+}
+
+function selectExistingMapping(targetField: string, sourceField: string) {
+  selectedMapping.value = {targetField, sourceField};
+  selectedTarget.value = targetField;
 }
 
 async function saveMapping() {
@@ -347,11 +361,16 @@ async function saveMapping() {
 
 function resetMapping() {
   mappings.value = [];
+  selectedMapping.value = null;
+  selectedTarget.value = '';
   drawLines();
 }
 
 function removeSelectedMapping() {
-  mappings.value = mappings.value.filter(item => item.targetField !== selectedTarget.value);
+  const mapping = selectedMapping.value || mappings.value.find(item => item.targetField === selectedTarget.value);
+  if (!mapping) return;
+  mappings.value = mappings.value.filter(item => item.targetField !== mapping.targetField || item.sourceField !== mapping.sourceField);
+  selectedMapping.value = null;
   selectedTarget.value = '';
   drawLines();
 }
@@ -538,8 +557,14 @@ onActivated(() => {
   pointer-events: none;
 }
 .mapping-lines line {
+  pointer-events: stroke;
   stroke: #409eff;
   stroke-width: 2;
+  cursor: pointer;
+}
+.mapping-lines line.selected {
+  stroke: #f56c6c;
+  stroke-width: 3;
 }
 .mapping-panel {
   z-index: 1;
@@ -574,6 +599,64 @@ onActivated(() => {
 }
 .source-node {
   grid-template-columns: 76px minmax(0, 1fr);
+}
+.ocr-row {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 8px;
+  align-items: stretch;
+}
+.ocr-anchor {
+  min-height: 42px;
+  padding: 6px 8px;
+  overflow: hidden;
+  color: #303133;
+  font-weight: 600;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.ocr-content {
+  display: flex;
+  min-width: 0;
+  min-height: 42px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+}
+.ocr-row.mapped .ocr-anchor,
+.ocr-row.selected .ocr-anchor {
+  border-color: #409eff;
+  background: #ecf5ff;
+}
+.ocr-row.selected .ocr-content {
+  border-color: #409eff;
+}
+.ocr-content strong {
+  overflow: hidden;
+  color: #303133;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ocr-content small {
+  min-width: 0;
+  overflow: hidden;
+  color: #909399;
+  font-size: 12px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .field-code {
   overflow: hidden;
