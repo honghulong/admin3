@@ -102,21 +102,25 @@
       </template>
     </el-dialog>
 
-    <el-dialog title="字段连线映射" v-model="mappingVisible" width="980px" class="mapping-dialog" @opened="drawLines">
+    <el-dialog title="字段连线映射" v-model="mappingVisible" width="1180px" class="mapping-dialog" @opened="drawLines">
       <div ref="mappingCanvas" class="mapping-canvas">
         <svg class="mapping-lines">
           <line v-for="line in renderedLines" :key="line.targetField + line.sourceField" :x1="line.x1" :y1="line.y1" :x2="line.x2" :y2="line.y2"></line>
         </svg>
-        <div class="mapping-panel">
+        <div class="mapping-panel target-panel">
           <div class="mapping-title">来文资料字段</div>
           <button v-for="field in targetFields" :key="field.field" :ref="setTargetRef(field.field)" type="button" class="field-node target-node" :class="{selected: selectedTarget === field.field}" @click="selectTarget(field.field)">
             <span>{{ field.label }}</span><small>{{ form[field.field] || '-' }}</small>
           </button>
         </div>
-        <div class="mapping-panel">
+        <div class="mapping-panel source-panel">
           <div class="mapping-title">OCR返回字段</div>
           <button v-for="field in latestOcrFields" :key="field.field" :ref="setSourceRef(field.field)" type="button" class="field-node source-node" :class="{mapped: isSourceMapped(field.field)}" @click="selectSource(field.field)">
-            <span>{{ field.field }}</span><small>{{ field.value }}</small>
+            <span class="field-code">{{ field.field }}</span>
+            <span class="field-content">
+              <strong>{{ field.text }}</strong>
+              <small v-if="field.meta">{{ field.meta }}</small>
+            </span>
           </button>
         </div>
       </div>
@@ -130,7 +134,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, nextTick, reactive, ref} from 'vue';
+import {computed, nextTick, onActivated, onMounted, reactive, ref} from 'vue';
 import {ElMessage, ElMessageBox} from 'element-plus';
 import {Connection, Delete, Edit, Plus, Search, View} from '@element-plus/icons-vue';
 import {
@@ -163,6 +167,7 @@ const mappingCanvas = ref<HTMLElement>();
 const targetRefs = new Map<string, HTMLElement>();
 const sourceRefs = new Map<string, HTMLElement>();
 const renderedLines = ref<any[]>([]);
+let activatedOnce = false;
 const secrecyOptions = ['绝密', '机密', '秘密', '普通'];
 const urgencyOptions = ['特急', '加急', '平急', '普通'];
 const targetFields = [
@@ -180,13 +185,22 @@ const form = reactive<any>({code: '', carrierNo: '', title: '', docNo: '', secre
 const latestOcrFields = computed(() => {
   const latest = [...scanList.value].reverse().find(item => item.ocrBusinessJson);
   const fields = parseJson(latest?.ocrBusinessJson);
-  return Object.keys(fields).map(field => ({field, value: String(fields[field] ?? '')}));
+  return Object.keys(fields).map(field => {
+    const parsed = parseOcrFieldValue(String(fields[field] ?? ''));
+    return {field, value: parsed.text, text: parsed.text, meta: parsed.meta};
+  });
 });
 
 async function loadData() {
-  const res = await getIncomingDocumentList({page: query.pageIndex - 1, size: query.pageSize, keyword: query.keyword});
-  tableData.value = res.data.content || [];
-  pageTotal.value = res.data.totalElements || 0;
+  const res = await getIncomingDocumentList({page: query.pageIndex, size: query.pageSize, keyword: query.keyword});
+  tableData.value = res.data.list || [];
+  pageTotal.value = res.data.total || 0;
+}
+
+async function loadDefaultData() {
+  query.keyword = '';
+  query.pageIndex = 1;
+  await loadData();
 }
 
 function resetForm() {
@@ -241,7 +255,7 @@ async function saveDocument() {
   fillDetail(res.data);
   isEdit.value = true;
   ElMessage.success('保存成功');
-  loadData();
+  await loadDefaultData();
 }
 
 async function handleDelete(row: any) {
@@ -322,7 +336,12 @@ function selectSource(field: string) {
 async function saveMapping() {
   await saveIncomingOcrMapping(JSON.stringify(mappings.value));
   applyMappingToForm();
-  ElMessage.success('映射已保存并应用');
+  if (editId.value) {
+    const res = await updateIncomingDocument(editId.value, {...form});
+    fillDetail(res.data);
+    loadData();
+  }
+  ElMessage.success('映射已保存并写入来文');
   drawLines();
 }
 
@@ -388,6 +407,14 @@ function parseJson(value: string) {
   }
 }
 
+function parseOcrFieldValue(value: string) {
+  const parts = value.split(' | ');
+  if (parts.length >= 4 && /^p\d+$/.test(parts[1]) && parts[2].startsWith('conf ') && parts[3].startsWith('box ')) {
+    return {text: parts[0], meta: parts.slice(1).join(' | ')};
+  }
+  return {text: value, meta: ''};
+}
+
 function formatJson(value: string) {
   try {
     return JSON.stringify(JSON.parse(value), null, 2);
@@ -419,7 +446,14 @@ function statusTag(status: string) {
   return {pending: 'info', processing: 'warning', completed: 'success', failed: 'danger'}[status] || 'info';
 }
 
-loadData();
+onMounted(() => {
+  if (!activatedOnce) loadDefaultData();
+});
+
+onActivated(() => {
+  activatedOnce = true;
+  loadDefaultData();
+});
 </script>
 
 <style scoped>
@@ -491,8 +525,8 @@ loadData();
 .mapping-canvas {
   position: relative;
   display: grid;
-  grid-template-columns: 300px 1fr 300px;
-  gap: 260px;
+  grid-template-columns: 300px 1fr 460px;
+  gap: 180px;
   min-height: 520px;
   padding: 12px;
 }
@@ -513,6 +547,12 @@ loadData();
   flex-direction: column;
   gap: 8px;
 }
+.target-panel {
+  grid-column: 1;
+}
+.source-panel {
+  grid-column: 3;
+}
 .mapping-title {
   color: #303133;
   font-weight: 600;
@@ -520,7 +560,7 @@ loadData();
 }
 .field-node {
   display: grid;
-  grid-template-columns: 90px minmax(0, 1fr);
+  grid-template-columns: 92px minmax(0, 1fr);
   gap: 8px;
   width: 100%;
   min-height: 38px;
@@ -532,10 +572,37 @@ loadData();
   border-radius: 4px;
   cursor: pointer;
 }
+.source-node {
+  grid-template-columns: 76px minmax(0, 1fr);
+}
+.field-code {
+  overflow: hidden;
+  color: #303133;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.field-content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.field-content strong {
+  overflow: hidden;
+  color: #303133;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .field-node small {
   min-width: 0;
   overflow: hidden;
   color: #909399;
+  font-size: 12px;
+  line-height: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

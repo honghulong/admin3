@@ -25,6 +25,10 @@ public class IncomingDocumentOcrMapper {
     if (rawJson == null || rawJson.isBlank()) return fields;
     try {
       JsonNode root = objectMapper.readTree(rawJson);
+      if (root.path("pages").isArray()) {
+        extractPageLines(root.path("pages"), fields);
+        if (!fields.isEmpty()) return fields;
+      }
       JsonNode businessRoot = root.has("data") ? root.get("data") : root;
       flatten("", businessRoot, fields);
       return fields;
@@ -58,6 +62,36 @@ public class IncomingDocumentOcrMapper {
         flatten(prefix.isBlank() ? key : prefix + "." + key, child, fields);
       }
     }
+  }
+
+  private void extractPageLines(JsonNode pages, Map<String, String> fields) {
+    int index = 1;
+    StringBuilder plainText = new StringBuilder();
+    for (JsonNode page : pages) {
+      JsonNode lines = page.path("lines");
+      if (!lines.isArray()) continue;
+      int pageNo = page.path("page_no").asInt(1);
+      for (JsonNode line : lines) {
+        String text = line.path("text").asText("");
+        if (text.isBlank()) continue;
+        String key = String.format("line.%03d", index++);
+        fields.put(key, formatLineValue(pageNo, line, text));
+        if (!plainText.isEmpty()) plainText.append('\n');
+        plainText.append(text);
+      }
+    }
+    if (!plainText.isEmpty()) {
+      fields.put("plain_text", plainText.toString());
+    }
+  }
+
+  private String formatLineValue(int pageNo, JsonNode line, String text) {
+    double confidence = line.path("confidence").asDouble(0);
+    int x1 = (int) Math.round(line.path("x1").asDouble(0));
+    int y1 = (int) Math.round(line.path("y1").asDouble(0));
+    int x2 = (int) Math.round(line.path("x2").asDouble(0));
+    int y2 = (int) Math.round(line.path("y2").asDouble(0));
+    return text + " | p" + pageNo + " | conf " + String.format("%.3f", confidence) + " | box " + x1 + "," + y1 + "," + x2 + "," + y2;
   }
 
   private boolean isWrapperKey(String key) {

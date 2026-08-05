@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -47,6 +48,8 @@ public class IncomingDocumentService {
 
   private static final String MODULE = "incoming-document";
   private static final String OCR_URL = "http://120.234.136.122:18769/ocr";
+  private static final Duration OCR_TIMEOUT = Duration.ofSeconds(180);
+  private static final int OCR_MAX_ATTEMPTS = 2;
 
   private final IncomingDocumentRepository documentRepository;
   private final IncomingScanAttachmentRepository scanRepository;
@@ -279,21 +282,41 @@ public class IncomingDocumentService {
   }
 
   private String callOcr(Path file, String filename, String contentType) throws Exception {
-    String boundary = "----Admin3IncomingOcr" + UUID.randomUUID();
     byte[] fileBytes = Files.readAllBytes(file);
-    byte[] body = multipartBody(boundary, filename, contentType, fileBytes);
-    HttpRequest request = HttpRequest.newBuilder()
-      .uri(URI.create(OCR_URL))
-      .header("Content-Type", "multipart/form-data; boundary=" + boundary)
-      .POST(HttpRequest.BodyPublishers.ofByteArray(body))
-      .build();
-    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-    if (response.statusCode() < 200 || response.statusCode() >= 300) {
-      throw new BusinessException(CommonResultStatus.SERVER_ERROR, "OCR服务返回HTTP " + response.statusCode());
+    Exception lastError = null;
+    for (int attempt = 1; attempt <= OCR_MAX_ATTEMPTS; attempt++) {
+      String boundary = "----Admin3IncomingOcr" + UUID.randomUUID();
+      byte[] body = multipartBody(boundary, safeMultipartFilename(filename, file), contentType, fileBytes);
+      HttpRequest request = HttpRequest.newBuilder()
+        .uri(URI.create(OCR_URL))
+        .timeout(OCR_TIMEOUT)
+        .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+        .POST(HttpRequest.BodyPublishers.ofByteArray(body))
+        .build();
+      try {
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+          throw new BusinessException(CommonResultStatus.SERVER_ERROR, "OCR service returned HTTP " + response.statusCode());
+        }
+        return response.body();
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw e;
+      } catch (IOException e) {
+        lastError = e;
+        if (attempt == OCR_MAX_ATTEMPTS) throw e;
+      }
     }
-    return response.body();
+    throw lastError;
   }
 
+  private String safeMultipartFilename(String filename, Path file) {
+    String source = firstNonBlank(filename, file.getFileName().toString());
+    int dot = source.lastIndexOf('.');
+    String ext = dot >= 0 ? source.substring(dot).replaceAll("[^A-Za-z0-9.]", "") : "";
+    if (ext.isBlank()) ext = ".bin";
+    return "incoming-scan" + ext;
+  }
   private byte[] multipartBody(String boundary, String filename, String contentType, byte[] fileBytes) throws IOException {
     String header = "--" + boundary + "\r\n"
       + "Content-Disposition: form-data; name=\"file\"; filename=\"" + filename + "\"\r\n"
