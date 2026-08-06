@@ -35,6 +35,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
       "/storage/fetch/**",
       "/storage/download/**",
       "/attachments/*/download",
+      "/incoming-restore/**",
       "/login",
       "/swagger-ui.html",
       "/swagger-ui/**",
@@ -60,6 +61,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry.addResourceHandler("/incoming-restore/**").addResourceLocations("file:uploads/incoming-restore/");
     registry.addResourceHandler("/**").addResourceLocations("classpath:/META-INF/resources/webjars/admin3-ui/");
   }
 

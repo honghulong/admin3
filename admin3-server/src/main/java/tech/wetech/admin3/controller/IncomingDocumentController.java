@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import tech.wetech.admin3.common.authz.RequiresPermissions;
 import tech.wetech.admin3.sys.service.IncomingDocumentService;
+import tech.wetech.admin3.sys.service.OcrMappingRuleService;
 import tech.wetech.admin3.sys.service.dto.IncomingDocumentDTO;
+import tech.wetech.admin3.sys.service.dto.OcrMappingRuleDTO;
 import tech.wetech.admin3.sys.service.dto.PageDTO;
 
 import java.util.List;
@@ -21,9 +23,11 @@ import java.util.List;
 public class IncomingDocumentController {
 
   private final IncomingDocumentService incomingDocumentService;
+  private final OcrMappingRuleService ocrMappingRuleService;
 
-  public IncomingDocumentController(IncomingDocumentService incomingDocumentService) {
+  public IncomingDocumentController(IncomingDocumentService incomingDocumentService, OcrMappingRuleService ocrMappingRuleService) {
     this.incomingDocumentService = incomingDocumentService;
+    this.ocrMappingRuleService = ocrMappingRuleService;
   }
 
   @RequiresPermissions("incoming-document:view")
@@ -81,6 +85,16 @@ public class IncomingDocumentController {
     return ResponseEntity.ok(incomingDocumentService.recognizeScan(id, scanId));
   }
 
+  @RequiresPermissions("incoming-document:view")
+  @PostMapping("/{id}/scans/{scanId}:restore")
+  public ResponseEntity<IncomingDocumentService.RestoreResponse> restoreScan(
+    @PathVariable Long id,
+    @PathVariable Long scanId,
+    @RequestParam(defaultValue = "false") boolean force
+  ) {
+    return ResponseEntity.ok(incomingDocumentService.restoreScan(id, scanId, force));
+  }
+
   @RequiresPermissions("incoming-document:update")
   @DeleteMapping("/{id}/scans/{scanId}")
   public ResponseEntity<IncomingDocumentDTO> deleteScan(@PathVariable Long id, @PathVariable Long scanId) {
@@ -89,25 +103,47 @@ public class IncomingDocumentController {
 
   @RequiresPermissions("incoming-document:view")
   @GetMapping("/ocr-mapping")
-  public ResponseEntity<MappingResponse> findMapping() {
-    return ResponseEntity.ok(new MappingResponse(incomingDocumentService.findMapping()));
+  public ResponseEntity<OcrMappingRuleDTO> findMapping() {
+    OcrMappingRuleDTO rule = ocrMappingRuleService.findLatestIncomingRule();
+    return rule == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(rule);
   }
 
   @RequiresPermissions("incoming-document:update")
   @PutMapping("/ocr-mapping")
-  public ResponseEntity<MappingResponse> saveMapping(@RequestBody MappingRequest request) {
-    return ResponseEntity.ok(new MappingResponse(incomingDocumentService.saveMapping(request.mappingJson())));
+  public ResponseEntity<OcrMappingRuleDTO> saveMapping(@RequestBody @Valid MappingRequest request) {
+    if (request.id() == null) {
+      return ResponseEntity.ok(ocrMappingRuleService.createRule(
+        request.name(),
+        OcrMappingRuleService.INCOMING_DOCUMENT_MODULE,
+        OcrMappingRuleService.INCOMING_DOCUMENT_FORM,
+        request.mappingJson()
+      ));
+    }
+    return ResponseEntity.ok(ocrMappingRuleService.updateRule(
+      request.id(),
+      request.name(),
+      OcrMappingRuleService.INCOMING_DOCUMENT_MODULE,
+      OcrMappingRuleService.INCOMING_DOCUMENT_FORM,
+      request.mappingJson()
+    ));
   }
 
   private IncomingDocumentService.DocumentRequest toServiceRequest(IncomingDocumentRequest request) {
     return new IncomingDocumentService.DocumentRequest(
       request.code(),
       request.carrierNo(),
+      request.incomingUnit(),
       request.title(),
       request.docNo(),
+      request.receivedNo(),
+      request.receivedDate(),
       request.secrecyLevel(),
       request.urgencyLevel(),
       request.handler(),
+      request.officeOpinion(),
+      request.leaderInstruction(),
+      request.readerSigner(),
+      request.handlingStatus(),
       request.remark(),
       request.attachmentIds()
     );
@@ -116,16 +152,21 @@ public class IncomingDocumentController {
   record IncomingDocumentRequest(
     String code,
     String carrierNo,
+    String incomingUnit,
     @NotBlank String title,
     String docNo,
+    String receivedNo,
+    String receivedDate,
     String secrecyLevel,
     String urgencyLevel,
     String handler,
+    String officeOpinion,
+    String leaderInstruction,
+    String readerSigner,
+    String handlingStatus,
     String remark,
     List<Long> attachmentIds
   ) {}
 
-  record MappingRequest(String mappingJson) {}
-
-  record MappingResponse(String mappingJson) {}
+  record MappingRequest(Long id, @NotBlank String name, String mappingJson) {}
 }

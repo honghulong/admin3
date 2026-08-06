@@ -51,6 +51,10 @@ export function recognizeIncomingScan(id: number, scanId: number) {
   return request({url: `${BASE_URI}/incoming-documents/${id}/scans/${scanId}:recognize`, method: 'post'});
 }
 
+export function restoreIncomingScan(id: number, scanId: number, force = false) {
+  return request({url: `${BASE_URI}/incoming-documents/${id}/scans/${scanId}:restore`, method: 'post', params: {force}});
+}
+
 export function deleteIncomingScan(id: number, scanId: number) {
   return request({url: `${BASE_URI}/incoming-documents/${id}/scans/${scanId}`, method: 'delete'});
 }
@@ -59,6 +63,6 @@ export function getIncomingOcrMapping() {
   return request({url: `${BASE_URI}/incoming-documents/ocr-mapping`, method: 'get'});
 }
 
-export function saveIncomingOcrMapping(mappingJson: string) {
-  return request({url: `${BASE_URI}/incoming-documents/ocr-mapping`, method: 'put', data: {mappingJson}});
+export function saveIncomingOcrMapping(data: {id?: number | null; name: string; mappingJson: string}) {
+  return request({url: `${BASE_URI}/incoming-documents/ocr-mapping`, method: 'put', data});
 }

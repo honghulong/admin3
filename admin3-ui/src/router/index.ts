@@ -75,6 +75,14 @@ const routes: RouteRecordRaw[] = [
         component: () => import(/* webpackChunkName: "dashboard" */ '../views/incoming-document-list.vue'),
       },
       {
+        path: '/ocr-mapping-rules',
+        name: 'ocr-mapping-rules',
+        meta: {
+          title: '映射规则管理',
+        },
+        component: () => import(/* webpackChunkName: "dashboard" */ '../views/ocr-mapping-rule-list.vue'),
+      },
+      {
         path: '/dict',
         name: 'dict',
         meta: {

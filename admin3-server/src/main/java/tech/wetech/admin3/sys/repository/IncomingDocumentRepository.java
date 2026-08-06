@@ -12,12 +12,17 @@ public interface IncomingDocumentRepository extends JpaRepository<IncomingDocume
 
   boolean existsByCodeAndIdNot(String code, Long id);
 
+  boolean existsByIdAndDeletedFalse(Long id);
+
   @Query("""
     select d from IncomingDocument d
-    where (:keyword is null or :keyword = ''
+    where d.deleted = false
+      and (:keyword is null or :keyword = ''
       or lower(d.code) like lower(concat('%', :keyword, '%'))
       or lower(d.title) like lower(concat('%', :keyword, '%'))
       or lower(d.docNo) like lower(concat('%', :keyword, '%'))
+      or lower(d.receivedNo) like lower(concat('%', :keyword, '%'))
+      or lower(d.incomingUnit) like lower(concat('%', :keyword, '%'))
       or lower(d.carrierNo) like lower(concat('%', :keyword, '%')))
     order by d.createdAt desc
     """)

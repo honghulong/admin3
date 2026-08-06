@@ -9,6 +9,9 @@
     <el-table :data="tableData" border class="table" header-cell-class-name="table-header">
       <el-table-column prop="code" label="编号" width="150"></el-table-column>
       <el-table-column prop="carrierNo" label="载体编号" width="140"></el-table-column>
+      <el-table-column prop="incomingUnit" label="来文单位" min-width="180" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="receivedNo" label="收文编号" width="160" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="receivedDate" label="收文时间" width="140" show-overflow-tooltip></el-table-column>
       <el-table-column prop="title" label="文件标题" min-width="220" show-overflow-tooltip></el-table-column>
       <el-table-column prop="docNo" label="来文字号" width="160" show-overflow-tooltip></el-table-column>
       <el-table-column prop="secrecyLevel" label="密级" width="90"></el-table-column>
@@ -34,16 +37,23 @@
             <div class="form-section-title">来文信息</div>
             <el-button size="small" :icon="Connection" @click="openMappingDialog" :disabled="latestOcrFields.length === 0">设置映射</el-button>
           </div>
-          <el-row :gutter="14">
-            <el-col :span="6"><el-form-item label="编号"><el-input v-model="form.code" placeholder="留空自动生成"></el-input></el-form-item></el-col>
-            <el-col :span="6"><el-form-item label="载体编号"><el-input v-model="form.carrierNo"></el-input></el-form-item></el-col>
-            <el-col :span="12"><el-form-item label="文件标题" required><el-input v-model="form.title"></el-input></el-form-item></el-col>
-            <el-col :span="8"><el-form-item label="来文字号"><el-input v-model="form.docNo"></el-input></el-form-item></el-col>
-            <el-col :span="4"><el-form-item label="密级"><el-select v-model="form.secrecyLevel" clearable><el-option v-for="item in secrecyOptions" :key="item" :label="item" :value="item"></el-option></el-select></el-form-item></el-col>
-            <el-col :span="4"><el-form-item label="紧急程度"><el-select v-model="form.urgencyLevel" clearable><el-option v-for="item in urgencyOptions" :key="item" :label="item" :value="item"></el-option></el-select></el-form-item></el-col>
-            <el-col :span="8"><el-form-item label="经办人"><el-input v-model="form.handler"></el-input></el-form-item></el-col>
-            <el-col :span="24"><el-form-item label="备注"><el-input v-model="form.remark" type="textarea" :autosize="{minRows: 2, maxRows: 4}"></el-input></el-form-item></el-col>
-          </el-row>
+          <div class="document-form-grid">
+            <el-form-item label="编号"><el-input v-model="form.code" placeholder="留空自动生成"></el-input></el-form-item>
+            <el-form-item label="载体编号"><el-input v-model="form.carrierNo"></el-input></el-form-item>
+            <el-form-item label="来文单位" class="grid-span-2"><el-input v-model="form.incomingUnit"></el-input></el-form-item>
+            <el-form-item label="收文编号"><el-input v-model="form.receivedNo"></el-input></el-form-item>
+            <el-form-item label="收文时间"><el-input v-model="form.receivedDate"></el-input></el-form-item>
+            <el-form-item label="文件标题" required class="grid-span-2"><el-input v-model="form.title"></el-input></el-form-item>
+            <el-form-item label="来文字号" class="grid-span-2"><el-input v-model="form.docNo"></el-input></el-form-item>
+            <el-form-item label="密级"><el-select v-model="form.secrecyLevel" clearable><el-option v-for="item in secrecyOptions" :key="item" :label="item" :value="item"></el-option></el-select></el-form-item>
+            <el-form-item label="紧急程度"><el-select v-model="form.urgencyLevel" clearable><el-option v-for="item in urgencyOptions" :key="item" :label="item" :value="item"></el-option></el-select></el-form-item>
+            <el-form-item label="经办人"><el-input v-model="form.handler"></el-input></el-form-item>
+            <el-form-item label="办公室意见" class="grid-span-4"><el-input v-model="form.officeOpinion" type="textarea" :autosize="{minRows: 2, maxRows: 4}"></el-input></el-form-item>
+            <el-form-item label="领导阅批" class="grid-span-4"><el-input v-model="form.leaderInstruction" type="textarea" :autosize="{minRows: 2, maxRows: 5}"></el-input></el-form-item>
+            <el-form-item label="阅者签字"><el-input v-model="form.readerSigner"></el-input></el-form-item>
+            <el-form-item label="办理情况" class="grid-span-3"><el-input v-model="form.handlingStatus"></el-input></el-form-item>
+            <el-form-item label="备注" class="grid-span-4"><el-input v-model="form.remark" type="textarea" :autosize="{minRows: 2, maxRows: 4}"></el-input></el-form-item>
+          </div>
         </div>
 
         <div class="form-section">
@@ -81,10 +91,11 @@
             <el-table-column label="业务字段" min-width="220" show-overflow-tooltip>
               <template #default="{ row }">{{ Object.keys(parseJson(row.ocrBusinessJson)).join('、') || '-' }}</template>
             </el-table-column>
-            <el-table-column label="操作" width="250">
+            <el-table-column label="操作" width="300">
               <template #default="{ row }">
                 <el-button text type="primary" @click="preview(row)">预览</el-button>
                 <el-button text type="primary" @click="recognize(row)">识别</el-button>
+                <el-button text type="primary" :disabled="!row.ocrRawJson" @click="openRestoreDialog(row)">还原</el-button>
                 <el-popover v-if="row.ocrRawJson" placement="top" :width="520" trigger="hover">
                   <template #reference><el-button text type="primary">结果</el-button></template>
                   <pre class="ocr-json">{{ formatJson(row.ocrRawJson) }}</pre>
@@ -102,7 +113,25 @@
       </template>
     </el-dialog>
 
-    <el-dialog title="字段连线映射" v-model="mappingVisible" width="1180px" class="mapping-dialog" @opened="drawLines">
+    <el-dialog title="文件还原预览" v-model="restoreVisible" width="1180px" top="3vh" class="restore-dialog">
+      <div class="restore-toolbar">
+        <span>{{ restoreSummary }}</span>
+        <div>
+          <el-button size="small" :loading="restoreLoading" @click="reloadRestore">重新还原</el-button>
+          <el-button size="small" type="primary" :disabled="!restoreUrl" @click="openRestorePage">新页打开</el-button>
+        </div>
+      </div>
+      <div class="restore-frame-wrap">
+        <iframe v-if="restoreUrl" class="restore-frame" :src="restoreUrl"></iframe>
+        <el-empty v-else description="暂无还原预览"></el-empty>
+      </div>
+    </el-dialog>
+    <el-dialog title="字段连线映射" v-model="mappingVisible" width="96%" top="3vh" class="mapping-dialog" @opened="drawLines">
+      <el-form label-width="100px" class="mapping-rule-form">
+        <el-form-item label="规则名称" required>
+          <el-input v-model="mappingRuleName" maxlength="100" show-word-limit placeholder="请输入全局唯一的映射规则名称"></el-input>
+        </el-form-item>
+      </el-form>
       <div ref="mappingCanvas" class="mapping-canvas">
         <svg class="mapping-lines">
           <line v-for="line in renderedLines" :key="line.targetField + line.sourceField" :class="{selected: selectedMapping?.targetField === line.targetField && selectedMapping?.sourceField === line.sourceField}" :x1="line.x1" :y1="line.y1" :x2="line.x2" :y2="line.y2" @click="selectExistingMapping(line.targetField, line.sourceField)"></line>
@@ -112,15 +141,21 @@
           <button v-for="field in targetFields" :key="field.field" :ref="setTargetRef(field.field)" type="button" class="field-node target-node" :class="{selected: selectedTarget === field.field}" @click="selectTarget(field.field)">
             <span>{{ field.label }}</span><small>{{ form[field.field] || '-' }}</small>
           </button>
+          <div class="mapping-hint" v-if="selectedMapping">
+            {{ describeMapping(selectedMapping) }}
+          </div>
         </div>
         <div class="mapping-panel source-panel">
-          <div class="mapping-title">OCR返回字段</div>
-          <div v-for="field in latestOcrFields" :key="field.field" class="ocr-row" :class="{mapped: isSourceMapped(field.field), selected: selectedMapping?.sourceField === field.field}">
-            <button :ref="setSourceRef(field.field)" type="button" class="ocr-anchor" @click="selectSource(field.field)">{{ field.field }}</button>
-            <span class="ocr-content" @click="selectExistingSourceMapping(field.field)">
-              <strong>{{ field.text }}</strong>
-              <small v-if="field.meta">{{ field.meta }}</small>
-            </span>
+          <div class="mapping-title">OCR结构化内容</div>
+          <div v-for="group in latestOcrGroups" :key="group.title" class="ocr-group">
+            <div class="ocr-group-title">{{ group.title }}</div>
+            <div v-for="field in group.fields" :key="field.field" class="ocr-row" :class="{mapped: isSourceMapped(field.field), selected: selectedMapping?.sourceField === field.field}">
+              <button :ref="setSourceRef(field.field)" type="button" class="ocr-anchor" :title="field.field" @click="selectSource(field.field)">{{ field.field }}</button>
+              <span class="ocr-content" :title="field.text" @click="selectExistingSourceMapping(field.field)">
+                <strong>{{ field.text }}</strong>
+                <small v-if="field.meta">{{ field.meta }}</small>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -146,6 +181,7 @@ import {
   getIncomingDocumentList,
   getIncomingOcrMapping,
   recognizeIncomingScan,
+  restoreIncomingScan,
   saveIncomingOcrMapping,
   updateIncomingDocument,
   uploadIncomingAttachment,
@@ -157,11 +193,18 @@ const tableData = ref<any[]>([]);
 const pageTotal = ref(0);
 const dialogVisible = ref(false);
 const mappingVisible = ref(false);
+const restoreVisible = ref(false);
 const isEdit = ref(false);
 const editId = ref<number | null>(null);
 const attachmentList = ref<any[]>([]);
 const scanList = ref<any[]>([]);
-const mappings = ref<Array<{targetField: string; sourceField: string}>>([]);
+const restoreScan = ref<any>(null);
+const restoreSummary = ref('');
+const restoreUrl = ref('');
+const restoreLoading = ref(false);
+const mappingRuleId = ref<number | null>(null);
+const mappingRuleName = ref('');
+const mappings = ref<any[]>([]);
 const selectedTarget = ref('');
 const selectedMapping = ref<{targetField: string; sourceField: string} | null>(null);
 const mappingCanvas = ref<HTMLElement>();
@@ -174,22 +217,56 @@ const urgencyOptions = ['特急', '加急', '平急', '普通'];
 const targetFields = [
   {field: 'code', label: '编号'},
   {field: 'carrierNo', label: '载体编号'},
+  {field: 'incomingUnit', label: '来文单位'},
+  {field: 'receivedNo', label: '收文编号'},
+  {field: 'receivedDate', label: '收文时间'},
   {field: 'title', label: '文件标题'},
   {field: 'docNo', label: '来文字号'},
   {field: 'secrecyLevel', label: '密级'},
   {field: 'urgencyLevel', label: '紧急程度'},
   {field: 'handler', label: '经办人'},
+  {field: 'officeOpinion', label: '办公室意见'},
+  {field: 'leaderInstruction', label: '领导阅批'},
+  {field: 'readerSigner', label: '阅者签字'},
+  {field: 'handlingStatus', label: '办理情况'},
   {field: 'remark', label: '备注'}
 ];
-const form = reactive<any>({code: '', carrierNo: '', title: '', docNo: '', secrecyLevel: '', urgencyLevel: '', handler: '', remark: ''});
+const emptyForm = {
+  code: '',
+  carrierNo: '',
+  incomingUnit: '',
+  title: '',
+  docNo: '',
+  receivedNo: '',
+  receivedDate: '',
+  secrecyLevel: '',
+  urgencyLevel: '',
+  handler: '',
+  officeOpinion: '',
+  leaderInstruction: '',
+  readerSigner: '',
+  handlingStatus: '',
+  remark: ''
+};
+const form = reactive<any>({...emptyForm});
 
 const latestOcrFields = computed(() => {
-  const latest = [...scanList.value].reverse().find(item => item.ocrBusinessJson);
-  const fields = parseJson(latest?.ocrBusinessJson);
-  return Object.keys(fields).map(field => {
+  return latestOcrGroups.value.flatMap(group => group.fields);
+});
+
+const latestOcrGroups = computed(() => {
+  const latest = [...scanList.value].reverse().find(item => item.ocrRawJson || item.ocrBusinessJson);
+  if (!latest) return [];
+  const raw = parseJson(latest.ocrRawJson);
+  const groups = buildOcrGroups(raw);
+  if (groups.length > 0) return groups;
+
+  const fields = parseJson(latest.ocrBusinessJson);
+  const fallback = Object.keys(fields).map(field => {
     const parsed = parseOcrFieldValue(String(fields[field] ?? ''));
     return {field, value: parsed.text, text: parsed.text, meta: parsed.meta};
   });
+  return fallback.length ? [{title: '兼容字段', fields: fallback}] : [];
 });
 
 async function loadData() {
@@ -205,7 +282,7 @@ async function loadDefaultData() {
 }
 
 function resetForm() {
-  Object.assign(form, {code: '', carrierNo: '', title: '', docNo: '', secrecyLevel: '', urgencyLevel: '', handler: '', remark: ''});
+  Object.assign(form, emptyForm);
   attachmentList.value = [];
   scanList.value = [];
   editId.value = null;
@@ -235,11 +312,18 @@ function fillDetail(data: any) {
   Object.assign(form, {
     code: data.code || '',
     carrierNo: data.carrierNo || '',
+    incomingUnit: data.incomingUnit || '',
     title: data.title || '',
     docNo: data.docNo || '',
+    receivedNo: data.receivedNo || '',
+    receivedDate: data.receivedDate || '',
     secrecyLevel: data.secrecyLevel || '',
     urgencyLevel: data.urgencyLevel || '',
     handler: data.handler || '',
+    officeOpinion: data.officeOpinion || '',
+    leaderInstruction: data.leaderInstruction || '',
+    readerSigner: data.readerSigner || '',
+    handlingStatus: data.handlingStatus || '',
     remark: data.remark || ''
   });
   attachmentList.value = data.attachments || [];
@@ -309,8 +393,10 @@ async function removeScan(row: any) {
 
 async function openMappingDialog() {
   const res = await getIncomingOcrMapping();
+  mappingRuleId.value = res.data?.id || null;
+  mappingRuleName.value = res.data?.name || '';
   try {
-    mappings.value = JSON.parse(res.data.mappingJson || '[]');
+    mappings.value = JSON.parse(res.data?.mappingJson || '[]');
   } catch {
     mappings.value = [];
   }
@@ -330,7 +416,7 @@ function selectSource(field: string) {
     return;
   }
   mappings.value = mappings.value.filter(item => item.targetField !== selectedTarget.value && item.sourceField !== field);
-  mappings.value.push({targetField: selectedTarget.value, sourceField: field});
+  mappings.value.push(createMappingAnchor(selectedTarget.value, field));
   selectedMapping.value = {targetField: selectedTarget.value, sourceField: field};
   selectedTarget.value = '';
   drawLines();
@@ -348,7 +434,13 @@ function selectExistingMapping(targetField: string, sourceField: string) {
 }
 
 async function saveMapping() {
-  await saveIncomingOcrMapping(JSON.stringify(mappings.value));
+  if (!mappingRuleName.value.trim()) {
+    ElMessage.warning('请输入映射规则名称');
+    return;
+  }
+  const res = await saveIncomingOcrMapping({id: mappingRuleId.value, name: mappingRuleName.value.trim(), mappingJson: JSON.stringify(mappings.value)});
+  mappingRuleId.value = res.data.id;
+  mappingRuleName.value = res.data.name;
   applyMappingToForm();
   if (editId.value) {
     const res = await updateIncomingDocument(editId.value, {...form});
@@ -376,13 +468,213 @@ function removeSelectedMapping() {
 }
 
 function applyMappingToForm() {
-  const latest = latestOcrFields.value.reduce((acc: any, item) => {
+  const fields = latestOcrFields.value;
+  const latest = fields.reduce((acc: any, item) => {
     acc[item.field] = item.value;
     return acc;
   }, {});
   mappings.value.forEach(item => {
-    if (latest[item.sourceField] !== undefined) form[item.targetField] = latest[item.sourceField];
+    const value = resolveMappedValue(item, fields, latest);
+    if (value !== undefined) form[item.targetField] = value;
   });
+}
+
+function createMappingAnchor(targetField: string, sourceField: string) {
+  const source = latestOcrFields.value.find(item => item.field === sourceField);
+  const mapping: any = {
+    targetField,
+    sourceField,
+    sourceType: source?.sourceType || inferSourceType(sourceField),
+    sourceText: source?.value || '',
+    sourceRect: source?.rect || null,
+    sourceIndex: source?.sourceIndex ?? null
+  };
+  if (source?.sourceType === 'table_cell') {
+    const label = findNearestLeftLabel(source, latestOcrFields.value);
+    if (label) {
+      mapping.spatialAnchor = {
+        labelText: label.value,
+        labelField: label.field,
+        labelRect: label.rect,
+        relation: 'right-neighbor',
+        sameRow: true,
+        nearest: true
+      };
+    }
+  }
+  return mapping;
+}
+
+function resolveMappedValue(mapping: any, fields: any[], latest: any) {
+  const spatial = resolveBySpatialAnchor(mapping, fields);
+  if (spatial !== undefined) return spatial;
+  if (latest[mapping.sourceField] !== undefined) return latest[mapping.sourceField];
+  return undefined;
+}
+
+function resolveBySpatialAnchor(mapping: any, fields: any[]) {
+  const anchor = mapping?.spatialAnchor;
+  if (!anchor?.labelText || anchor.relation !== 'right-neighbor') return undefined;
+  const tableCells = fields.filter(item => item.sourceType === 'table_cell' && Array.isArray(item.rect));
+  const labels = tableCells
+    .filter(item => normalizeText(item.value) === normalizeText(anchor.labelText))
+    .sort((a, b) => rectDistance(a.rect, anchor.labelRect) - rectDistance(b.rect, anchor.labelRect));
+  const label = labels[0];
+  if (!label) return undefined;
+  const candidates = tableCells
+    .filter(item => item.field !== label.field)
+    .filter(item => rectCenterX(item.rect) > rectCenterX(label.rect))
+    .filter(item => verticalOverlapRatio(item.rect, label.rect) > 0.45)
+    .sort((a, b) => {
+      const leftGapA = a.rect[0] - label.rect[2];
+      const leftGapB = b.rect[0] - label.rect[2];
+      return leftGapA - leftGapB || rectDistance(a.rect, mapping.sourceRect) - rectDistance(b.rect, mapping.sourceRect);
+    });
+  return candidates[0]?.value;
+}
+
+function buildOcrGroups(raw: any) {
+  const groups: Array<{title: string; fields: any[]}> = [];
+  const cells = extractTableCells(raw);
+  if (cells.length > 0) groups.push({title: '表格单元格', fields: cells});
+
+  const lines = extractPageLines(raw);
+  if (lines.length > 0) groups.push({title: 'OCR行文本', fields: lines});
+
+  const plainText = extractPlainText(raw);
+  if (plainText) {
+    groups.push({
+      title: '全文',
+      fields: [{field: 'plain_text', value: plainText, text: summarizeText(plainText), meta: `全文 ${plainText.length} 字`}]
+    });
+  }
+  return groups;
+}
+
+function extractTableCells(raw: any) {
+  const cells: any[] = [];
+  const tables = raw?.restore?.cell_mapping?.tables;
+  if (Array.isArray(tables)) {
+    tables.forEach((table: any, tableIndex: number) => {
+      const tableCells = Array.isArray(table?.cells) ? table.cells : [];
+      tableCells.forEach((cell: any) => {
+        const text = normalizeText(cell?.text);
+        if (!text) return;
+        const field = `cell.${String(cells.length + 1).padStart(3, '0')}`;
+        cells.push({
+          field,
+          value: text,
+          text,
+          meta: `表格${tableIndex + 1} | 单元格${cell?.index ?? cells.length + 1}${formatRect(cell?.rect)}`,
+          rect: normalizeRect(cell?.rect),
+          sourceIndex: cell?.index ?? cells.length + 1,
+          sourceType: 'table_cell'
+        });
+      });
+    });
+  }
+
+  if (cells.length > 0) return cells;
+  const structureTables = raw?.structure?.raw_results?.[0]?.res?.parsing_res_list;
+  if (!Array.isArray(structureTables)) return [];
+  structureTables
+    .filter((block: any) => block?.block_label === 'table')
+    .forEach((block: any, tableIndex: number) => {
+      extractHtmlCellText(String(block?.block_content || '')).forEach((text, cellIndex) => {
+        const field = `cell.${String(cells.length + 1).padStart(3, '0')}`;
+        cells.push({field, value: text, text, meta: `结构表格${tableIndex + 1} | 单元格${cellIndex + 1}`, rect: null, sourceIndex: cellIndex + 1, sourceType: 'table_cell'});
+      });
+    });
+  return cells;
+}
+
+function extractPageLines(raw: any) {
+  const lines: any[] = [];
+  const pages = Array.isArray(raw?.pages) ? raw.pages : [];
+  pages.forEach((page: any) => {
+    const pageNo = page?.page_no || lines.length + 1;
+    const pageLines = Array.isArray(page?.lines) ? page.lines : [];
+    pageLines.forEach((line: any) => {
+      const text = normalizeText(line?.text);
+      if (!text) return;
+      const field = `line.${String(lines.length + 1).padStart(3, '0')}`;
+      const conf = typeof line?.confidence === 'number' ? ` | conf ${line.confidence.toFixed(3)}` : '';
+      const rect = normalizeRect([line?.x1, line?.y1, line?.x2, line?.y2]);
+      lines.push({field, value: text, text, meta: `第${pageNo}页${conf}${formatRect(rect)}`, rect, sourceIndex: lines.length + 1, sourceType: 'ocr_line'});
+    });
+  });
+  return lines;
+}
+
+function extractPlainText(raw: any) {
+  const pages = Array.isArray(raw?.pages) ? raw.pages : [];
+  const text = pages.map((page: any) => normalizeText(page?.plain_text)).filter(Boolean).join('\n');
+  if (text) return text;
+  return extractPageLines(raw).map(item => item.value).join('\n');
+}
+
+function extractHtmlCellText(html: string) {
+  return [...html.matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/gi)]
+    .map(match => normalizeText(match[1].replace(/<[^>]*>/g, ' ')))
+    .filter(Boolean);
+}
+
+function normalizeText(value: any) {
+  return String(value ?? '').replace(/\s+/g, ' ').trim();
+}
+
+function summarizeText(value: string) {
+  return value.length > 80 ? `${value.slice(0, 80)}...` : value;
+}
+
+function formatRect(rect: any) {
+  if (!Array.isArray(rect) || rect.length < 4 || rect.some(item => typeof item !== 'number')) return '';
+  return ` | box ${rect.slice(0, 4).map(item => Math.round(item)).join(',')}`;
+}
+
+function normalizeRect(rect: any) {
+  if (!Array.isArray(rect) || rect.length < 4) return null;
+  const nums = rect.slice(0, 4).map((item: any) => Number(item));
+  return nums.some((item: number) => Number.isNaN(item)) ? null : nums;
+}
+
+function inferSourceType(field: string) {
+  if (field.startsWith('cell.')) return 'table_cell';
+  if (field.startsWith('line.')) return 'ocr_line';
+  if (field === 'plain_text') return 'plain_text';
+  return 'legacy';
+}
+
+function findNearestLeftLabel(source: any, fields: any[]) {
+  if (!Array.isArray(source?.rect)) return null;
+  return fields
+    .filter(item => item.sourceType === 'table_cell' && item.field !== source.field && Array.isArray(item.rect))
+    .filter(item => rectCenterX(item.rect) < rectCenterX(source.rect))
+    .filter(item => verticalOverlapRatio(item.rect, source.rect) > 0.45)
+    .sort((a, b) => {
+      const gapA = source.rect[0] - a.rect[2];
+      const gapB = source.rect[0] - b.rect[2];
+      return gapA - gapB || rectDistance(a.rect, source.rect) - rectDistance(b.rect, source.rect);
+    })[0] || null;
+}
+
+function rectCenterX(rect: number[]) {
+  return (rect[0] + rect[2]) / 2;
+}
+
+function rectCenterY(rect: number[]) {
+  return (rect[1] + rect[3]) / 2;
+}
+
+function rectDistance(a: any, b: any) {
+  if (!Array.isArray(a) || !Array.isArray(b)) return Number.MAX_SAFE_INTEGER;
+  return Math.hypot(rectCenterX(a) - rectCenterX(b), rectCenterY(a) - rectCenterY(b));
+}
+
+function verticalOverlapRatio(a: number[], b: number[]) {
+  const overlap = Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]));
+  const minHeight = Math.max(1, Math.min(a[3] - a[1], b[3] - b[1]));
+  return overlap / minHeight;
 }
 
 function drawLines() {
@@ -417,6 +709,13 @@ function isSourceMapped(field: string) {
   return mappings.value.some(item => item.sourceField === field);
 }
 
+function describeMapping(mapping: any) {
+  if (mapping?.spatialAnchor?.labelText) {
+    return `${mapping.sourceField}：优先取“${mapping.spatialAnchor.labelText}”右侧同一行最近的值`;
+  }
+  return `${mapping?.sourceField || '-'}：按锚点编号取值`;
+}
+
 function parseJson(value: string) {
   if (!value) return {};
   try {
@@ -440,6 +739,37 @@ function formatJson(value: string) {
   } catch {
     return value;
   }
+}
+
+async function openRestoreDialog(scan: any) {
+  if (!scan?.ocrRawJson) {
+    ElMessage.warning('请先完成扫描件OCR');
+    return;
+  }
+  restoreScan.value = scan;
+  restoreVisible.value = true;
+  await loadRestore(false);
+}
+
+async function reloadRestore() {
+  await loadRestore(true);
+}
+
+async function loadRestore(force: boolean) {
+  const scan = restoreScan.value;
+  if (!editId.value || !scan?.id) return;
+  restoreLoading.value = true;
+  try {
+    const res = await restoreIncomingScan(editId.value, scan.id, force);
+    restoreUrl.value = `/admin3${res.data.url}?t=${Date.now()}`;
+    restoreSummary.value = `${scan.fileName || '-'} · ${res.data.generated ? '已生成新还原' : '已读取已保存还原'}`;
+  } finally {
+    restoreLoading.value = false;
+  }
+}
+
+function openRestorePage() {
+  if (restoreUrl.value) window.open(restoreUrl.value, '_blank');
 }
 
 function preview(row: any) {
@@ -502,6 +832,25 @@ onActivated(() => {
   overflow-y: auto;
   padding-right: 6px;
 }
+.incoming-dialog :deep(.el-select),
+.incoming-dialog :deep(.el-input),
+.incoming-dialog :deep(.el-textarea) {
+  width: 100%;
+}
+.incoming-dialog :deep(.el-form-item) {
+  margin-bottom: 12px;
+}
+.document-form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  column-gap: 14px;
+}
+.grid-span-2 {
+  grid-column: span 2;
+}
+.grid-span-4 {
+  grid-column: 1 / -1;
+}
 .form-section {
   margin-bottom: 10px;
   padding: 10px 12px;
@@ -541,12 +890,44 @@ onActivated(() => {
   white-space: pre-wrap;
   word-break: break-all;
 }
+.restore-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  color: #606266;
+  font-size: 13px;
+}
+.restore-frame-wrap {
+  max-height: 72vh;
+  overflow: auto;
+  padding: 12px;
+  background: #f5f7fa;
+  border: 1px solid #e4e7ed;
+}
+.restore-frame {
+  display: block;
+  width: 100%;
+  height: 72vh;
+  margin: 0 auto;
+  border: 0;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, .14);
+}
+.mapping-rule-form {
+  margin-bottom: 8px;
+  padding: 0 12px;
+}
+.mapping-rule-form :deep(.el-form-item) {
+  margin-bottom: 8px;
+}
 .mapping-canvas {
   position: relative;
   display: grid;
-  grid-template-columns: 300px 1fr 460px;
-  gap: 180px;
-  min-height: 520px;
+  grid-template-columns: 320px minmax(80px, 1fr) minmax(620px, 760px);
+  gap: 48px;
+  min-height: 620px;
   padding: 12px;
 }
 .mapping-lines {
@@ -571,17 +952,41 @@ onActivated(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 .target-panel {
   grid-column: 1;
 }
 .source-panel {
   grid-column: 3;
+  max-height: 68vh;
+  overflow: auto;
+  padding-right: 4px;
 }
 .mapping-title {
   color: #303133;
   font-weight: 600;
   text-align: center;
+}
+.ocr-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ocr-group + .ocr-group {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #ebeef5;
+}
+.ocr-group-title {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 4px 0;
+  color: #606266;
+  font-size: 13px;
+  font-weight: 600;
+  background: #fff;
 }
 .field-node {
   display: grid;
@@ -602,35 +1007,34 @@ onActivated(() => {
 }
 .ocr-row {
   display: grid;
-  grid-template-columns: 82px minmax(0, 1fr);
+  grid-template-columns: 108px minmax(0, 1fr);
   gap: 8px;
   align-items: stretch;
 }
 .ocr-anchor {
-  min-height: 42px;
+  min-height: 50px;
   padding: 6px 8px;
-  overflow: hidden;
   color: #303133;
   font-weight: 600;
   text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   background: #fff;
   border: 1px solid #dcdfe6;
   border-radius: 4px;
   cursor: pointer;
+  word-break: break-word;
 }
 .ocr-content {
   display: flex;
   min-width: 0;
-  min-height: 42px;
+  min-height: 50px;
   flex-direction: column;
   justify-content: center;
-  gap: 2px;
-  padding: 6px 10px;
+  gap: 4px;
+  padding: 8px 10px;
   background: #fff;
   border: 1px solid #ebeef5;
   border-radius: 4px;
+  cursor: pointer;
 }
 .ocr-row.mapped .ocr-anchor,
 .ocr-row.selected .ocr-anchor {
@@ -641,22 +1045,20 @@ onActivated(() => {
   border-color: #409eff;
 }
 .ocr-content strong {
-  overflow: hidden;
   color: #303133;
   font-size: 14px;
   font-weight: 500;
-  line-height: 18px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 20px;
+  white-space: normal;
+  word-break: break-word;
 }
 .ocr-content small {
   min-width: 0;
-  overflow: hidden;
   color: #909399;
   font-size: 12px;
   line-height: 16px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
 }
 .field-code {
   overflow: hidden;
@@ -693,5 +1095,14 @@ onActivated(() => {
 .field-node.mapped {
   border-color: #409eff;
   background: #ecf5ff;
+}
+.mapping-hint {
+  padding: 8px 10px;
+  color: #606266;
+  font-size: 12px;
+  line-height: 18px;
+  background: #f5f7fa;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
 }
 </style>

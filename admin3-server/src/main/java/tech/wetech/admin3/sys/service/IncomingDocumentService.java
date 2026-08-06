@@ -47,7 +47,7 @@ import static tech.wetech.admin3.common.Constants.SESSION_CURRENT_USER;
 public class IncomingDocumentService {
 
   private static final String MODULE = "incoming-document";
-  private static final String OCR_URL = "http://120.234.136.122:18769/ocr";
+  private static final String OCR_URL = "http://120.234.136.122:18769/structure";
   private static final Duration OCR_TIMEOUT = Duration.ofSeconds(180);
   private static final int OCR_MAX_ATTEMPTS = 2;
 
@@ -57,8 +57,10 @@ public class IncomingDocumentService {
   private final OcrMappingConfigRepository mappingConfigRepository;
   private final ObjectMapper objectMapper;
   private final IncomingDocumentOcrMapper ocrMapper;
+  private final IncomingDocumentRestoreRenderer restoreRenderer;
   private final HttpClient httpClient = HttpClient.newHttpClient();
   private final Path uploadDir = Paths.get("uploads/attachments");
+  private final Path restoreDir = Paths.get("uploads/incoming-restore");
 
   public IncomingDocumentService(IncomingDocumentRepository documentRepository,
                                  IncomingScanAttachmentRepository scanRepository,
@@ -71,6 +73,7 @@ public class IncomingDocumentService {
     this.mappingConfigRepository = mappingConfigRepository;
     this.objectMapper = objectMapper;
     this.ocrMapper = new IncomingDocumentOcrMapper(objectMapper);
+    this.restoreRenderer = new IncomingDocumentRestoreRenderer(objectMapper);
   }
 
   public PageDTO<IncomingDocumentDTO> findDocuments(String keyword, Pageable pageable) {
@@ -79,7 +82,9 @@ public class IncomingDocumentService {
   }
 
   public IncomingDocumentDTO findDocumentById(Long id) {
-    IncomingDocument document = documentRepository.findById(id).orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    IncomingDocument document = documentRepository.findById(id)
+      .filter(item -> !Boolean.TRUE.equals(item.getDeleted()))
+      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
     List<Attachment> attachments = attachmentRepository.findByIncomingDocumentIdAndDeletedFalseOrderByCreatedAtAsc(id).stream()
       .filter(item -> !"scan".equals(item.getAttachmentRole()))
       .toList();
@@ -98,6 +103,7 @@ public class IncomingDocumentService {
     document.setCreatedBy(userInfo.userId());
     document.setUpdatedAt(now);
     document.setUpdatedBy(userInfo.userId());
+    document.setDeleted(false);
     IncomingDocument saved = documentRepository.save(document);
     linkAttachments(saved.getId(), request.attachmentIds());
     return findDocumentById(saved.getId());
@@ -121,7 +127,12 @@ public class IncomingDocumentService {
   }
 
   public void deleteDocument(Long id) {
-    documentRepository.delete(documentRepository.findById(id).orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST)));
+    IncomingDocument document = documentRepository.findById(id).orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    document.setDeleted(true);
+    document.setDeletedAt(LocalDateTime.now());
+    document.setUpdatedAt(LocalDateTime.now());
+    document.setUpdatedBy(currentUser().userId());
+    documentRepository.save(document);
     attachmentRepository.deleteByIncomingDocumentId(id);
     scanRepository.findByIncomingDocumentIdOrderByCreatedAtAsc(id).forEach(scanRepository::delete);
   }
@@ -195,6 +206,28 @@ public class IncomingDocumentService {
     return findDocumentById(documentId);
   }
 
+  public RestoreResponse restoreScan(Long documentId, Long scanId, boolean force) {
+    ensureDocument(documentId);
+    IncomingScanAttachment scan = scanRepository.findById(scanId)
+      .filter(item -> documentId.equals(item.getIncomingDocumentId()))
+      .filter(item -> !Boolean.TRUE.equals(item.getDeleted()))
+      .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+    if (scan.getOcrRawJson() == null || scan.getOcrRawJson().isBlank()) {
+      throw new BusinessException(PARAM_ERROR, "请先完成扫描件OCR识别");
+    }
+    Path htmlPath = restoreHtmlPath(scanId);
+    boolean cached = Files.exists(htmlPath) && !force;
+    if (!cached) {
+      try {
+        Files.createDirectories(htmlPath.getParent());
+        Files.writeString(htmlPath, restoreRenderer.render(scan.getOcrRawJson()), java.nio.charset.StandardCharsets.UTF_8);
+      } catch (Exception e) {
+        throw new BusinessException(CommonResultStatus.SERVER_ERROR, "文件还原失败: " + e.getMessage());
+      }
+    }
+    return new RestoreResponse("/incoming-restore/" + scanId + "/restore.html", !cached);
+  }
+
   public String findMapping() {
     Long userId = currentUser().userId();
     return mappingConfigRepository.findFirstByModuleAndUserIdOrderByUpdatedAtDesc(MODULE, userId)
@@ -225,11 +258,18 @@ public class IncomingDocumentService {
   private void fillDocument(IncomingDocument document, DocumentRequest request) {
     if (request.code() != null && !request.code().isBlank()) document.setCode(request.code());
     document.setCarrierNo(request.carrierNo());
+    document.setIncomingUnit(request.incomingUnit());
     document.setTitle(request.title());
     document.setDocNo(request.docNo());
+    document.setReceivedNo(request.receivedNo());
+    document.setReceivedDate(request.receivedDate());
     document.setSecrecyLevel(request.secrecyLevel());
     document.setUrgencyLevel(request.urgencyLevel());
     document.setHandler(request.handler());
+    document.setOfficeOpinion(request.officeOpinion());
+    document.setLeaderInstruction(request.leaderInstruction());
+    document.setReaderSigner(request.readerSigner());
+    document.setHandlingStatus(request.handlingStatus());
     document.setRemark(request.remark());
   }
 
@@ -337,8 +377,12 @@ public class IncomingDocumentService {
     return uploadDir.resolve(storedName);
   }
 
+  private Path restoreHtmlPath(Long scanId) {
+    return restoreDir.resolve(String.valueOf(scanId)).resolve("restore.html");
+  }
+
   private void ensureDocument(Long id) {
-    if (!documentRepository.existsById(id)) throw new BusinessException(RECORD_NOT_EXIST);
+    if (!documentRepository.existsByIdAndDeletedFalse(id)) throw new BusinessException(RECORD_NOT_EXIST);
   }
 
   private UserinfoDTO currentUser() {
@@ -360,12 +404,21 @@ public class IncomingDocumentService {
   public record DocumentRequest(
     String code,
     String carrierNo,
+    String incomingUnit,
     String title,
     String docNo,
+    String receivedNo,
+    String receivedDate,
     String secrecyLevel,
     String urgencyLevel,
     String handler,
+    String officeOpinion,
+    String leaderInstruction,
+    String readerSigner,
+    String handlingStatus,
     String remark,
     List<Long> attachmentIds
   ) {}
+
+  public record RestoreResponse(String url, boolean generated) {}
 }
