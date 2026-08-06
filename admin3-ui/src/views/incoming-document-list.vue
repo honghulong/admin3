@@ -922,6 +922,10 @@ onActivated(() => {
 .mapping-rule-form :deep(.el-form-item) {
   margin-bottom: 8px;
 }
+.mapping-dialog :deep(.el-dialog__body) {
+  max-height: 78vh;
+  overflow: auto;
+}
 .mapping-canvas {
   position: relative;
   display: grid;
@@ -959,9 +963,6 @@ onActivated(() => {
 }
 .source-panel {
   grid-column: 3;
-  max-height: 68vh;
-  overflow: auto;
-  padding-right: 4px;
 }
 .mapping-title {
   color: #303133;
