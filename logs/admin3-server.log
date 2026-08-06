@@ -114,3 +114,133 @@ Standard Commons Logging discovery in action with spring-jcl: please remove comm
 2026-08-06T17:36:20.262+08:00  INFO 24532 --- [admin3] [http-nio-9099-exec-8] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
 2026-08-06T17:36:20.264+08:00  INFO 24532 --- [admin3] [http-nio-9099-exec-8] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
 2026-08-06T17:36:20.266+08:00  INFO 24532 --- [admin3] [http-nio-9099-exec-8] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-08-06T17:50:44.314+08:00  INFO 23280 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 23280 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-08-06T17:50:44.315+08:00  INFO 23280 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-08-06T17:50:45.590+08:00  INFO 23280 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-06T17:50:45.823+08:00  INFO 23280 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 225 ms. Found 24 JPA repository interfaces.
+2026-08-06T17:50:47.702+08:00  INFO 23280 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-08-06T17:50:47.723+08:00  INFO 23280 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-06T17:50:47.723+08:00  INFO 23280 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-08-06T17:50:47.789+08:00  INFO 23280 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-08-06T17:50:47.789+08:00  INFO 23280 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3380 ms
+2026-08-06T17:50:48.562+08:00  INFO 23280 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-06T17:50:48.672+08:00  INFO 23280 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-08-06T17:50:48.740+08:00  INFO 23280 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-06T17:50:49.099+08:00  INFO 23280 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-06T17:50:49.157+08:00  INFO 23280 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-06T17:50:49.846+08:00  INFO 23280 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3ad2883a
+2026-08-06T17:50:49.851+08:00  INFO 23280 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-06T17:50:49.938+08:00  WARN 23280 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-08-06T17:50:53.553+08:00  INFO 23280 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-06T17:50:53.829+08:00  INFO 23280 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-06T17:50:55.165+08:00  INFO 23280 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-06T17:50:58.696+08:00  WARN 23280 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-06T17:50:59.564+08:00  INFO 23280 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-08-06T17:50:59.595+08:00  INFO 23280 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 15.811 seconds (process running for 16.453)
+2026-08-06T17:55:00.149+08:00  INFO 14552 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 14552 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-08-06T17:55:00.150+08:00  INFO 14552 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-08-06T17:55:01.426+08:00  INFO 14552 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-06T17:55:01.645+08:00  INFO 14552 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 213 ms. Found 24 JPA repository interfaces.
+2026-08-06T17:55:02.639+08:00  INFO 14552 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-08-06T17:55:02.661+08:00  INFO 14552 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-06T17:55:02.661+08:00  INFO 14552 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-08-06T17:55:02.726+08:00  INFO 14552 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-08-06T17:55:02.727+08:00  INFO 14552 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2493 ms
+2026-08-06T17:55:02.990+08:00  INFO 14552 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-06T17:55:03.111+08:00  INFO 14552 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-08-06T17:55:03.154+08:00  INFO 14552 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-06T17:55:03.443+08:00  INFO 14552 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-06T17:55:03.481+08:00  INFO 14552 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-06T17:55:03.920+08:00  INFO 14552 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4be460e5
+2026-08-06T17:55:03.923+08:00  INFO 14552 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-06T17:55:03.990+08:00  WARN 14552 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-08-06T17:55:06.206+08:00  INFO 14552 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-06T17:55:06.422+08:00  INFO 14552 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-06T17:55:07.084+08:00  INFO 14552 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-06T17:55:09.193+08:00  WARN 14552 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-06T17:55:09.770+08:00  INFO 14552 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-08-06T17:55:09.786+08:00  INFO 14552 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 10.2 seconds (process running for 10.926)
+2026-08-06T17:55:10.005+08:00  INFO 14552 --- [admin3] [main] .s.b.a.l.ConditionEvaluationReportLogger : 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2026-08-06T17:55:10.027+08:00 ERROR 14552 --- [admin3] [main] o.s.boot.SpringApplication               : Application run failed
+
+java.lang.IllegalStateException: Comparison identity missing in entity: Resource<null>
+	at tech.wetech.admin3.sys.model.BaseEntity._checkIdentity(BaseEntity.java:71) ~[!/:0.0.1-SNAPSHOT]
+	at tech.wetech.admin3.sys.model.BaseEntity.equals(BaseEntity.java:56) ~[!/:0.0.1-SNAPSHOT]
+	at java.base/java.util.HashMap.getNode(HashMap.java:578) ~[na:na]
+	at java.base/java.util.HashMap.containsKey(HashMap.java:602) ~[na:na]
+	at java.base/java.util.HashSet.contains(HashSet.java:213) ~[na:na]
+	at org.hibernate.collection.spi.PersistentSet.contains(PersistentSet.java:163) ~[hibernate-core-6.4.4.Final.jar!/:6.4.4.Final]
+	at tech.wetech.admin3.sys.model.Resource.$$_hibernate_write_parent(Resource.java) ~[!/:0.0.1-SNAPSHOT]
+	at tech.wetech.admin3.sys.model.Resource.setParent(Resource.java:68) ~[!/:0.0.1-SNAPSHOT]
+	at tech.wetech.admin3.infra.OcrMappingRuleMenuInitializer.ensureResource(OcrMappingRuleMenuInitializer.java:54) ~[!/:0.0.1-SNAPSHOT]
+	at tech.wetech.admin3.infra.OcrMappingRuleMenuInitializer.run(OcrMappingRuleMenuInitializer.java:37) ~[!/:0.0.1-SNAPSHOT]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:351) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.invokeJoinpoint(ReflectiveMethodInvocation.java:196) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:765) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:123) ~[spring-tx-6.1.4.jar!/:6.1.4]
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:385) ~[spring-tx-6.1.4.jar!/:6.1.4]
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119) ~[spring-tx-6.1.4.jar!/:6.1.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:765) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:717) ~[spring-aop-6.1.4.jar!/:6.1.4]
+	at tech.wetech.admin3.infra.OcrMappingRuleMenuInitializer$$SpringCGLIB$$0.run(<generated>) ~[!/:0.0.1-SNAPSHOT]
+	at org.springframework.boot.SpringApplication.lambda$callRunner$4(SpringApplication.java:786) ~[spring-boot-3.2.3.jar!/:3.2.3]
+	at org.springframework.util.function.ThrowingConsumer$1.acceptWithException(ThrowingConsumer.java:83) ~[spring-core-6.1.4.jar!/:6.1.4]
+	at org.springframework.util.function.ThrowingConsumer.accept(ThrowingConsumer.java:60) ~[spring-core-6.1.4.jar!/:6.1.4]
+	at org.springframework.util.function.ThrowingConsumer$1.accept(ThrowingConsumer.java:88) ~[spring-core-6.1.4.jar!/:6.1.4]
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:798) ~[spring-boot-3.2.3.jar!/:3.2.3]
+	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:786) ~[spring-boot-3.2.3.jar!/:3.2.3]
+	at org.springframework.boot.SpringApplication.lambda$callRunners$3(SpringApplication.java:774) ~[spring-boot-3.2.3.jar!/:3.2.3]
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:184) ~[na:na]
+	at java.base/java.util.stream.SortedOps$SizedRefSortingSink.end(SortedOps.java:357) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:510) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499) ~[na:na]
+	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:151) ~[na:na]
+	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:174) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596) ~[na:na]
+	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:774) ~[spring-boot-3.2.3.jar!/:3.2.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:341) ~[spring-boot-3.2.3.jar!/:3.2.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1354) ~[spring-boot-3.2.3.jar!/:3.2.3]
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1343) ~[spring-boot-3.2.3.jar!/:3.2.3]
+	at tech.wetech.admin3.Admin3ServerApplication.main(Admin3ServerApplication.java:12) ~[!/:0.0.1-SNAPSHOT]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:91) ~[admin3-server-0.0.1-SNAPSHOT.jar:0.0.1-SNAPSHOT]
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:53) ~[admin3-server-0.0.1-SNAPSHOT.jar:0.0.1-SNAPSHOT]
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:58) ~[admin3-server-0.0.1-SNAPSHOT.jar:0.0.1-SNAPSHOT]
+
+2026-08-06T17:55:10.053+08:00  INFO 14552 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-06T17:55:10.057+08:00  INFO 14552 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2026-08-06T17:55:10.064+08:00  INFO 14552 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-08-06T17:58:04.797+08:00  INFO 19764 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 19764 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-08-06T17:58:04.798+08:00  INFO 19764 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-08-06T17:58:06.056+08:00  INFO 19764 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-06T17:58:06.261+08:00  INFO 19764 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 196 ms. Found 24 JPA repository interfaces.
+2026-08-06T17:58:07.209+08:00  INFO 19764 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-08-06T17:58:07.234+08:00  INFO 19764 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-06T17:58:07.234+08:00  INFO 19764 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-08-06T17:58:07.299+08:00  INFO 19764 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-08-06T17:58:07.299+08:00  INFO 19764 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2413 ms
+2026-08-06T17:58:07.546+08:00  INFO 19764 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-06T17:58:07.660+08:00  INFO 19764 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-08-06T17:58:07.691+08:00  INFO 19764 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-06T17:58:07.914+08:00  INFO 19764 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-06T17:58:07.944+08:00  INFO 19764 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-06T17:58:08.342+08:00  INFO 19764 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1ab9c735
+2026-08-06T17:58:08.347+08:00  INFO 19764 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-06T17:58:08.406+08:00  WARN 19764 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-08-06T17:58:10.310+08:00  INFO 19764 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-06T17:58:10.465+08:00  INFO 19764 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-06T17:58:10.961+08:00  INFO 19764 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-06T17:58:12.576+08:00  WARN 19764 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-06T17:58:12.989+08:00  INFO 19764 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-08-06T17:58:13.000+08:00  INFO 19764 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 8.745 seconds (process running for 9.308)
+2026-08-06T17:58:17.803+08:00  INFO 19764 --- [admin3] [http-nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-06T17:58:17.805+08:00  INFO 19764 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-06T17:58:17.810+08:00  INFO 19764 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
