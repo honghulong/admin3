@@ -187,6 +187,10 @@ import {
   uploadIncomingAttachment,
   uploadIncomingScan
 } from '../api/incoming-document';
+import {
+  createMappingAnchor as createOcrMappingAnchor,
+  resolveMappedValue as resolveOcrMappedValue
+} from '../utils/incoming-ocr-mapping';
 
 const query = reactive({pageIndex: 1, pageSize: 10, keyword: ''});
 const tableData = ref<any[]>([]);
@@ -205,6 +209,7 @@ const restoreLoading = ref(false);
 const mappingRuleId = ref<number | null>(null);
 const mappingRuleName = ref('');
 const mappings = ref<any[]>([]);
+const mappingApplyHistory = ref<any[]>([]);
 const selectedTarget = ref('');
 const selectedMapping = ref<{targetField: string; sourceField: string} | null>(null);
 const mappingCanvas = ref<HTMLElement>();
@@ -473,43 +478,26 @@ function applyMappingToForm() {
     acc[item.field] = item.value;
     return acc;
   }, {});
+  const history: any[] = [];
   mappings.value.forEach(item => {
-    const value = resolveMappedValue(item, fields, latest);
-    if (value !== undefined) form[item.targetField] = value;
+    const result = resolveOcrMappedValue(item, fields, latest);
+    if (result !== undefined) {
+      form[item.targetField] = result.value;
+      history.push({
+        targetField: item.targetField,
+        value: result.value,
+        matchedField: result.matchedField,
+        reason: result.reason,
+        fallback: result.fallback
+      });
+    }
   });
+  mappingApplyHistory.value = history;
+  if (history.length > 0) console.info('[incoming-ocr-mapping] apply history', history);
 }
 
 function createMappingAnchor(targetField: string, sourceField: string) {
-  const source = latestOcrFields.value.find(item => item.field === sourceField);
-  const mapping: any = {
-    targetField,
-    sourceField,
-    sourceType: source?.sourceType || inferSourceType(sourceField),
-    sourceText: source?.value || '',
-    sourceRect: source?.rect || null,
-    sourceIndex: source?.sourceIndex ?? null
-  };
-  if (source?.sourceType === 'table_cell') {
-    const label = findNearestLeftLabel(source, latestOcrFields.value);
-    if (label) {
-      mapping.spatialAnchor = {
-        labelText: label.value,
-        labelField: label.field,
-        labelRect: label.rect,
-        relation: 'right-neighbor',
-        sameRow: true,
-        nearest: true
-      };
-    }
-  }
-  return mapping;
-}
-
-function resolveMappedValue(mapping: any, fields: any[], latest: any) {
-  const spatial = resolveBySpatialAnchor(mapping, fields);
-  if (spatial !== undefined) return spatial;
-  if (latest[mapping.sourceField] !== undefined) return latest[mapping.sourceField];
-  return undefined;
+  return createOcrMappingAnchor(targetField, sourceField, latestOcrFields.value);
 }
 
 function resolveBySpatialAnchor(mapping: any, fields: any[]) {
