@@ -271,6 +271,7 @@ public class IncomingDocumentService {
     document.setReaderSigner(request.readerSigner());
     document.setHandlingStatus(request.handlingStatus());
     document.setRemark(request.remark());
+    document.setOcrMappingApplyHistory(request.ocrMappingApplyHistory());
   }
 
   private void linkAttachments(Long documentId, List<Long> attachmentIds) {
@@ -417,6 +418,7 @@ public class IncomingDocumentService {
     String readerSigner,
     String handlingStatus,
     String remark,
+    String ocrMappingApplyHistory,
     List<Long> attachmentIds
   ) {}
 

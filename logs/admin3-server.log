@@ -1,78 +1,26 @@
-2026-08-10T11:43:03.653+08:00  INFO 5228 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 5228 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
-2026-08-10T11:43:03.670+08:00  INFO 5228 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
-2026-08-10T11:43:04.858+08:00  INFO 5228 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-08-10T11:43:05.087+08:00  INFO 5228 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 219 ms. Found 24 JPA repository interfaces.
-2026-08-10T11:43:08.083+08:00  INFO 5228 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
-2026-08-10T11:43:08.102+08:00  INFO 5228 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-08-10T11:43:08.103+08:00  INFO 5228 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
-2026-08-10T11:43:08.172+08:00  INFO 5228 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
-2026-08-10T11:43:08.173+08:00  INFO 5228 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4412 ms
-2026-08-10T11:43:08.686+08:00  INFO 5228 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-08-10T11:43:08.840+08:00  INFO 5228 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
-2026-08-10T11:43:08.905+08:00  INFO 5228 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2026-08-10T11:43:09.458+08:00  INFO 5228 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-08-10T11:43:09.498+08:00  INFO 5228 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-08-10T11:43:10.415+08:00  INFO 5228 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@47d9c01
-2026-08-10T11:43:10.420+08:00  INFO 5228 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-08-10T11:43:10.513+08:00  WARN 5228 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
-2026-08-10T11:43:13.961+08:00  INFO 5228 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-08-10T11:43:14.275+08:00  INFO 5228 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-08-10T11:43:15.975+08:00  INFO 5228 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-08-10T11:43:19.834+08:00  WARN 5228 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-08-10T11:43:20.750+08:00  INFO 5228 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
-2026-08-10T11:43:20.817+08:00  INFO 5228 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 17.736 seconds (process running for 18.519)
-2026-08-10T11:43:35.506+08:00  INFO 5228 --- [admin3] [http-nio-9099-exec-2] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-08-10T11:43:35.507+08:00  INFO 5228 --- [admin3] [http-nio-9099-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-08-10T11:43:35.510+08:00  INFO 5228 --- [admin3] [http-nio-9099-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
-2026-08-10T17:32:36.798+08:00  INFO 7660 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 7660 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
-2026-08-10T17:32:36.801+08:00  INFO 7660 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
-2026-08-10T17:32:38.245+08:00  INFO 7660 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-08-10T17:32:38.477+08:00  INFO 7660 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 225 ms. Found 24 JPA repository interfaces.
-2026-08-10T17:32:40.867+08:00  INFO 7660 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
-2026-08-10T17:32:40.892+08:00  INFO 7660 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-08-10T17:32:40.893+08:00  INFO 7660 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
-2026-08-10T17:32:40.969+08:00  INFO 7660 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
-2026-08-10T17:32:40.969+08:00  INFO 7660 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4076 ms
-2026-08-10T17:32:41.779+08:00  INFO 7660 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-08-10T17:32:41.914+08:00  INFO 7660 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
-2026-08-10T17:32:41.979+08:00  INFO 7660 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2026-08-10T17:32:42.383+08:00  INFO 7660 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-08-10T17:32:42.430+08:00  INFO 7660 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-08-10T17:32:43.283+08:00  INFO 7660 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@464a3430
-2026-08-10T17:32:43.287+08:00  INFO 7660 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-08-10T17:32:43.383+08:00  WARN 7660 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
-2026-08-10T17:32:47.245+08:00  INFO 7660 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-08-10T17:32:47.475+08:00  INFO 7660 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-08-10T17:32:48.835+08:00  INFO 7660 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-08-10T17:32:52.275+08:00  WARN 7660 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-08-10T17:32:53.009+08:00  INFO 7660 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
-2026-08-10T17:32:53.061+08:00  INFO 7660 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 16.818 seconds (process running for 17.495)
-2026-08-10T17:33:07.005+08:00  INFO 7660 --- [admin3] [http-nio-9099-exec-2] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-08-10T17:33:07.006+08:00  INFO 7660 --- [admin3] [http-nio-9099-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-08-10T17:33:07.007+08:00  INFO 7660 --- [admin3] [http-nio-9099-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2026-08-10T17:44:51.045+08:00  INFO 24764 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 24764 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
-2026-08-10T17:44:51.047+08:00  INFO 24764 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
-2026-08-10T17:44:52.252+08:00  INFO 24764 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-08-10T17:44:52.436+08:00  INFO 24764 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 178 ms. Found 24 JPA repository interfaces.
-2026-08-10T17:44:53.335+08:00  INFO 24764 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
-2026-08-10T17:44:53.356+08:00  INFO 24764 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-08-10T17:44:53.357+08:00  INFO 24764 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
-2026-08-10T17:44:53.424+08:00  INFO 24764 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
-2026-08-10T17:44:53.425+08:00  INFO 24764 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2299 ms
-2026-08-10T17:44:53.695+08:00  INFO 24764 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-08-10T17:44:53.825+08:00  INFO 24764 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
-2026-08-10T17:44:53.880+08:00  INFO 24764 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2026-08-10T17:44:54.095+08:00  INFO 24764 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-08-10T17:44:54.121+08:00  INFO 24764 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-08-10T17:44:54.515+08:00  INFO 24764 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1ab9c735
-2026-08-10T17:44:54.518+08:00  INFO 24764 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-08-10T17:44:54.579+08:00  WARN 24764 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
-2026-08-10T17:44:56.588+08:00  INFO 24764 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-08-10T17:44:56.755+08:00  INFO 24764 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-08-10T17:44:57.322+08:00  INFO 24764 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-08-10T17:44:59.265+08:00  WARN 24764 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-08-10T17:44:59.623+08:00  INFO 24764 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
-2026-08-10T17:44:59.636+08:00  INFO 24764 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 9.092 seconds (process running for 9.648)
-2026-08-10T17:45:07.180+08:00  INFO 24764 --- [admin3] [http-nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-08-10T17:45:07.181+08:00  INFO 24764 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-08-10T17:45:07.182+08:00  INFO 24764 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-08-11T16:06:55.404+08:00  INFO 14252 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Starting Admin3ServerApplication v0.0.1-SNAPSHOT using Java 21.0.11 with PID 14252 (D:\hongmengProjects\admin3\admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar started by Administrator in D:\hongmengProjects\admin3)
+2026-08-11T16:06:55.420+08:00  INFO 14252 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : The following 1 profile is active: "biz"
+2026-08-11T16:06:56.640+08:00  INFO 14252 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-11T16:06:56.853+08:00  INFO 14252 --- [admin3] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 205 ms. Found 24 JPA repository interfaces.
+2026-08-11T16:06:59.772+08:00  INFO 14252 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 9099 (http)
+2026-08-11T16:06:59.797+08:00  INFO 14252 --- [admin3] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-11T16:06:59.798+08:00  INFO 14252 --- [admin3] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-08-11T16:06:59.877+08:00  INFO 14252 --- [admin3] [main] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring embedded WebApplicationContext
+2026-08-11T16:06:59.878+08:00  INFO 14252 --- [admin3] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 4364 ms
+2026-08-11T16:07:00.467+08:00  INFO 14252 --- [admin3] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-11T16:07:00.590+08:00  INFO 14252 --- [admin3] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-08-11T16:07:00.644+08:00  INFO 14252 --- [admin3] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-11T16:07:01.009+08:00  INFO 14252 --- [admin3] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-11T16:07:01.057+08:00  INFO 14252 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-11T16:07:01.859+08:00  INFO 14252 --- [admin3] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4c000cc4
+2026-08-11T16:07:01.865+08:00  INFO 14252 --- [admin3] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-11T16:07:02.423+08:00  WARN 14252 --- [admin3] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MySQLDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 8.0.0. Check the community dialects project for available legacy versions.
+2026-08-11T16:07:05.996+08:00  INFO 14252 --- [admin3] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-11T16:07:06.448+08:00  INFO 14252 --- [admin3] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-11T16:07:07.725+08:00  INFO 14252 --- [admin3] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-11T16:07:10.832+08:00  WARN 14252 --- [admin3] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-11T16:07:11.990+08:00  INFO 14252 --- [admin3] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 9099 (http) with context path '/admin3'
+2026-08-11T16:07:12.017+08:00  INFO 14252 --- [admin3] [main] t.wetech.admin3.Admin3ServerApplication  : Started Admin3ServerApplication in 17.186 seconds (process running for 17.886)
+2026-08-11T16:13:35.998+08:00  INFO 14252 --- [admin3] [http-nio-9099-exec-1] o.a.c.c.C.[.[localhost].[/admin3]        : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-11T16:13:36.000+08:00  INFO 14252 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-11T16:13:36.004+08:00  INFO 14252 --- [admin3] [http-nio-9099-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms

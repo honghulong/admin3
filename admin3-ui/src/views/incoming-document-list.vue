@@ -127,42 +127,74 @@
       </div>
     </el-dialog>
     <el-dialog title="字段连线映射" v-model="mappingVisible" width="96%" top="3vh" class="mapping-dialog" @opened="drawLines">
-      <el-form label-width="100px" class="mapping-rule-form">
-        <el-form-item label="规则名称" required>
-          <el-input v-model="mappingRuleName" maxlength="100" show-word-limit placeholder="请输入全局唯一的映射规则名称"></el-input>
-        </el-form-item>
-      </el-form>
-      <div ref="mappingCanvas" class="mapping-canvas">
-        <svg class="mapping-lines">
-          <line v-for="line in renderedLines" :key="line.targetField + line.sourceField" :class="{selected: selectedMapping?.targetField === line.targetField && selectedMapping?.sourceField === line.sourceField}" :x1="line.x1" :y1="line.y1" :x2="line.x2" :y2="line.y2" @click="selectExistingMapping(line.targetField, line.sourceField)"></line>
-        </svg>
-        <div class="mapping-panel target-panel">
-          <div class="mapping-title">来文资料字段</div>
-          <button v-for="field in targetFields" :key="field.field" :ref="setTargetRef(field.field)" type="button" class="field-node target-node" :class="{selected: selectedTarget === field.field}" @click="selectTarget(field.field)">
-            <span>{{ field.label }}</span><small>{{ form[field.field] || '-' }}</small>
-          </button>
-          <div class="mapping-hint" v-if="selectedMapping">
-            {{ describeMapping(selectedMapping) }}
-          </div>
-        </div>
-        <div class="mapping-panel source-panel">
-          <div class="mapping-title">OCR结构化内容</div>
-          <div v-for="group in latestOcrGroups" :key="group.title" class="ocr-group">
-            <div class="ocr-group-title">{{ group.title }}</div>
-            <div v-for="field in group.fields" :key="field.field" class="ocr-row" :class="{mapped: isSourceMapped(field.field), selected: selectedMapping?.sourceField === field.field}">
-              <button :ref="setSourceRef(field.field)" type="button" class="ocr-anchor" :title="field.field" @click="selectSource(field.field)">{{ field.field }}</button>
-              <span class="ocr-content" :title="field.text" @click="selectExistingSourceMapping(field.field)">
-                <strong>{{ field.text }}</strong>
-                <small v-if="field.meta">{{ field.meta }}</small>
-              </span>
+      <el-tabs v-model="mappingTab" class="mapping-tabs" @tab-change="handleMappingTabChange">
+        <el-tab-pane label="连线映射" name="edit">
+          <el-form label-width="100px" class="mapping-rule-form">
+            <el-form-item label="规则名称" required>
+              <el-input v-model="mappingRuleName" maxlength="100" show-word-limit placeholder="请输入全局唯一的映射规则名称"></el-input>
+            </el-form-item>
+          </el-form>
+          <div ref="mappingCanvas" class="mapping-canvas">
+            <svg class="mapping-lines">
+              <line v-for="line in renderedLines" :key="line.targetField + line.sourceField" :class="{selected: selectedMapping?.targetField === line.targetField && selectedMapping?.sourceField === line.sourceField}" :x1="line.x1" :y1="line.y1" :x2="line.x2" :y2="line.y2" @click="selectExistingMapping(line.targetField, line.sourceField)"></line>
+            </svg>
+            <div class="mapping-panel target-panel">
+              <div class="mapping-title">来文资料字段</div>
+              <button v-for="field in targetFields" :key="field.field" :ref="setTargetRef(field.field)" type="button" class="field-node target-node" :class="{selected: selectedTarget === field.field}" @click="selectTarget(field.field)">
+                <span>{{ field.label }}</span><small>{{ form[field.field] || '-' }}</small>
+              </button>
+              <div class="mapping-hint" v-if="selectedMapping">
+                {{ describeMapping(selectedMapping) }}
+              </div>
+            </div>
+            <div class="mapping-panel source-panel">
+              <div class="mapping-title">OCR结构化内容</div>
+              <div v-for="group in latestOcrGroups" :key="group.title" class="ocr-group">
+                <div class="ocr-group-title">{{ group.title }}</div>
+                <div v-for="field in group.fields" :key="field.field" class="ocr-row" :class="{mapped: isSourceMapped(field.field), selected: selectedMapping?.sourceField === field.field}">
+                  <button :ref="setSourceRef(field.field)" type="button" class="ocr-anchor" :title="field.field" @click="selectSource(field.field)">{{ field.field }}</button>
+                  <span class="ocr-content" :title="field.text" @click="selectExistingSourceMapping(field.field)">
+                    <strong>{{ field.text }}</strong>
+                    <small v-if="field.meta">{{ field.meta }}</small>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </el-tab-pane>
+        <el-tab-pane label="赋值历史" name="history">
+          <div v-if="mappingApplyHistory.length === 0" class="mapping-history-empty">暂无赋值历史</div>
+          <div v-else class="mapping-history-list">
+            <div v-for="item in mappingApplyHistory" :key="item.targetField" class="mapping-history-row">
+              <div class="mapping-history-field">
+                <strong>{{ getTargetLabel(item.targetField) }}</strong>
+                <small>{{ item.value || '-' }}</small>
+              </div>
+              <div class="mapping-history-hit">
+                <span :class="['mapping-history-status', {fallback: item.applyResult?.fallback}]">{{ item.applyResult?.fallback ? 'fallback' : 'matched' }}</span>
+                <span>{{ item.applyResult?.reason || '-' }}</span>
+              </div>
+              <div class="mapping-history-json-grid">
+                <div>
+                  <div class="mapping-json-title">保存的匹配规则 JSON</div>
+                  <pre class="mapping-rule-json">{{ formatJson(item.mappingRule) }}</pre>
+                </div>
+                <div>
+                  <div class="mapping-json-title">applyResult</div>
+                  <pre class="mapping-rule-json">{{ formatJson(item.applyResult) }}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
       <template #footer>
-        <el-button @click="resetMapping">重置连线</el-button>
-        <el-button @click="removeSelectedMapping" :disabled="!selectedTarget && !selectedMapping">取消当前连线</el-button>
-        <el-button type="primary" @click="saveMapping">保存</el-button>
+        <template v-if="mappingTab === 'edit'">
+          <el-button @click="resetMapping">重置连线</el-button>
+          <el-button @click="removeSelectedMapping" :disabled="!selectedTarget && !selectedMapping">取消当前连线</el-button>
+          <el-button type="primary" @click="saveMapping">保存</el-button>
+        </template>
+        <el-button v-else @click="mappingVisible = false">关闭</el-button>
       </template>
     </el-dialog>
   </div>
@@ -208,6 +240,7 @@ const restoreUrl = ref('');
 const restoreLoading = ref(false);
 const mappingRuleId = ref<number | null>(null);
 const mappingRuleName = ref('');
+const mappingTab = ref('edit');
 const mappings = ref<any[]>([]);
 const mappingApplyHistory = ref<any[]>([]);
 const selectedTarget = ref('');
@@ -251,7 +284,8 @@ const emptyForm = {
   leaderInstruction: '',
   readerSigner: '',
   handlingStatus: '',
-  remark: ''
+  remark: '',
+  ocrMappingApplyHistory: ''
 };
 const form = reactive<any>({...emptyForm});
 
@@ -329,8 +363,10 @@ function fillDetail(data: any) {
     leaderInstruction: data.leaderInstruction || '',
     readerSigner: data.readerSigner || '',
     handlingStatus: data.handlingStatus || '',
-    remark: data.remark || ''
+    remark: data.remark || '',
+    ocrMappingApplyHistory: data.ocrMappingApplyHistory || ''
   });
+  mappingApplyHistory.value = parseHistory(data.ocrMappingApplyHistory);
   attachmentList.value = data.attachments || [];
   scanList.value = data.scanAttachments || [];
 }
@@ -378,6 +414,7 @@ async function handleScanFileChange(uploadFile: any) {
   const res = await uploadIncomingScan(editId.value, uploadFile.raw);
   fillDetail(res.data);
   applyMappingToForm();
+  await persistMappingApplyHistory();
   ElMessage.success('扫描件上传并识别完成');
 }
 
@@ -386,6 +423,7 @@ async function recognize(row: any) {
   const res = await recognizeIncomingScan(editId.value, row.id);
   fillDetail(res.data);
   applyMappingToForm();
+  await persistMappingApplyHistory();
   ElMessage.success('识别完成');
 }
 
@@ -405,6 +443,7 @@ async function openMappingDialog() {
   } catch {
     mappings.value = [];
   }
+  mappingTab.value = 'edit';
   mappingVisible.value = true;
   await nextTick();
   drawLines();
@@ -486,14 +525,21 @@ function applyMappingToForm() {
       history.push({
         targetField: item.targetField,
         value: result.value,
-        matchedField: result.matchedField,
-        reason: result.reason,
-        fallback: result.fallback
+        mappingRule: item,
+        applyResult: result
       });
     }
   });
   mappingApplyHistory.value = history;
+  form.ocrMappingApplyHistory = JSON.stringify(history);
   if (history.length > 0) console.info('[incoming-ocr-mapping] apply history', history);
+}
+
+async function persistMappingApplyHistory() {
+  if (!editId.value) return;
+  const res = await updateIncomingDocument(editId.value, {...form});
+  fillDetail(res.data);
+  loadData();
 }
 
 function createMappingAnchor(targetField: string, sourceField: string) {
@@ -721,7 +767,21 @@ function parseOcrFieldValue(value: string) {
   return {text: value, meta: ''};
 }
 
-function formatJson(value: string) {
+function parseHistory(value: string) {
+  const parsed = parseJson(value);
+  return Array.isArray(parsed) ? parsed : [];
+}
+
+function getTargetLabel(field: string) {
+  return targetFields.find(item => item.field === field)?.label || field;
+}
+
+function handleMappingTabChange() {
+  if (mappingTab.value === 'edit') drawLines();
+}
+
+function formatJson(value: any) {
+  if (typeof value !== 'string') return JSON.stringify(value ?? {}, null, 2);
   try {
     return JSON.stringify(JSON.parse(value), null, 2);
   } catch {
@@ -1085,7 +1145,92 @@ onActivated(() => {
   border-color: #409eff;
   background: #ecf5ff;
 }
-.mapping-hint {
+.mapping-tabs {
+  padding: 0 12px;
+}
+.mapping-tabs :deep(.el-tabs__content) {
+  overflow: visible;
+}
+.mapping-history-empty {
+  padding: 36px 0;
+  color: #909399;
+  text-align: center;
+}
+.mapping-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 12px;
+}
+.mapping-history-row {
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+}
+.mapping-history-field {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.mapping-history-field strong {
+  color: #303133;
+  font-size: 14px;
+}
+.mapping-history-field small {
+  min-width: 0;
+  overflow: hidden;
+  color: #606266;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mapping-history-hit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #606266;
+  font-size: 12px;
+}
+.mapping-history-status {
+  padding: 1px 6px;
+  color: #409eff;
+  background: #ecf5ff;
+  border: 1px solid #b3d8ff;
+  border-radius: 4px;
+}
+.mapping-history-status.fallback {
+  color: #e6a23c;
+  background: #fdf6ec;
+  border-color: #f5dab1;
+}
+.mapping-history-json-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.mapping-json-title {
+  margin-bottom: 6px;
+  color: #303133;
+  font-size: 13px;
+  font-weight: 600;
+}
+.mapping-rule-json {
+  max-height: 360px;
+  margin: 0;
+  padding: 8px;
+  overflow: auto;
+  color: #303133;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #f8fafc;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+}.mapping-hint {
   padding: 8px 10px;
   color: #606266;
   font-size: 12px;

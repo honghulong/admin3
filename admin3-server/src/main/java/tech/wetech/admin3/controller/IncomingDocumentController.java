@@ -145,6 +145,7 @@ public class IncomingDocumentController {
       request.readerSigner(),
       request.handlingStatus(),
       request.remark(),
+      request.ocrMappingApplyHistory(),
       request.attachmentIds()
     );
   }
@@ -165,6 +166,7 @@ public class IncomingDocumentController {
     String readerSigner,
     String handlingStatus,
     String remark,
+    String ocrMappingApplyHistory,
     List<Long> attachmentIds
   ) {}
 

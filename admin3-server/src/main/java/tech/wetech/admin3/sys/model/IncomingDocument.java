@@ -52,6 +52,9 @@ public class IncomingDocument extends BaseEntity {
   @Column(columnDefinition = "TEXT")
   private String remark;
 
+  @Column(columnDefinition = "MEDIUMTEXT")
+  private String ocrMappingApplyHistory;
+
   @Column(nullable = false)
   private LocalDateTime createdAt;
 
@@ -188,6 +191,14 @@ public class IncomingDocument extends BaseEntity {
 
   public void setRemark(String remark) {
     this.remark = remark;
+  }
+
+  public String getOcrMappingApplyHistory() {
+    return ocrMappingApplyHistory;
+  }
+
+  public void setOcrMappingApplyHistory(String ocrMappingApplyHistory) {
+    this.ocrMappingApplyHistory = ocrMappingApplyHistory;
   }
 
   public LocalDateTime getCreatedAt() {
