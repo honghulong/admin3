@@ -282,7 +282,7 @@
                 <el-upload
                   ref="uploadRef"
                   :auto-upload="false"
-                  :on-change="(file: any) => handleFileChange(file, 'invoice')"
+                  :on-change="handleInvoiceBatchFileChange"
                   :on-exceed="handleUploadExceed"
                   :file-list="[]"
                   accept=".jpg,.png,.gif,.webp,.pdf,.xml,.ofd"
@@ -749,6 +749,7 @@ import {
   recallReimbursement,
   getReimbursementDetail,
   uploadAttachment,
+  recognizeAttachmentBatch,
   deleteAttachment,
   deleteInvoice,
   uploadInvoiceSupportAttachment,
@@ -1242,6 +1243,54 @@ async function handleEdit(row: TableItem) {
   dialogVisible.value = true;
 }
 
+// Element Plus emits on-change synchronously for each file in one selection.
+let pendingInvoiceFiles: any[] = [];
+let invoiceBatchScheduled = false;
+function handleInvoiceBatchFileChange(file: any) {
+  pendingInvoiceFiles.push(file);
+  if (invoiceBatchScheduled) return;
+  invoiceBatchScheduled = true;
+  const reimbursementId = editId.value;
+  queueMicrotask(() => {
+    const files = pendingInvoiceFiles;
+    pendingInvoiceFiles = [];
+    invoiceBatchScheduled = false;
+    void uploadInvoiceBatch(files, reimbursementId);
+  });
+}
+
+async function uploadInvoiceBatch(files: any[], reimbursementId: number | null) {
+  if (!reimbursementId) {
+    ElMessage.warning('请先保存报销单再上传附件');
+    return;
+  }
+  const names = new Set(fileList.value.map(file => file.name));
+  const selected = files.filter(file => {
+    const name = file.raw?.name || file.name;
+    if (names.has(name)) return false;
+    names.add(name);
+    return true;
+  });
+  if (selected.length !== files.length) ElMessage.warning('已跳过重复文件');
+  const results = await Promise.allSettled(selected.map(file => uploadAttachment(file.raw, reimbursementId, true)));
+  const attachments = results.flatMap(result => result.status === 'fulfilled' ? [result.value.data] : []);
+  if (results.some(result => result.status === 'rejected')) ElMessage.error('部分文件上传失败');
+  if (!attachments.length) return;
+  if (editId.value === reimbursementId) {
+    for (const attachment of attachments) {
+      uploadedAttachmentIds.value.push(attachment.id);
+      fileList.value.push(mapAttachmentFile(attachment));
+    }
+  }
+  try {
+    await recognizeAttachmentBatch(reimbursementId, attachments.map(attachment => attachment.id));
+    if (editId.value === reimbursementId) startOcrPolling();
+    ElMessage.success('上传成功，正在识别中...');
+  } catch (error: any) {
+    ElMessage.error(error?.response?.data?.message || '批量识别启动失败，请重新上传文件');
+  }
+}
+
 async function handleFileChange(uploadFile: any, uploadType: 'invoice' | 'support' = 'invoice') {
   const reimbursementId = editId.value;
   if (!reimbursementId) {
@@ -1340,6 +1389,7 @@ function startOcrPolling() {
 
 /** OCR 识别成功：解析结果并填充表单字段 */
 function handleOcrSuccess(att: any) {
+  if (att.attachmentRole === 'support') return;
   try {
     const result = JSON.parse(att.ocrResult);
     console.log('OCR result for attachment', att.id, ':', result);

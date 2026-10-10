@@ -30,6 +30,49 @@ class OcrServiceTest {
   private final OcrService ocrService = new OcrService(null, null, null, null, null);
 
   @Test
+  void paddlePagesExtractExemptInvoiceAmountAndZeroTax() throws Exception {
+    Map<String, String> fields = paddleAmountFields("免税");
+    assertThat(fields).containsEntry("total_amount", "800.00")
+      .containsEntry("tax_amount", "0.00")
+      .containsEntry("amount_before_tax", "800.00")
+      .containsEntry("tax_rate", "免税");
+  }
+
+  @Test
+  void unreadableTaxOnTaxableInvoiceIsNotZero() throws Exception {
+    assertThat(paddleAmountFields("13%")).containsEntry("total_amount", "800.00")
+      .doesNotContainKey("tax_amount");
+  }
+
+  @Test
+  void legacyFlatCoordinatesStillExtractTotal() throws Exception {
+    ObjectMapper mapper = new ObjectMapper();
+    OcrService service = new OcrService(null, null, null, null, mapper);
+    JsonNode root = mapper.readTree("""
+      {"ocr_raw":[{"text":"（小写）￥800.00","bbox":[1137,821,1351,821,1351,857,1137,857]}]}
+      """);
+    assertThat(service.extractInvoiceFieldsFromOcrRaw(root, "invoice.png"))
+      .containsEntry("total_amount", "800.00");
+  }
+
+  private Map<String, String> paddleAmountFields(String rate) throws Exception {
+    ObjectMapper mapper = new ObjectMapper();
+    OcrService service = new OcrService(null, null, null, null, mapper);
+    JsonNode root = mapper.readTree("""
+      {"pages":[{"lines":[
+        {"text":"税额","bbox":[[1567,417],[1653,420],[1653,457],[1566,454]]},
+        {"text":"%s","bbox":[[1298,450],[1361,450],[1361,485],[1298,485]]},
+        {"text":"***","bbox":[[1621,458],[1653,458],[1653,482],[1621,482]]},
+        {"text":"（小写）￥800.00","bbox":[[1137,821],[1351,821],[1351,857],[1137,857]]}
+      ]}]}
+      """.formatted(rate));
+    String enhanced = service.enhanceInvoiceFieldsFromOcrRaw(root.toString(), "invoice.pdf");
+    assertThat(service.extractOcrText(root)).contains("（小写）￥800.00");
+    return mapper.convertValue(mapper.readTree(enhanced).path("invoice_fields"),
+      new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {});
+  }
+
+  @Test
   void extractTotalAmountFromTextReadsAmountAfterLowercaseMarker() {
     String ocrText = """
       价税合计（大写）

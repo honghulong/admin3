@@ -65,7 +65,7 @@ public class OcrExecutionService {
   private OcrEngineConfig internalConfig() {
     OcrEngineConfig config = new OcrEngineConfig();
     config.setProviderType("INTERNAL");
-    config.setBaseUrl("http://localhost:8765");
+    config.setBaseUrl("http://127.0.0.1:8769");
     config.setParseStrategy("BBOX_REGION");
     config.setFallbackEnabled(false);
     return config;

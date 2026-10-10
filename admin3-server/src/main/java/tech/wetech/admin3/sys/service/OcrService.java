@@ -55,7 +55,7 @@ import org.w3c.dom.NodeList;
 public class OcrService {
 
   private static final Logger log = LoggerFactory.getLogger(OcrService.class);
-  private static final String OCR_SERVER_URL = "http://localhost:8765";
+  private static final String OCR_SERVER_URL = "http://127.0.0.1:8769";
   private static final java.time.Duration OCR_REQUEST_TIMEOUT = java.time.Duration.ofSeconds(120);
   private static final Semaphore OCR_REQUESTS = new Semaphore(1, true);
   private static final List<ExpenseTypeRule> EXPENSE_TYPE_RULES = List.of(
@@ -122,6 +122,28 @@ public class OcrService {
   }
 
   public void recognizeAttachment(Long attachmentId, Path imagePath) {
+    recognizeAttachment(attachmentId, imagePath, false);
+  }
+
+  public void recognizeAttachmentBatchAsync(Map<Long, Path> files) {
+    Thread.startVirtualThread(() -> recognizeAttachmentBatch(files));
+  }
+
+  void recognizeAttachmentBatch(Map<Long, Path> files) {
+    // All ordinary invoices must be saved before deferred support attachments are linked.
+    files.forEach((id, path) -> recognizeAttachment(id, path, true));
+    for (Long id : files.keySet()) {
+      Attachment attachment = attachmentRepository.findById(id).orElse(null);
+      if (attachment == null || Boolean.TRUE.equals(attachment.getDeleted())
+          || !"support".equals(attachment.getAttachmentRole())
+          || !"processing".equals(attachment.getOcrStatus())) continue;
+      applySupportAttachmentOcr(id);
+      attachment.setOcrStatus("completed");
+      attachmentRepository.save(attachment);
+    }
+  }
+
+  void recognizeAttachment(Long attachmentId, Path imagePath, boolean deferSupport) {
     Attachment attachment = attachmentRepository.findById(attachmentId).orElse(null);
     if (attachment == null) {
       log.warn("Attachment {} not found, skip OCR", attachmentId);
@@ -137,11 +159,7 @@ public class OcrService {
       String safeOcrResultJson = stripSupplementaryChars(ocrResultJson);
       log.info("OCR completed for attachment {}, result length: {}", attachmentId, ocrResultJson.length());
 
-      attachment.setOcrStatus("completed");
-      attachment.setOcrResult(safeOcrResultJson);
-      attachmentRepository.save(attachment);
-
-      updateReimbursementFromOcr(attachment, safeOcrResultJson);
+      applyRecognizedAttachment(attachment, safeOcrResultJson, deferSupport);
     } catch (Exception e) {
       log.error("OCR failed for attachment {}: {}", attachmentId, e.getMessage(), e);
       attachment.setOcrStatus("failed");
@@ -149,6 +167,42 @@ public class OcrService {
       attachment.setOcrResult(stripSupplementaryChars("{\"error\":\"" + errMsg.replace("\"", "'") + "\"}"));
       attachmentRepository.save(attachment);
     }
+  }
+
+  void applyRecognizedAttachment(Attachment attachment, String ocrResultJson, boolean deferSupport) throws Exception {
+    JsonNode data = unwrapOcrData(objectMapper.readTree(ocrResultJson));
+    boolean itinerary = extractOcrText(data).contains("行程单");
+    attachment.setOcrResult(ocrResultJson);
+    if (itinerary) {
+      attachment.setAttachmentRole("support");
+      attachment.setOcrStatus(deferSupport ? "processing" : "completed");
+      attachmentRepository.save(attachment);
+      if (!deferSupport) updateExpenseItemTripFromSupportOcr(attachment, ocrResultJson);
+      log.info("Attachment {} identified as itinerary, deferred={}", attachment.getId(), deferSupport);
+      return;
+    }
+    updateReimbursementFromOcr(attachment, ocrResultJson);
+    attachment.setOcrStatus("completed");
+    attachmentRepository.save(attachment);
+  }
+
+  String extractOcrText(JsonNode data) {
+    List<String> lines = new ArrayList<>();
+    String text = data.path("ocr_text").asText("");
+    if (!isEmpty(text)) lines.add(text);
+    // PaddleOCR returns recognized text in pages[].lines[], without ocr_text.
+    for (JsonNode page : data.path("pages")) {
+      for (JsonNode line : page.path("lines")) {
+        String value = line.path("text").asText("");
+        if (!isEmpty(value)) lines.add(value);
+      }
+    }
+    JsonNode raw = data.has("ocr_raw") ? data.path("ocr_raw") : data.path("raw").path("ocr_raw");
+    for (JsonNode line : raw) {
+      String value = line.path("text").asText("");
+      if (!isEmpty(value)) lines.add(value);
+    }
+    return String.join("\n", lines);
   }
 
   public void recognizeInvoiceSupportAttachment(Long attachmentId, Path imagePath) {
@@ -202,7 +256,7 @@ public class OcrService {
 
     try {
       JsonNode data = unwrapOcrData(objectMapper.readTree(ocrResultJson));
-      String ocrText = data.has("ocr_text") ? data.get("ocr_text").asText() : "";
+      String ocrText = extractOcrText(data);
 
       String invoiceNo = getJsonField(data, "invoice_no");
       String invoiceCode = getJsonField(data, "invoice_code");
@@ -387,7 +441,7 @@ public class OcrService {
         log.debug("Support attachment {} not linked to active invoice, skip trip update", attachment.getId());
         return;
       }
-      String ocrText = data.has("ocr_text") ? data.get("ocr_text").asText() : "";
+      String ocrText = extractOcrText(data);
       TripPlaces places = ocrText.contains("货拉拉") && data.has("ocr_raw")
         ? extractHuolalaTripPlacesFromOcrRaw(data.get("ocr_raw"))
         : extractTripPlaces(ocrText);
@@ -419,7 +473,7 @@ public class OcrService {
   private Invoice linkSupportAttachmentByInvoiceNo(Attachment attachment, JsonNode data) {
     if (attachment.getReimbursementId() == null) return null;
     String invoiceNo = getJsonField(data, "invoice_no");
-    String ocrText = data.has("ocr_text") ? data.get("ocr_text").asText() : "";
+    String ocrText = extractOcrText(data);
     if (isEmpty(invoiceNo) && !isEmpty(ocrText)) {
       invoiceNo = regexExtract(ocrText, "发票号码[：:\\s]*(\\d{8,20})");
       if (isEmpty(invoiceNo)) invoiceNo = regexExtract(ocrText, "(?<!\\d)(\\d{20})(?!\\d)");
@@ -1362,7 +1416,7 @@ public class OcrService {
 
   private String enhanceInvoiceFieldsFromOcrRaw(String ocrJson, String filename, Map<String, String> textFields) throws Exception {
     JsonNode root = objectMapper.readTree(ocrJson);
-    Map<String, String> bboxFields = extractInvoiceFieldsFromOcrRaw(root, filename);
+    Map<String, String> bboxFields = new LinkedHashMap<>(extractInvoiceFieldsFromOcrRaw(root, filename));
     if (!textFields.isEmpty()) {
       mergeMissing(bboxFields, textFields);
       if (!isEmpty(textFields.get("issuer"))) {
@@ -1381,12 +1435,15 @@ public class OcrService {
 
   Map<String, String> extractInvoiceFieldsFromOcrRaw(JsonNode root, String filename) {
     JsonNode raw = root.has("ocr_raw") ? root.path("ocr_raw") : root.path("raw").path("ocr_raw");
-    if (!raw.isArray()) return Map.of();
     List<BboxWord> boxes = new ArrayList<>();
     for (JsonNode item : raw) {
-      JsonNode bbox = item.path("bbox");
-      if (bbox.isArray() && bbox.size() >= 8) {
-        boxes.add(new BboxWord(item.path("text").asText(""), bbox));
+      addInvoiceBboxWord(boxes, item);
+    }
+    if (boxes.isEmpty()) {
+      for (JsonNode page : root.path("pages")) {
+        for (JsonNode item : page.path("lines")) {
+          addInvoiceBboxWord(boxes, item);
+        }
       }
     }
     if (boxes.isEmpty()) return Map.of();
@@ -1402,6 +1459,25 @@ public class OcrService {
     putIfNotEmpty(fields, "remarks", extractRemarksFromBbox(boxes));
     normalizeStructuredFields(fields, filename);
     return fields;
+  }
+
+  private void addInvoiceBboxWord(List<BboxWord> boxes, JsonNode item) {
+    JsonNode bbox = item.path("bbox");
+    if (!bbox.isArray()) return;
+    var coordinates = com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.arrayNode();
+    for (JsonNode coordinate : bbox) {
+      if (coordinate.isArray()) {
+        if (coordinate.size() != 2 || !coordinate.get(0).isNumber() || !coordinate.get(1).isNumber()) return;
+        coordinates.add(coordinate.get(0));
+        coordinates.add(coordinate.get(1));
+      } else {
+        if (!coordinate.isNumber()) return;
+        coordinates.add(coordinate);
+      }
+    }
+    if (coordinates.size() == 8) {
+      boxes.add(new BboxWord(item.path("text").asText(""), coordinates));
+    }
   }
 
   private void fillPartyFieldsFromBbox(Map<String, String> fields, List<BboxWord> boxes) {
@@ -1448,6 +1524,17 @@ public class OcrService {
       }
     }
     putIfNotEmpty(fields, "total_amount", extractTotalAmountFromBbox(boxes));
+    boolean exempt = boxes.stream().anyMatch(box -> "免税".equals(box.text().trim()));
+    Optional<BboxWord> taxHeader = boxes.stream().filter(box -> "税额".equals(box.text().trim())).findFirst();
+    if (exempt && taxHeader.isPresent() && boxes.stream().anyMatch(box ->
+        box.text().trim().matches("\\*{2,}") && box.cy() > taxHeader.get().cy()
+          && Math.abs(box.cx() - taxHeader.get().cx()) < 80)) {
+      fields.put("tax_amount", "0.00");
+      fields.put("tax_rate", "免税");
+      if (isEmpty(fields.get("amount_before_tax"))) {
+        putIfNotEmpty(fields, "amount_before_tax", fields.get("total_amount"));
+      }
+    }
   }
 
   private List<BboxWord> moneyBoxesNearAnchor(List<BboxWord> boxes, String anchorText, double yWindow) {

@@ -51,7 +51,7 @@ public class ReimbursementMcpConfig {
 
   private static final Logger log = LoggerFactory.getLogger(ReimbursementMcpConfig.class);
 
-  private static final String OCR_SERVER_URL = "http://localhost:8765";
+  private static final String OCR_SERVER_URL = "http://127.0.0.1:8769";
 
   @Bean
   McpJsonMapper reimbursementMcpJsonMapper(ObjectMapper mapper) {
@@ -658,7 +658,7 @@ public class ReimbursementMcpConfig {
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
       } catch (java.net.ConnectException e) {
         log.error("OCR service connection refused: {}", e.getMessage());
-        throw new RuntimeException("OCR服务连接失败，请确认OCR服务已启动 (http://localhost:8765)", e);
+        throw new RuntimeException("OCR服务连接失败，请确认OCR服务已启动 (http://127.0.0.1:8769)", e);
       } catch (java.net.http.HttpTimeoutException e) {
         log.error("OCR service timeout: {}", e.getMessage());
         throw new RuntimeException("OCR服务连接超时，请确认OCR服务运行正常", e);

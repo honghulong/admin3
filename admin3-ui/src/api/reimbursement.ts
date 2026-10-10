@@ -231,9 +231,10 @@ export function recallReimbursement(id: number) {
     });
 };
 
-export function uploadAttachment(file: File, reimbursementId?: number) {
+export function uploadAttachment(file: File, reimbursementId?: number, deferOcr = false) {
     const formData = new FormData();
     formData.append('file', file);
+    if (deferOcr) formData.append('deferOcr', 'true');
     if (reimbursementId) {
         formData.append('reimbursementId', String(reimbursementId));
     }
@@ -242,6 +243,15 @@ export function uploadAttachment(file: File, reimbursementId?: number) {
         method: 'post',
         headers: {'Content-Type': 'multipart/form-data'},
         data: formData
+    });
+};
+
+export function recognizeAttachmentBatch(reimbursementId: number, attachmentIds: number[]) {
+    return request({
+        url: `${BASE_URI}/attachments/recognize-batch`,
+        method: 'post',
+        params: {reimbursementId},
+        data: attachmentIds
     });
 };
 

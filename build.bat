@@ -1,0 +1,4 @@
+@echo off
+title admin3-build
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0build.ps1" %*
+exit /b %errorlevel%

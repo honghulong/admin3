@@ -1,126 +1,80 @@
 <#
 .SYNOPSIS
-    Admin3 full build script (frontend + backend packaging)
-.DESCRIPTION
-    Steps: 1) vite build frontend, 2) stop Java processes (avoid jar lock),
-    3) mvn clean package backend (produces fat JAR with frontend resources).
+    Clean, compile and package frontend + backend into one executable JAR.
 .EXAMPLE
-    .\build.ps1                    # full build
-    .\build.ps1 -SkipFrontend      # skip frontend build if dist exists
-    .\build.ps1 -SkipClean         # skip mvn clean (incremental compile)
+    .\build.bat                  # clean package, skip tests
+    .\build.bat -Restart         # clean package, then start service
+    .\build.bat -RunTests        # clean package with tests
+    .\build.bat -SkipClean       # package without clean
 #>
-
 param(
-    [switch]$SkipFrontend,
-    [switch]$SkipClean
+    [switch]$SkipClean,
+    [switch]$RunTests,
+    [switch]$Restart
 )
 
 $ErrorActionPreference = "Stop"
 $rootDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Admin3 Build Script" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host ""
-
-# Step 1: Build frontend
-if (-not $SkipFrontend) {
-    Write-Host "[1/3] Building frontend (vite build)..." -ForegroundColor Yellow
-    $frontendDir = Join-Path $rootDir "admin3-ui"
-
-    Push-Location $frontendDir
-    try {
-        $distDir = Join-Path $frontendDir "dist"
-        if (Test-Path $distDir) {
-            Remove-Item -Recurse -Force $distDir
-            Write-Host "  cleaned old dist directory" -ForegroundColor Gray
-        }
-
-        $viteBin = Join-Path $frontendDir "node_modules\vite\bin\vite.js"
-        if (-not (Test-Path $viteBin)) {
-            Write-Host "  [WARN] vite not found, running yarn install..." -ForegroundColor Yellow
-            & yarn install
-            if ($LASTEXITCODE -ne 0) { throw "yarn install failed" }
-        }
-
-        & node $viteBin build
-        if ($LASTEXITCODE -ne 0) { throw "vite build failed" }
-
-        if (-not (Test-Path $distDir)) {
-            throw "vite build done but dist directory not found"
-        }
-        Write-Host "  frontend build complete: $distDir" -ForegroundColor Green
-    }
-    finally {
-        Pop-Location
-    }
-}
-else {
-    Write-Host "[1/3] Skipping frontend build" -ForegroundColor Gray
-}
-
-# Step 2: Stop Java processes that may lock JAR files
-Write-Host "[2/3] Checking Java processes..." -ForegroundColor Yellow
-$javaProcs = Get-Process -Name "java" -ErrorAction SilentlyContinue
-if ($javaProcs) {
-    $count = ($javaProcs | Measure-Object).Count
-    Write-Host "  found $count Java process(es), stopping..." -ForegroundColor Yellow
-    $javaProcs | Stop-Process -Force
-    Start-Sleep -Seconds 1
-    Write-Host "  Java processes stopped" -ForegroundColor Green
-}
-else {
-    Write-Host "  no running Java processes" -ForegroundColor Gray
-}
-
-# Step 3: Maven package backend
-Write-Host "[3/3] Maven packaging backend..." -ForegroundColor Yellow
+$jarFile = Join-Path $rootDir "admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar"
 $mvnw = Join-Path $rootDir "mvnw.cmd"
 
-$mvnArgs = @()
-if ($SkipClean) {
-    $mvnArgs += "package"
-    Write-Host "  mode: incremental (skip clean)" -ForegroundColor Gray
-}
-else {
-    $mvnArgs += "clean"
-    $mvnArgs += "package"
-    Write-Host "  mode: full (clean)" -ForegroundColor Gray
-}
-$mvnArgs += "-pl"
-$mvnArgs += "admin3-server"
-$mvnArgs += "-am"
-$mvnArgs += "-DskipTests"
-
-Push-Location $rootDir
 try {
-    & $mvnw $mvnArgs
-    if ($LASTEXITCODE -ne 0) { throw "Maven build failed" }
-}
-finally {
-    Pop-Location
-}
-
-# Verify result
-$jarFile = Join-Path $rootDir "admin3-server\target\admin3-server-0.0.1-SNAPSHOT.jar"
-if (Test-Path $jarFile) {
-    $size = (Get-Item $jarFile).Length
-    $sizeMB = [math]::Round($size / 1MB, 1)
-    Write-Host ""
-    Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "  BUILD SUCCESS!" -ForegroundColor Green
-    Write-Host "  JAR: $jarFile" -ForegroundColor Green
-    Write-Host "  Size: ${sizeMB}MB" -ForegroundColor Green
-    Write-Host "========================================" -ForegroundColor Cyan
-
-    if ($size -gt 10MB) {
-        Write-Host "  [OK] Frontend resources included in JAR" -ForegroundColor Green
+    # Match this project's JAR to avoid stopping unrelated Java applications.
+    Write-Host "[1/3] Checking running admin3 service..."
+    $javaProcs = Get-CimInstance Win32_Process -Filter "Name = 'java.exe'" |
+        Where-Object { $_.CommandLine -and $_.CommandLine.IndexOf($jarFile, [StringComparison]::OrdinalIgnoreCase) -ge 0 }
+    foreach ($proc in $javaProcs) {
+        Write-Host "Stopping admin3 (PID: $($proc.ProcessId))"
+        Stop-Process -Id $proc.ProcessId -Force
+        Wait-Process -Id $proc.ProcessId -Timeout 15 -ErrorAction SilentlyContinue
     }
-    else {
-        Write-Host "  [WARN] JAR is small, frontend resources may be missing" -ForegroundColor Yellow
+
+    $mvnArgs = @()
+    if (-not $SkipClean) { $mvnArgs += "clean" }
+    $mvnArgs += "package"
+    if (-not $RunTests) { $mvnArgs += "-DskipTests" }
+
+    Write-Host "[2/3] Cleaning, compiling and packaging frontend + backend..."
+    Write-Host "Command: .\mvnw.cmd $($mvnArgs -join ' ')"
+    Push-Location $rootDir
+    try {
+        & $mvnw $mvnArgs
+        if ($LASTEXITCODE -ne 0) { throw "Maven build failed (exit code $LASTEXITCODE)." }
     }
+    finally { Pop-Location }
+
+    Write-Host "[3/3] Verifying bundled frontend..."
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $archive = [IO.Compression.ZipFile]::OpenRead($jarFile)
+    try {
+        $uiEntry = $archive.GetEntry("BOOT-INF/lib/admin3-ui-0.0.1-SNAPSHOT.jar")
+        if (-not $uiEntry) { throw "Frontend JAR is missing from backend JAR." }
+        $buffer = New-Object IO.MemoryStream
+        $entryStream = $uiEntry.Open()
+        try {
+            $entryStream.CopyTo($buffer)
+            $buffer.Position = 0
+            $frontend = New-Object IO.Compression.ZipArchive($buffer, [IO.Compression.ZipArchiveMode]::Read, $true)
+            try {
+                if (-not $frontend.GetEntry("META-INF/resources/webjars/admin3-ui/index.html")) {
+                    throw "Frontend index.html is missing from bundled frontend JAR."
+                }
+            }
+            finally { $frontend.Dispose() }
+        }
+        finally { $entryStream.Dispose(); $buffer.Dispose() }
+    }
+    finally { $archive.Dispose() }
+
+    Write-Host "BUILD SUCCESS: $jarFile" -ForegroundColor Green
+    Write-Host "Verified: bundled frontend JAR and index.html."
+    if ($Restart) {
+        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $rootDir "start.ps1")
+        if ($LASTEXITCODE -ne 0) { throw "Service start failed." }
+    }
+    else { Write-Host "Start service: .\start.bat" }
 }
-else {
-    Write-Host "[ERROR] JAR file not found: $jarFile" -ForegroundColor Red
+catch {
+    Write-Host "[ERROR] $($_.Exception.Message)" -ForegroundColor Red
     exit 1
 }

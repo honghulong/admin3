@@ -57,3 +57,23 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# ==== 大文件 / 运行时产物（2026-10-10 新增）====
+# GitHub 单文件硬限制 100MB，超限会导致 pre-receive hook declined (GH001)
+deploy_tmp/
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.tgz
+*.gz
+*.exe
+*.msi
+*.iso
+*.dmg
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+logs/
+*.log
+*.pid

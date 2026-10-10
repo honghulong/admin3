@@ -47,7 +47,7 @@ import static tech.wetech.admin3.common.Constants.SESSION_CURRENT_USER;
 public class IncomingDocumentService {
 
   private static final String MODULE = "incoming-document";
-  private static final String OCR_URL = "http://120.234.136.122:18769/structure";
+  private static final String OCR_URL = "http://127.0.0.1:8769/structure";
   private static final Duration OCR_TIMEOUT = Duration.ofSeconds(180);
   private static final int OCR_MAX_ATTEMPTS = 2;
 

@@ -30,6 +30,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.List;
+import java.util.LinkedHashMap;
 
 import static tech.wetech.admin3.common.CommonResultStatus.PARAM_ERROR;
 import static tech.wetech.admin3.common.CommonResultStatus.RECORD_NOT_EXIST;
@@ -58,7 +60,8 @@ public class AttachmentController {
   @PostMapping("/upload")
   public ResponseEntity<ReimbursementDTO.AttachmentDTO> uploadAttachment(
     @RequestParam("file") MultipartFile file,
-    @RequestParam(value = "reimbursementId", required = false) Long reimbursementId) {
+    @RequestParam(value = "reimbursementId", required = false) Long reimbursementId,
+    @RequestParam(value = "deferOcr", defaultValue = "false") boolean deferOcr) {
     if (file.isEmpty()) {
       throw new BusinessException(PARAM_ERROR, "文件不能为空");
     }
@@ -104,14 +107,42 @@ public class AttachmentController {
         attachment.getId(), originalName, file.getSize(), reimbursementId, storedName);
 
       // 异步触发 OCR 识别
-      ocrService.recognizeAttachmentAsync(attachment.getId(), targetPath);
-      log.info("OCR triggered for attachment {}", attachment.getId());
+      if (!deferOcr) {
+        ocrService.recognizeAttachmentAsync(attachment.getId(), targetPath);
+        log.info("OCR triggered for attachment {}", attachment.getId());
+      } else {
+        log.info("Attachment {} awaiting batch OCR", attachment.getId());
+      }
 
       return ResponseEntity.ok(new ReimbursementDTO.AttachmentDTO(attachment));
     } catch (IOException e) {
       log.error("File upload failed: {}", e.getMessage(), e);
       throw new BusinessException(SERVER_ERROR, "文件上传失败: " + e.getMessage());
     }
+  }
+
+  @RequiresPermissions("reimbursement:create")
+  @PostMapping("/recognize-batch")
+  public ResponseEntity<Void> recognizeBatch(@RequestParam Long reimbursementId, @RequestBody List<Long> attachmentIds) {
+    if (attachmentIds.isEmpty() || attachmentIds.size() > 50) {
+      throw new BusinessException(PARAM_ERROR, "Invalid attachment batch size");
+    }
+    UserinfoDTO userInfo = (UserinfoDTO) SessionItemHolder.getItem(SESSION_CURRENT_USER);
+    var files = new LinkedHashMap<Long, Path>();
+    for (Long id : attachmentIds) {
+      Attachment attachment = attachmentRepository.findById(id)
+        .orElseThrow(() -> new BusinessException(RECORD_NOT_EXIST));
+      if (!reimbursementId.equals(attachment.getReimbursementId())
+          || !userInfo.userId().equals(attachment.getUploadedBy())
+          || Boolean.TRUE.equals(attachment.getDeleted())
+          || !"pending".equals(attachment.getOcrStatus())) {
+        throw new BusinessException(PARAM_ERROR, "Attachment is not available for batch recognition");
+      }
+      String storedName = attachment.getFileUrl().split("/")[2];
+      files.put(id, uploadDir.resolve(storedName));
+    }
+    ocrService.recognizeAttachmentBatchAsync(files);
+    return ResponseEntity.accepted().build();
   }
 
   @RequiresPermissions("reimbursement:delete")

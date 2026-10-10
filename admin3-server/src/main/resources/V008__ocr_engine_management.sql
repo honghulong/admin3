@@ -26,7 +26,7 @@ INSERT INTO ocr_engine_config (
   name, provider_type, base_url, model_name, protocol, enabled, is_default,
   fallback_enabled, created_at, updated_at
 )
-SELECT 'Internal OCR', 'INTERNAL', 'http://localhost:8765', NULL, 'INTERNAL_HTTP',
+SELECT 'Internal OCR', 'INTERNAL', 'http://127.0.0.1:8769', NULL, 'INTERNAL_HTTP',
        b'1', b'1', b'0', NOW(), NOW()
 WHERE NOT EXISTS (
   SELECT 1 FROM ocr_engine_config WHERE provider_type = 'INTERNAL'

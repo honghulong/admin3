@@ -35,7 +35,7 @@ public class InternalOcrProvider implements OcrProvider {
     baos.write(("--" + boundary + "--" + lineSeparator).getBytes());
 
     String baseUrl = config.getBaseUrl() == null || config.getBaseUrl().isBlank()
-      ? "http://localhost:8765"
+      ? "http://127.0.0.1:8769"
       : config.getBaseUrl();
     HttpRequest httpRequest = HttpRequest.newBuilder()
       .uri(URI.create(baseUrl.replaceAll("/+$", "") + "/ocr"))
